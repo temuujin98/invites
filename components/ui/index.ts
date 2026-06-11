@@ -17,3 +17,4 @@ export { Drawer } from "./Drawer";
 export { Skeleton } from "./Skeleton";
 export { DateInput } from "./DateInput";
 export { TimeInput } from "./TimeInput";
+export { Stepper } from "./Stepper";
