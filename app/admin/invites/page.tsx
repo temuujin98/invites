@@ -10,6 +10,7 @@ import { FilterTabs } from "@/components/shared/FilterTabs";
 import { StatusBadge } from "@/components/invite/StatusBadge";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { APP_URL } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
 
 type FilterStatus = "all" | InviteStatus;
@@ -138,7 +139,7 @@ export default function AdminInvitesPage() {
                           <button
                             type="button"
                             onClick={() => {
-                              navigator.clipboard.writeText(`https://invites.mn/i/${inv.shareSlug}`).catch(() => undefined);
+                              navigator.clipboard.writeText(`${APP_URL}/i/${inv.shareSlug}`).catch(() => undefined);
                             }}
                             className="flex h-6 items-center rounded-(--radius-ctrl) border border-(--color-border) px-2 text-[10px] text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
                           >

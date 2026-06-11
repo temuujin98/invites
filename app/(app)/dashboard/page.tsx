@@ -12,6 +12,7 @@ import { FilterTabs } from "@/components/shared/FilterTabs";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { ActionMenu } from "@/components/shared/ActionMenu";
 import { StatusBadge } from "@/components/invite/StatusBadge";
+import { APP_URL } from "@/lib/constants";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
@@ -142,7 +143,7 @@ export default function DashboardPage() {
 
   // ── Actions ──
   function handleCopyLink(invite: Invite) {
-    const url = `https://invites.mn/i/${invite.shareSlug}`;
+    const url = `${APP_URL}/i/${invite.shareSlug}`;
     navigator.clipboard.writeText(url).catch(() => undefined);
     setCopiedId(invite.id);
     setTimeout(() => setCopiedId(null), 2000);

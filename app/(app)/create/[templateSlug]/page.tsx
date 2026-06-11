@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Toggle } from "@/components/ui/Toggle";
 import type { InviteTemplate, InviteValues, TemplateFieldConfig } from "@/types/template";
+import { APP_URL } from "@/lib/constants";
 import { QRPreview } from "@/components/invite/QRPreview";
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -542,7 +543,7 @@ function StepPublish({
   onPublicChange: (v: boolean) => void;
 }) {
   const msg = slugMessage(slugState);
-  const BASE_URL = "invites.mn/i/";
+  const BASE_URL = `${APP_URL}/i/`;
 
   return (
     <div className="flex flex-col gap-6">
@@ -624,7 +625,7 @@ function PublishSuccessScreen({
   shareSlug: string;
 }) {
   const [copied, setCopied] = useState(false);
-  const fullUrl = `https://invites.mn/i/${shareSlug}`;
+  const fullUrl = `${APP_URL}/i/${shareSlug}`;
 
   function handleCopy() {
     navigator.clipboard.writeText(fullUrl).catch(() => undefined);

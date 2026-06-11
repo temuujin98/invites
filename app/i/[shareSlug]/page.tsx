@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { APP_URL } from "@/lib/constants";
 import { mockInvites, mockTemplates } from "@/lib/mock-data";
 import { InviteRenderer } from "@/components/invite/InviteRenderer";
 import { Drawer } from "@/components/ui/Drawer";
@@ -441,7 +442,7 @@ export default function PublicInvitePage() {
     return <InvalidLinkState />;
   }
 
-  const shareUrl = `https://invites.mn/i/${invite.shareSlug}`;
+  const shareUrl = `${APP_URL}/i/${invite.shareSlug}`;
 
   return (
     <div className="flex min-h-screen flex-col bg-(--color-bg)">

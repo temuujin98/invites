@@ -38,6 +38,7 @@ import { ShareLinkCard } from "@/components/invite/ShareLinkCard";
 import { InviteCard } from "@/components/invite/InviteCard";
 
 import { mockTemplates, mockCategories, mockInvites } from "@/lib/mock-data";
+import { APP_URL } from "@/lib/constants";
 import type { InviteValues } from "@/types/template";
 
 // ---------------------------------------------------------------------------
@@ -684,7 +685,7 @@ export default function ComponentsShowcasePage() {
               </p>
               <div className="max-w-md">
                 <ShareLinkCard
-                  shareUrl="https://urilt.mn/i/anujin-6-nas-2026"
+                  shareUrl={`${APP_URL}/i/anujin-6-nas-2026`}
                   slug="anujin-6-nas-2026"
                 />
               </div>

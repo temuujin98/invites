@@ -19,3 +19,6 @@ export const RSVP_STATUS = {
   NO: "declined",
   MAYBE: "maybe",
 } as const;
+
+export const APP_URL =
+  process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "https://invites.mn";

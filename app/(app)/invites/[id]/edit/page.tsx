@@ -14,6 +14,7 @@ import { Stepper } from "@/components/ui/Stepper";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Toggle } from "@/components/ui/Toggle";
+import { APP_URL } from "@/lib/constants";
 import type { InviteTemplate, InviteValues, TemplateFieldConfig } from "@/types/template";
 
 type StepKey = "info" | "location" | "photo" | "publish";
@@ -401,7 +402,7 @@ function StepSave({
   onPublicChange: (v: boolean) => void;
 }) {
   const msg = slugMessage(slugState, shareSlug, originalSlug);
-  const BASE_URL = "invites.mn/i/";
+  const BASE_URL = `${APP_URL}/i/`;
 
   return (
     <div className="flex flex-col gap-6">
