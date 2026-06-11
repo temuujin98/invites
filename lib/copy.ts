@@ -1,0 +1,17 @@
+export const COPY = {
+  loading: "Уншиж байна...",
+  empty: "Өгөгдөл байхгүй",
+  error: "Алдаа гарлаа",
+  cancel: "Цуцлах",
+  save: "Хадгалах",
+  delete: "Устгах",
+  confirm: "Баталгаажуулах",
+  back: "Буцах",
+  next: "Дараах",
+  publish: "Нийтлэх",
+  edit: "Засварлах",
+  preview: "Урьдчилан харах",
+  create: "Үүсгэх",
+  close: "Хаах",
+  search: "Хайх",
+} as const;

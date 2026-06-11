@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+/* ── Design tokens (docs/03-design-system.md) ─────────────────────────── */
+:root {
+  /* Surfaces */
+  --bg: #F8F7F4;
+  --surface: #FFFFFF;
+  --surface-soft: #EEEAE5;
+  --border: #E5E1DB;
+
+  /* Text */
+  --text: #1F1D1A;
+  --text-secondary: #6D6762;
+  --text-muted: #9E9891;
+
+  /* Primary (near-black) */
+  --primary: #2A2725;
+  --primary-hover: #1A1816;
+
+  /* Accent (violet) */
+  --accent: #8B5CF6;
+  --accent-hover: #7C3AED;
+  --accent-soft: #F3EEFE;
+
+  /* Semantic */
+  --success: #3B8A5A;
+  --success-soft: #EFF8F2;
+  --warning: #C49234;
+  --warning-soft: #FDF8EE;
+  --danger: #C4443A;
+  --danger-soft: #FDF0EF;
+
+  /* Focus */
+  --focus-ring: rgba(139, 92, 246, 0.35);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(28,27,26,.05);
+  --shadow-md: 0 4px 12px rgba(28,27,26,.08);
+  --shadow-lg: 0 12px 32px rgba(28,27,26,.12);
+}
+
+/* ── Tailwind v4 theme mapping ─────────────────────────────────────────── */
+@theme inline {
+  /* Colors */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-soft: var(--surface-soft);
+  --color-border: var(--border);
+
+  --color-text: var(--text);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  /* Border radius */
+  --radius-ctrl: 8px;
+  --radius-card: 12px;
+  --radius-card-lg: 16px;
+  --radius-panel: 20px;
+  --radius-xl-panel: 28px;
+
+  /* Shadows */
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+
+  /* Font */
+  --font-sans: var(--font-roboto), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ── Base styles ───────────────────────────────────────────────────────── */
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-roboto), ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Focus ring ────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* ── Reduced motion ────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
