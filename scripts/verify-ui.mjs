@@ -284,6 +284,49 @@ try {
       );
     }
   }
+  // ── CHECK E: No letterbox — renderer height == screen element height ─────
+  console.log("\n── Check E: PhonePreviewFrame no letterbox ──");
+
+  const letterboxResult = await page.evaluate(() => {
+    // Find all PhonePreviewFrame screen divs — they have overflow:hidden + aspectRatio style
+    const screens = Array.from(document.querySelectorAll("div")).filter((el) => {
+      const s = el.style;
+      return s.overflow === "hidden" && s.aspectRatio && s.aspectRatio.length > 0;
+    });
+    return screens.map((screen, i) => {
+      const sr = screen.getBoundingClientRect();
+      // Renderer is the direct child (the div with paddingBottom trick)
+      const renderer = screen.firstElementChild;
+      if (!renderer) return { index: i, screenH: Math.round(sr.height), rendererH: 0, error: "no child" };
+      const rr = renderer.getBoundingClientRect();
+      return {
+        index: i,
+        screenH: Math.round(sr.height),
+        rendererH: Math.round(rr.height),
+        diff: Math.abs(Math.round(sr.height) - Math.round(rr.height)),
+      };
+    });
+  });
+
+  console.log("  Screen/renderer pairs:", JSON.stringify(letterboxResult, null, 2));
+
+  if (letterboxResult.length === 0) {
+    fail("Check E: no PhonePreviewFrame screen elements found");
+  } else {
+    const worst = letterboxResult.reduce((a, b) => ((b.diff ?? 999) > (a.diff ?? 999) ? b : a));
+    if (worst.diff > 2) {
+      fail(
+        "Check E: letterbox detected — screen[" + worst.index + "] height=" + worst.screenH +
+        " but renderer height=" + worst.rendererH + " (diff=" + worst.diff + "px, need ≤2px)",
+      );
+    } else {
+      ok(
+        "Check E: no letterbox — " + letterboxResult.length + " screen(s) checked, max diff=" +
+        worst.diff + "px",
+      );
+    }
+  }
+
   // ── CHECK D: Admin template editor — add field, assert FieldSettingsPanel ──
   console.log("\n── Check D: Admin template editor field add ──");
 

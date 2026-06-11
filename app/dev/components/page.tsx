@@ -697,22 +697,15 @@ export default function ComponentsShowcasePage() {
                 PhonePreviewFrame
               </p>
               <div className="w-36">
-                <PhonePreviewFrame>
-                  <div
-                    className="w-full h-full flex items-center justify-center"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #f8bbd9 0%, #fce4ec 50%, #e1bee7 100%)",
-                    }}
-                  >
-                    <span
-                      className="text-2xl"
-                      role="img"
-                      aria-label="баяр"
-                    >
-                      🎂
-                    </span>
-                  </div>
+                <PhonePreviewFrame
+                  canvasWidth={template.canvasWidth}
+                  canvasHeight={template.canvasHeight}
+                >
+                  <InviteRenderer
+                    template={template}
+                    values={values}
+                    mode="preview"
+                  />
                 </PhonePreviewFrame>
               </div>
             </div>
@@ -772,7 +765,10 @@ export default function ComponentsShowcasePage() {
                       ? "Preview горим — хэрхэн харагдахыг үзнэ"
                       : "Public горим — зочны харагдац"}
                 </p>
-                <PhonePreviewFrame>
+                <PhonePreviewFrame
+                  canvasWidth={template.canvasWidth}
+                  canvasHeight={template.canvasHeight}
+                >
                   <InviteRenderer
                     template={template}
                     values={values}
@@ -814,7 +810,10 @@ export default function ComponentsShowcasePage() {
                           ? "Preview"
                           : "Public"}
                     </p>
-                    <PhonePreviewFrame>
+                    <PhonePreviewFrame
+                      canvasWidth={template.canvasWidth}
+                      canvasHeight={template.canvasHeight}
+                    >
                       <InviteRenderer
                         template={template}
                         values={values}

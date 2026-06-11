@@ -237,7 +237,10 @@ function EditPageInner() {
           >
             <div className="flex justify-center py-4 px-4">
               <div className="w-40">
-                <PhonePreviewFrame>
+                <PhonePreviewFrame
+                  canvasWidth={template.canvasWidth}
+                  canvasHeight={template.canvasHeight}
+                >
                   <InviteRenderer template={template} values={values} mode="preview" />
                 </PhonePreviewFrame>
               </div>
@@ -311,7 +314,10 @@ function EditPageInner() {
               <p className="mb-3 text-center text-[11px] font-medium uppercase tracking-wider text-(--color-text-muted)">
                 Урьдчилан харах
               </p>
-              <PhonePreviewFrame>
+              <PhonePreviewFrame
+                canvasWidth={template.canvasWidth}
+                canvasHeight={template.canvasHeight}
+              >
                 <InviteRenderer template={template} values={values} mode="preview" />
               </PhonePreviewFrame>
             </div>

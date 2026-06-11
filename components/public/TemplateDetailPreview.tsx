@@ -12,7 +12,10 @@ export function TemplateDetailPreview({ template }: TemplateDetailPreviewProps) 
   return (
     <div className="flex justify-center md:justify-start">
       <div className="w-full max-w-[260px]">
-        <PhonePreviewFrame>
+        <PhonePreviewFrame
+          canvasWidth={template.canvasWidth}
+          canvasHeight={template.canvasHeight}
+        >
           <InviteRenderer
             template={template}
             values={{}}

@@ -290,7 +290,10 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
         size="sm"
       >
         <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
-          <PhonePreviewFrame>
+          <PhonePreviewFrame
+            canvasWidth={template.canvasWidth}
+            canvasHeight={template.canvasHeight}
+          >
             <InviteRenderer
               template={template}
               values={previewValues}

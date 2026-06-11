@@ -2,16 +2,24 @@
 
 interface PhonePreviewFrameProps {
   children: React.ReactNode;
+  /** Canvas aspect ratio — pass canvasWidth/canvasHeight from template. Defaults to 9/16. */
+  canvasWidth?: number;
+  canvasHeight?: number;
   className?: string;
 }
 
-export function PhonePreviewFrame({ children, className = "" }: PhonePreviewFrameProps) {
+export function PhonePreviewFrame({
+  children,
+  canvasWidth = 9,
+  canvasHeight = 16,
+  className = "",
+}: PhonePreviewFrameProps) {
+  const BEZEL = 3; // px — border width on all sides
+  const screenAspect = canvasWidth / canvasHeight;
+
   return (
-    <div
-      className={["relative mx-auto w-full max-w-xs", className].join(" ")}
-      style={{ aspectRatio: "9/16" }}
-    >
-      {/* Bezel overlay — sits on top, pointer-events none so content is clickable */}
+    <div className={["relative mx-auto w-full max-w-xs", className].join(" ")}>
+      {/* Bezel border overlay — drawn on top, pointer-events:none */}
       <div
         className="absolute inset-0 rounded-(--radius-xl-panel) border-[3px] border-(--color-text) shadow-(--shadow-md) pointer-events-none"
         aria-hidden="true"
@@ -25,12 +33,14 @@ export function PhonePreviewFrame({ children, className = "" }: PhonePreviewFram
         style={{ zIndex: 4 }}
       />
 
-      {/* Screen — rounds corners, clips content, height follows children */}
+      {/* Screen: aspect ratio lives here so the invite fills it edge-to-edge.
+          bg-surface-soft prevents sub-pixel gaps showing as a white line. */}
       <div
-        className="overflow-hidden"
+        className="overflow-hidden bg-(--color-surface-soft)"
         style={{
-          margin: 3,
-          borderRadius: "calc(var(--radius-xl-panel) - 3px)",
+          margin: BEZEL,
+          borderRadius: `calc(var(--radius-xl-panel) - ${BEZEL}px)`,
+          aspectRatio: `${screenAspect}`,
         }}
       >
         {children}

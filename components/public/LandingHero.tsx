@@ -120,7 +120,10 @@ export function LandingHero() {
             transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
             className="relative w-full max-w-55 shrink-0 md:max-w-60"
           >
-            <PhonePreviewFrame>
+            <PhonePreviewFrame
+              canvasWidth={HERO_TEMPLATE.canvasWidth}
+              canvasHeight={HERO_TEMPLATE.canvasHeight}
+            >
               <InviteRenderer
                 template={HERO_TEMPLATE}
                 values={HERO_VALUES}
