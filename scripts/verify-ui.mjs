@@ -284,6 +284,50 @@ try {
       );
     }
   }
+  // ── CHECK D: Admin template editor — add field, assert FieldSettingsPanel ──
+  console.log("\n── Check D: Admin template editor field add ──");
+
+  try {
+    const editorPage = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    await editorPage.goto("http://localhost:3000/admin/templates/new", {
+      waitUntil: "networkidle",
+      timeout: 30_000,
+    });
+
+    // Click "+ Талбар нэмэх" — try the LayerList details summary first
+    const addBtnHandle = await editorPage.getByText("+ Талбар нэмэх").first();
+    if (!addBtnHandle) {
+      fail("Check D: '+ Талбар нэмэх' button not found");
+    } else {
+      await addBtnHandle.click();
+      await editorPage.waitForTimeout(300);
+
+      // Click "Текст" menu item
+      const textItem = await editorPage.getByText("Текст").first();
+      await textItem.click();
+      await editorPage.waitForTimeout(500);
+
+      // Assert #editor-fields-panel has a [data-field-key] span
+      const keyResult = await editorPage.evaluate(() => {
+        const panel = document.getElementById("editor-fields-panel");
+        if (!panel) return { found: false, error: "panel not found" };
+        const span = panel.querySelector("[data-field-key]");
+        if (!span) return { found: false, error: "no [data-field-key] span found" };
+        const key = span.getAttribute("data-field-key") ?? span.textContent ?? "";
+        return { found: true, key };
+      });
+
+      if (keyResult.found && keyResult.key && keyResult.key.length > 0) {
+        ok("Check D: field added, data-field-key=\"" + keyResult.key + "\" visible in FieldSettingsPanel");
+      } else {
+        fail("Check D: " + (keyResult.error ?? "data-field-key span missing or empty"));
+      }
+    }
+
+    await editorPage.close();
+  } catch (err) {
+    fail("Check D: exception — " + String(err));
+  }
 } finally {
   await browser.close();
   if (devProc) {
