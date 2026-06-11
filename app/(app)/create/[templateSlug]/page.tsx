@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Toggle } from "@/components/ui/Toggle";
 import type { InviteTemplate, InviteValues, TemplateFieldConfig } from "@/types/template";
+import { QRPreview } from "@/components/invite/QRPreview";
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -657,17 +658,22 @@ function PublishSuccessScreen({
         </div>
 
         {/* Link box */}
-        <div className="mb-6 rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) p-4">
-          <p className="mb-2 text-xs font-medium text-(--color-text-secondary)">Урилгын холбоос</p>
-          <div className="flex items-center gap-2 rounded-(--radius-ctrl) bg-(--color-surface-soft) px-3 py-2">
-            <span className="flex-1 truncate text-xs text-(--color-text)">{fullUrl}</span>
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="shrink-0 rounded-(--radius-ctrl) bg-(--color-accent) px-2.5 py-1 text-[11px] font-medium text-white hover:bg-(--color-accent-hover) transition-colors"
-            >
-              {copied ? "Хуулагдлаа ✓" : "Хуулах"}
-            </button>
+        <div className="mb-6 rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) p-4 flex flex-col gap-4">
+          <div>
+            <p className="mb-2 text-xs font-medium text-(--color-text-secondary)">Урилгын холбоос</p>
+            <div className="flex items-center gap-2 rounded-(--radius-ctrl) bg-(--color-surface-soft) px-3 py-2">
+              <span className="flex-1 truncate text-xs text-(--color-text)">{fullUrl}</span>
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="shrink-0 rounded-(--radius-ctrl) bg-(--color-accent) px-2.5 py-1 text-[11px] font-medium text-white hover:bg-(--color-accent-hover) transition-colors"
+              >
+                {copied ? "Хуулагдлаа ✓" : "Хуулах"}
+              </button>
+            </div>
+          </div>
+          <div className="flex justify-center pt-1">
+            <QRPreview url={fullUrl} size={140} />
           </div>
         </div>
 

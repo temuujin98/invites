@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui";
+import { QRPreview } from "@/components/invite/QRPreview";
 
 interface ShareLinkCardProps {
   shareUrl: string;
@@ -60,21 +61,9 @@ export function ShareLinkCard({ shareUrl, slug }: ShareLinkCardProps) {
         </div>
       </div>
 
-      {/* QR placeholder */}
-      <div className="flex flex-col items-center justify-center gap-2 rounded-(--radius-card) border border-dashed border-(--color-border) bg-(--color-surface-soft) py-6">
-        <div className="flex h-16 w-16 items-center justify-center rounded-(--radius-ctrl) bg-(--color-surface) border border-(--color-border)">
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-            <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="2" />
-            <rect x="18" y="2" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="2" />
-            <rect x="2" y="18" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="2" />
-            <rect x="5" y="5" width="6" height="6" rx="1" fill="currentColor" />
-            <rect x="21" y="5" width="6" height="6" rx="1" fill="currentColor" />
-            <rect x="5" y="21" width="6" height="6" rx="1" fill="currentColor" />
-          </svg>
-        </div>
-        <p className="text-xs text-(--color-text-muted) text-center">
-          QR код Phase 8-д нэмэгдэнэ
-        </p>
+      {/* QR code */}
+      <div className="flex flex-col items-center gap-1 rounded-(--radius-card) border border-(--color-border) bg-(--color-surface-soft) py-4">
+        <QRPreview url={shareUrl} size={140} />
       </div>
 
       {/* Open link */}

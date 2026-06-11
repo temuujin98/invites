@@ -19,7 +19,7 @@ export function InviteCard({ invite, actions }: InviteCardProps) {
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={`/api/invites/${invite.id}/thumbnail`}
+          src={`/mock-templates/${invite.templateSlug}.svg`}
           alt={invite.title}
           className="h-full w-full object-cover"
           onError={(e) => {
