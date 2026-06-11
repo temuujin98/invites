@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f0f4ff"/>
+      <stop offset="60%" stop-color="#e8eeff"/>
+      <stop offset="100%" stop-color="#dde4ff"/>
+    </linearGradient>
+    <linearGradient id="topband" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1d4ed8" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="60"/></filter>
+    <filter id="blur2"><feGaussianBlur stdDeviation="30"/></filter>
+  </defs>
+
+  <rect width="1080" height="1920" fill="url(#bg)"/>
+
+  <!-- Blue ambient glow -->
+  <ellipse cx="200" cy="400" rx="400" ry="300" fill="#bfdbfe" opacity="0.4" filter="url(#blur)"/>
+  <ellipse cx="900" cy="1400" rx="380" ry="280" fill="#c7d2fe" opacity="0.35" filter="url(#blur)"/>
+
+  <!-- Top band -->
+  <rect x="0" y="0" width="1080" height="100" fill="url(#topband)"/>
+
+  <!-- Geometric accents — hexagon-ish shapes top right -->
+  <polygon points="960,120 1000,120 1020,156 1000,192 960,192 940,156" fill="none" stroke="#3b82f6" stroke-width="2" opacity="0.35"/>
+  <polygon points="880,100 910,100 925,128 910,156 880,156 865,128" fill="#1d4ed8" opacity="0.12"/>
+
+  <!-- Grid of subtle dots -->
+  <circle cx="120" cy="240" r="3" fill="#1d4ed8" opacity="0.2"/>
+  <circle cx="200" cy="240" r="3" fill="#1d4ed8" opacity="0.2"/>
+  <circle cx="280" cy="240" r="3" fill="#1d4ed8" opacity="0.2"/>
+  <circle cx="360" cy="240" r="3" fill="#1d4ed8" opacity="0.2"/>
+  <circle cx="120" cy="320" r="3" fill="#1d4ed8" opacity="0.15"/>
+  <circle cx="200" cy="320" r="3" fill="#1d4ed8" opacity="0.15"/>
+  <circle cx="280" cy="320" r="3" fill="#1d4ed8" opacity="0.15"/>
+  <circle cx="720" cy="240" r="3" fill="#1d4ed8" opacity="0.2"/>
+  <circle cx="800" cy="240" r="3" fill="#1d4ed8" opacity="0.2"/>
+  <circle cx="880" cy="240" r="3" fill="#1d4ed8" opacity="0.2"/>
+  <circle cx="960" cy="240" r="3" fill="#1d4ed8" opacity="0.2"/>
+  <circle cx="720" cy="320" r="3" fill="#1d4ed8" opacity="0.15"/>
+  <circle cx="800" cy="320" r="3" fill="#1d4ed8" opacity="0.15"/>
+  <circle cx="880" cy="320" r="3" fill="#1d4ed8" opacity="0.15"/>
+
+  <!-- Cap/mortarboard icon (abstract) at top center -->
+  <polygon points="540,160 660,210 540,260 420,210" fill="#1e3a8a" opacity="0.18"/>
+  <rect x="504" y="256" width="72" height="10" rx="5" fill="#1e3a8a" opacity="0.15"/>
+
+  <!-- Horizontal rule with ornament -->
+  <line x1="80" y1="850" x2="460" y2="850" stroke="url(#accent)" stroke-width="1.5"/>
+  <circle cx="540" cy="850" r="5" fill="#1d4ed8" opacity="0.5"/>
+  <line x1="620" y1="850" x2="1000" y2="850" stroke="url(#accent)" stroke-width="1.5"/>
+
+  <!-- Diagonal lines texture bottom-right -->
+  <line x1="840" y1="1400" x2="1040" y2="1600" stroke="#1d4ed8" stroke-width="1" opacity="0.08"/>
+  <line x1="880" y1="1400" x2="1080" y2="1600" stroke="#1d4ed8" stroke-width="1" opacity="0.08"/>
+  <line x1="800" y1="1400" x2="1000" y2="1600" stroke="#1d4ed8" stroke-width="1" opacity="0.08"/>
+  <line x1="760" y1="1400" x2="960" y2="1600" stroke="#1d4ed8" stroke-width="1" opacity="0.06"/>
+
+  <!-- Bottom band -->
+  <rect x="0" y="1820" width="1080" height="100" fill="url(#topband)"/>
+
+  <!-- Star/asterisk accent -->
+  <line x1="540" y1="1720" x2="540" y2="1780" stroke="#1d4ed8" stroke-width="1.5" opacity="0.3"/>
+  <line x1="510" y1="1730" x2="570" y2="1770" stroke="#1d4ed8" stroke-width="1.5" opacity="0.3"/>
+  <line x1="570" y1="1730" x2="510" y2="1770" stroke="#1d4ed8" stroke-width="1.5" opacity="0.3"/>
+
+  <!-- Fine border -->
+  <rect x="36" y="36" width="1008" height="1848" rx="16" fill="none" stroke="#1d4ed8" stroke-width="1" opacity="0.15"/>
+</svg>

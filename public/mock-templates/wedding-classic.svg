@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fdf8f0"/>
+      <stop offset="45%" stop-color="#faf3e8"/>
+      <stop offset="100%" stop-color="#f5ead8"/>
+    </linearGradient>
+    <linearGradient id="topband" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6b3a2a"/>
+      <stop offset="100%" stop-color="#8b5e42"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#c9a84c" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#c9a84c"/>
+      <stop offset="100%" stop-color="#c9a84c" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="softshadow"><feGaussianBlur stdDeviation="30"/></filter>
+  </defs>
+
+  <!-- Base -->
+  <rect width="1080" height="1920" fill="url(#bg)"/>
+
+  <!-- Warm ambient glow center -->
+  <ellipse cx="540" cy="900" rx="500" ry="600" fill="#c9a84c" opacity="0.06" filter="url(#softshadow)"/>
+
+  <!-- Top decorative band -->
+  <rect x="0" y="0" width="1080" height="96" fill="url(#topband)"/>
+
+  <!-- Gold lines under top band -->
+  <line x1="48" y1="108" x2="1032" y2="108" stroke="#c9a84c" stroke-width="1.5" opacity="0.8"/>
+  <line x1="48" y1="116" x2="1032" y2="116" stroke="#c9a84c" stroke-width="0.5" opacity="0.5"/>
+
+  <!-- Corner ornaments top-left -->
+  <path d="M48 140 L48 200 M48 140 L108 140" stroke="#c9a84c" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <circle cx="48" cy="140" r="4" fill="#c9a84c" opacity="0.6"/>
+  <!-- top-right -->
+  <path d="M1032 140 L1032 200 M1032 140 L972 140" stroke="#c9a84c" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <circle cx="1032" cy="140" r="4" fill="#c9a84c" opacity="0.6"/>
+
+  <!-- Floral-inspired arcs top center -->
+  <ellipse cx="540" cy="50" rx="200" ry="60" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.3"/>
+  <circle cx="420" cy="84" r="6" fill="#c9a84c" opacity="0.5"/>
+  <circle cx="540" cy="84" r="8" fill="#c9a84c" opacity="0.6"/>
+  <circle cx="660" cy="84" r="6" fill="#c9a84c" opacity="0.5"/>
+
+  <!-- Divider line with ornament — mid card -->
+  <line x1="120" y1="860" x2="480" y2="860" stroke="url(#gold)" stroke-width="1" opacity="0.7"/>
+  <circle cx="540" cy="860" r="6" fill="none" stroke="#c9a84c" stroke-width="1.5" opacity="0.7"/>
+  <line x1="600" y1="860" x2="960" y2="860" stroke="url(#gold)" stroke-width="1" opacity="0.7"/>
+
+  <!-- Petal shapes (stylized flowers) -->
+  <circle cx="160" cy="1440" r="60" fill="#c9a84c" opacity="0.06"/>
+  <circle cx="920" cy="1440" r="60" fill="#c9a84c" opacity="0.06"/>
+  <circle cx="160" cy="1440" r="30" fill="none" stroke="#c9a84c" stroke-width="1" opacity="0.2"/>
+  <circle cx="920" cy="1440" r="30" fill="none" stroke="#c9a84c" stroke-width="1" opacity="0.2"/>
+
+  <!-- Bottom ornament band -->
+  <rect x="0" y="1824" width="1080" height="96" fill="url(#topband)"/>
+  <line x1="48" y1="1812" x2="1032" y2="1812" stroke="#c9a84c" stroke-width="1.5" opacity="0.8"/>
+  <line x1="48" y1="1804" x2="1032" y2="1804" stroke="#c9a84c" stroke-width="0.5" opacity="0.5"/>
+
+  <!-- Corner ornaments bottom-left -->
+  <path d="M48 1780 L48 1720 M48 1780 L108 1780" stroke="#c9a84c" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <circle cx="48" cy="1780" r="4" fill="#c9a84c" opacity="0.6"/>
+  <!-- bottom-right -->
+  <path d="M1032 1780 L1032 1720 M1032 1780 L972 1780" stroke="#c9a84c" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <circle cx="1032" cy="1780" r="4" fill="#c9a84c" opacity="0.6"/>
+
+  <!-- Fine border -->
+  <rect x="40" y="40" width="1000" height="1840" rx="8" fill="none" stroke="#c9a84c" stroke-width="1" opacity="0.25"/>
+</svg>

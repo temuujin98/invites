@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0%" stop-color="#0d0c0a"/>
+      <stop offset="40%" stop-color="#1a1610"/>
+      <stop offset="100%" stop-color="#0a0908"/>
+    </linearGradient>
+    <linearGradient id="goldH" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#b8960c" stop-opacity="0"/>
+      <stop offset="30%" stop-color="#d4af37"/>
+      <stop offset="70%" stop-color="#d4af37"/>
+      <stop offset="100%" stop-color="#b8960c" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="goldV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b8960c" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#d4af37"/>
+      <stop offset="100%" stop-color="#b8960c" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="45%" r="45%">
+      <stop offset="0%" stop-color="#b8960c" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#b8960c" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="40"/></filter>
+  </defs>
+
+  <!-- Dark base -->
+  <rect width="1080" height="1920" fill="url(#bg)"/>
+
+  <!-- Gold glow center -->
+  <rect width="1080" height="1920" fill="url(#glow)"/>
+
+  <!-- Texture-like subtle noise approximation via tiny circles -->
+  <circle cx="200" cy="400" r="180" fill="#d4af37" opacity="0.04" filter="url(#blur)"/>
+  <circle cx="880" cy="1000" r="200" fill="#d4af37" opacity="0.05" filter="url(#blur)"/>
+  <circle cx="540" cy="1600" r="240" fill="#b8960c" opacity="0.06" filter="url(#blur)"/>
+
+  <!-- Top decorative frame lines -->
+  <line x1="60" y1="60" x2="1020" y2="60" stroke="url(#goldH)" stroke-width="1.5"/>
+  <line x1="60" y1="68" x2="1020" y2="68" stroke="url(#goldH)" stroke-width="0.5" opacity="0.5"/>
+
+  <!-- Corner diamonds top -->
+  <polygon points="60,60 76,76 60,92 44,76" fill="#d4af37" opacity="0.7"/>
+  <polygon points="1020,60 1036,76 1020,92 1004,76" fill="#d4af37" opacity="0.7"/>
+
+  <!-- Side vertical lines -->
+  <line x1="60" y1="76" x2="60" y2="1844" stroke="url(#goldV)" stroke-width="1"/>
+  <line x1="1020" y1="76" x2="1020" y2="1844" stroke="url(#goldV)" stroke-width="1"/>
+
+  <!-- Inner subtle secondary lines -->
+  <line x1="80" y1="80" x2="1000" y2="80" stroke="#d4af37" stroke-width="0.4" opacity="0.25"/>
+  <line x1="80" y1="80" x2="80" y2="1840" stroke="#d4af37" stroke-width="0.4" opacity="0.25"/>
+  <line x1="1000" y1="80" x2="1000" y2="1840" stroke="#d4af37" stroke-width="0.4" opacity="0.25"/>
+  <line x1="80" y1="1840" x2="1000" y2="1840" stroke="#d4af37" stroke-width="0.4" opacity="0.25"/>
+
+  <!-- Center ornamental divider -->
+  <line x1="140" y1="960" x2="460" y2="960" stroke="url(#goldH)" stroke-width="1.2"/>
+  <circle cx="540" cy="960" r="10" fill="none" stroke="#d4af37" stroke-width="1.5" opacity="0.8"/>
+  <circle cx="540" cy="960" r="4" fill="#d4af37" opacity="0.8"/>
+  <line x1="620" y1="960" x2="940" y2="960" stroke="url(#goldH)" stroke-width="1.2"/>
+
+  <!-- Decorative arc rings -->
+  <circle cx="540" cy="480" rx="220" r="220" fill="none" stroke="#d4af37" stroke-width="0.7" opacity="0.15"/>
+  <circle cx="540" cy="480" r="260" fill="none" stroke="#d4af37" stroke-width="0.4" opacity="0.1"/>
+
+  <!-- Small ornamental dots scattered -->
+  <circle cx="100" cy="300" r="3" fill="#d4af37" opacity="0.4"/>
+  <circle cx="980" cy="300" r="3" fill="#d4af37" opacity="0.4"/>
+  <circle cx="100" cy="1620" r="3" fill="#d4af37" opacity="0.4"/>
+  <circle cx="980" cy="1620" r="3" fill="#d4af37" opacity="0.4"/>
+  <circle cx="540" cy="180" r="4" fill="#d4af37" opacity="0.5"/>
+  <circle cx="540" cy="1740" r="4" fill="#d4af37" opacity="0.5"/>
+
+  <!-- Bottom corner diamonds -->
+  <polygon points="60,1860 76,1844 60,1828 44,1844" fill="#d4af37" opacity="0.7"/>
+  <polygon points="1020,1860 1036,1844 1020,1828 1004,1844" fill="#d4af37" opacity="0.7"/>
+
+  <!-- Bottom lines -->
+  <line x1="60" y1="1852" x2="1020" y2="1852" stroke="url(#goldH)" stroke-width="1.5"/>
+  <line x1="60" y1="1860" x2="1020" y2="1860" stroke="url(#goldH)" stroke-width="0.5" opacity="0.5"/>
+</svg>

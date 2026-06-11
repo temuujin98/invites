@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.2" y2="1">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="50%" stop-color="#fce7f3"/>
+      <stop offset="100%" stop-color="#ede9fe"/>
+    </linearGradient>
+    <linearGradient id="top" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ec4899"/>
+      <stop offset="50%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="50"/></filter>
+    <filter id="blur2"><feGaussianBlur stdDeviation="30"/></filter>
+  </defs>
+
+  <rect width="1080" height="1920" fill="url(#bg)"/>
+
+  <!-- Soft color blobs -->
+  <circle cx="150" cy="250" r="260" fill="#fbcfe8" opacity="0.5" filter="url(#blur)"/>
+  <circle cx="950" cy="500" r="220" fill="#c4b5fd" opacity="0.4" filter="url(#blur)"/>
+  <circle cx="300" cy="1100" r="200" fill="#bae6fd" opacity="0.45" filter="url(#blur)"/>
+  <circle cx="800" cy="1500" r="240" fill="#fbcfe8" opacity="0.4" filter="url(#blur)"/>
+
+  <!-- Rainbow top banner -->
+  <rect x="0" y="0" width="1080" height="80" fill="url(#top)"/>
+
+  <!-- Balloon shapes -->
+  <!-- Balloon 1 -->
+  <ellipse cx="120" cy="340" rx="48" ry="62" fill="#f472b6" opacity="0.7"/>
+  <path d="M120 402 Q118 440 115 460" stroke="#f472b6" stroke-width="2" fill="none" opacity="0.6"/>
+  <!-- Balloon 2 -->
+  <ellipse cx="200" cy="310" rx="42" ry="56" fill="#a78bfa" opacity="0.65"/>
+  <path d="M200 366 Q198 400 195 420" stroke="#a78bfa" stroke-width="2" fill="none" opacity="0.55"/>
+  <!-- Balloon 3 -->
+  <ellipse cx="880" cy="360" rx="46" ry="60" fill="#38bdf8" opacity="0.65"/>
+  <path d="M880 420 Q878 455 875 475" stroke="#38bdf8" stroke-width="2" fill="none" opacity="0.55"/>
+  <!-- Balloon 4 -->
+  <ellipse cx="960" cy="330" rx="44" ry="58" fill="#f9a8d4" opacity="0.7"/>
+  <path d="M960 388 Q958 422 955 442" stroke="#f9a8d4" stroke-width="2" fill="none" opacity="0.6"/>
+
+  <!-- Stars scattered -->
+  <polygon points="540,140 550,168 580,168 558,186 566,214 540,198 514,214 522,186 500,168 530,168" fill="#fde68a" opacity="0.7"/>
+  <polygon points="160,700 165,715 180,715 169,724 173,739 160,730 147,739 151,724 140,715 155,715" fill="#fde68a" opacity="0.5"/>
+  <polygon points="920,680 925,695 940,695 929,704 933,719 920,710 907,719 911,704 900,695 915,695" fill="#c4b5fd" opacity="0.55"/>
+  <polygon points="80,1200 84,1212 96,1212 87,1219 90,1231 80,1224 70,1231 73,1219 64,1212 76,1212" fill="#f9a8d4" opacity="0.5"/>
+  <polygon points="1000,1300 1004,1312 1016,1312 1007,1319 1010,1331 1000,1324 990,1331 993,1319 984,1312 996,1312" fill="#67e8f9" opacity="0.5"/>
+
+  <!-- Confetti dots -->
+  <circle cx="300" cy="680" r="9" fill="#f472b6" opacity="0.5"/>
+  <rect x="750" y="660" width="14" height="14" rx="3" fill="#a78bfa" opacity="0.5" transform="rotate(20 757 667)"/>
+  <rect x="170" y="1100" width="12" height="12" rx="2" fill="#38bdf8" opacity="0.45" transform="rotate(-15 176 106)"/>
+  <circle cx="880" cy="1150" r="8" fill="#f9a8d4" opacity="0.5"/>
+  <circle cx="540" cy="1700" r="7" fill="#fde68a" opacity="0.45"/>
+  <rect x="100" cy="1700" y="1700" width="10" height="10" rx="2" fill="#f472b6" opacity="0.4" transform="rotate(30 105 1705)"/>
+
+  <!-- Bottom wave rainbow -->
+  <path d="M0 1840 Q270 1790 540 1840 Q810 1890 1080 1840 L1080 1920 L0 1920 Z" fill="url(#top)" opacity="0.25"/>
+
+  <!-- Dotted border -->
+  <rect x="28" y="28" width="1024" height="1864" rx="40" fill="none" stroke="#f472b6" stroke-width="3" stroke-dasharray="16 12" opacity="0.3"/>
+</svg>

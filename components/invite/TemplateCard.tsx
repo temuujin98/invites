@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import type { InviteTemplate, TemplateCategory } from "@/types/template";
 
@@ -19,6 +21,7 @@ export function TemplateCard({ template, category, href }: TemplateCardProps) {
           src={template.thumbnailUrl}
           alt={template.name}
           className="absolute inset-0 h-full w-full object-cover"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
         />
         {template.status === "published" && (
           <span className="absolute top-2 right-2 rounded-(--radius-ctrl) bg-(--color-success-soft) px-2 py-0.5 text-[10px] font-medium text-(--color-success)">

@@ -222,6 +222,7 @@ export function InviteRenderer({
 }: InviteRendererProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [bgError, setBgError] = useState(false);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -245,13 +246,14 @@ export function InviteRenderer({
       ref={containerRef}
       style={{ position: "relative", width: "100%", paddingBottom, overflow: "hidden" }}
     >
-      {/* Background image */}
-      {template.backgroundUrl && (
+      {/* Background */}
+      {template.backgroundUrl && !bgError ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={template.backgroundUrl}
           alt=""
           aria-hidden="true"
+          onError={() => setBgError(true)}
           style={{
             position: "absolute",
             inset: 0,
@@ -261,7 +263,20 @@ export function InviteRenderer({
             display: "block",
           }}
         />
-      )}
+      ) : bgError ? (
+        /* Fallback: surface-soft with subtle dot pattern */
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundColor: "var(--surface-soft, #eeeae5)",
+            backgroundImage:
+              "radial-gradient(circle, rgba(0,0,0,0.08) 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
+          }}
+        />
+      ) : null}
 
       {/* Fields */}
       {scale > 0 &&

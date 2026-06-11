@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fdf6ff"/>
+      <stop offset="50%" stop-color="#fce8f6"/>
+      <stop offset="100%" stop-color="#f5c8e8"/>
+    </linearGradient>
+    <linearGradient id="blob1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f9a8d4" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#e879f9" stop-opacity="0.18"/>
+    </linearGradient>
+    <linearGradient id="blob2" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#f472b6" stop-opacity="0.15"/>
+    </linearGradient>
+    <filter id="blur1"><feGaussianBlur stdDeviation="60"/></filter>
+    <filter id="blur2"><feGaussianBlur stdDeviation="80"/></filter>
+  </defs>
+
+  <!-- Base gradient -->
+  <rect width="1080" height="1920" fill="url(#bg)"/>
+
+  <!-- Soft blobs -->
+  <ellipse cx="200" cy="300" rx="380" ry="320" fill="url(#blob1)" filter="url(#blur1)"/>
+  <ellipse cx="900" cy="600" rx="340" ry="280" fill="url(#blob2)" filter="url(#blur2)"/>
+  <ellipse cx="540" cy="1600" rx="420" ry="300" fill="#fce4ec" opacity="0.45" filter="url(#blur1)"/>
+
+  <!-- Decorative circles top -->
+  <circle cx="80" cy="80" r="120" fill="#f9a8d4" opacity="0.25"/>
+  <circle cx="1000" cy="120" r="90" fill="#c084fc" opacity="0.2"/>
+  <circle cx="540" cy="60" r="40" fill="#f472b6" opacity="0.15"/>
+
+  <!-- Confetti-like dots -->
+  <circle cx="160" cy="420" r="8" fill="#f9a8d4" opacity="0.6"/>
+  <circle cx="920" cy="380" r="6" fill="#c084fc" opacity="0.5"/>
+  <circle cx="80" cy="700" r="5" fill="#f472b6" opacity="0.4"/>
+  <circle cx="990" cy="800" r="9" fill="#e879f9" opacity="0.35"/>
+  <circle cx="200" cy="1100" r="7" fill="#f9a8d4" opacity="0.5"/>
+  <circle cx="880" cy="1200" r="5" fill="#a78bfa" opacity="0.45"/>
+  <circle cx="540" cy="1400" r="6" fill="#f472b6" opacity="0.4"/>
+  <circle cx="130" cy="1500" r="8" fill="#c084fc" opacity="0.35"/>
+  <circle cx="950" cy="1600" r="7" fill="#f9a8d4" opacity="0.4"/>
+
+  <!-- Thin decorative rings -->
+  <circle cx="540" cy="960" r="460" fill="none" stroke="#f9a8d4" stroke-width="1.5" opacity="0.2"/>
+  <circle cx="540" cy="960" r="500" fill="none" stroke="#c084fc" stroke-width="1" opacity="0.12"/>
+
+  <!-- Bottom wave -->
+  <path d="M0 1780 Q270 1720 540 1780 Q810 1840 1080 1780 L1080 1920 L0 1920 Z" fill="#f9a8d4" opacity="0.22"/>
+  <path d="M0 1820 Q270 1770 540 1820 Q810 1870 1080 1820 L1080 1920 L0 1920 Z" fill="#e879f9" opacity="0.14"/>
+
+  <!-- Top banner area soft rect -->
+  <rect x="0" y="0" width="1080" height="90" fill="#fce8f6" opacity="0.5"/>
+
+  <!-- Thin border frame -->
+  <rect x="24" y="24" width="1032" height="1872" rx="32" fill="none" stroke="#f9a8d4" stroke-width="2" opacity="0.35"/>
+</svg>
