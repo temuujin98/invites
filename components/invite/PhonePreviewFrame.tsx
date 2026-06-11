@@ -9,6 +9,7 @@ export function PhonePreviewFrame({ children, className = "" }: PhonePreviewFram
   return (
     <div
       className={["relative mx-auto w-full max-w-xs", className].join(" ")}
+      style={{ aspectRatio: "9/16" }}
     >
       {/* Bezel overlay — sits on top, pointer-events none so content is clickable */}
       <div

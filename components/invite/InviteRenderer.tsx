@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import type { InviteTemplate, InviteValues, TemplateFieldConfig } from "@/types/template";
 
 interface InviteRendererProps {
@@ -224,15 +224,20 @@ export function InviteRenderer({
   const [containerWidth, setContainerWidth] = useState(0);
   const [bgError, setBgError] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+    // Measure immediately (synchronous, before paint)
+    const w = el.getBoundingClientRect().width;
+    if (w > 0) setContainerWidth(w);
+
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
-      if (entry) setContainerWidth(entry.contentRect.width);
+      if (entry && entry.contentRect.width > 0) {
+        setContainerWidth(entry.contentRect.width);
+      }
     });
     observer.observe(el);
-    setContainerWidth(el.getBoundingClientRect().width);
     return () => observer.disconnect();
   }, []);
 

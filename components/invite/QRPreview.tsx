@@ -16,7 +16,7 @@ export function QRPreview({ url, size = 160 }: QRPreviewProps) {
     if (!canvasRef.current || !url) return;
     setError(false);
     QRCode.toCanvas(canvasRef.current, url, {
-      width: size * (typeof window !== "undefined" ? window.devicePixelRatio ?? 1 : 1),
+      width: size,
       margin: 1,
       color: { dark: "#1F1D1A", light: "#FFFFFF" },
     }).catch(() => setError(true));
