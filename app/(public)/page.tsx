@@ -114,13 +114,40 @@ const USE_CASES = [
 ];
 
 /* ── Category cards ─────────────────────────────────────────────────────── */
+// Icon SVGs matching design DSEventTypeCard eventIcons
+function CatIcon({ type }: { type: string }) {
+  if (type === "wedding") return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+      <path d="M12 21C12 21 4 15 4 9.5C4 6.5 6.5 4 9 4c1.5 0 2.5.8 3 1.5C12.5 4.8 13.5 4 15 4c2.5 0 5 2.5 5 5.5C20 15 12 21 12 21z"/>
+    </svg>
+  );
+  if (type === "corporate") return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/>
+    </svg>
+  );
+  if (type === "opening") return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+    </svg>
+  );
+  // birthday (default)
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+      <path d="M12 8V4"/><circle cx="12" cy="3" r="1" fill="var(--color-accent)" stroke="none"/>
+      <rect x="4" y="10" width="16" height="10" rx="3"/><path d="M4 14h16"/>
+      <path d="M8 10V8a2 2 0 014 0v2"/><path d="M12 10V8a2 2 0 014 0v2"/>
+    </svg>
+  );
+}
+
 const CAT_USE_CASES = [
-  { emoji: "💍", label: "Хуримын ёслол" },
-  { emoji: "🎂", label: "Төрсөн өдрийн баяр" },
-  { emoji: "🎓", label: "Төгсөлтийн ёслол" },
-  { emoji: "🏢", label: "Корпорейт арга хэмжээ" },
-  { emoji: "🎈", label: "Хүүхдийн баяр" },
-  { emoji: "🎉", label: "Бусад арга хэмжээ" },
+  { type: "birthday",  label: "Төрсөн өдөр",  count: 24, slug: "birthday" },
+  { type: "wedding",   label: "Хурим",         count: 18, slug: "wedding" },
+  { type: "corporate", label: "Корпоратив",    count: 12, slug: "corporate" },
+  { type: "opening",   label: "Төгсөлт",       count: 9,  slug: "graduation" },
+  { type: "birthday",  label: "Хүүхэд угтах",  count: 7,  slug: "baby-shower" },
+  { type: "opening",   label: "Нээлт",         count: 8,  slug: "opening" },
 ];
 
 /* ── Section heading helper ─────────────────────────────────────────────── */
@@ -167,19 +194,24 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── Category chips (bg) ──────────────────────────────────────────── */}
+      {/* ── Category cards ────────────────────────────────────────────────── */}
       <section className="py-14">
         <div className="mx-auto max-w-5xl px-4 md:px-6">
           <SecHead title="Ямар ч баярт тохирно" sub="Төрөл бүрийн арга хэмжээнд зориулсан загварууд" />
           <div className="flex flex-wrap justify-center gap-3">
-            {CAT_USE_CASES.map((uc) => (
+            {CAT_USE_CASES.map((uc, i) => (
               <Link
                 key={uc.label}
-                href={`/templates?category=${mockCategories.find((c) => c.name === uc.label)?.slug ?? ""}`}
-                className="flex items-center gap-2 rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) px-4 py-2.5 text-[13px] font-medium text-(--color-text) transition-shadow hover:shadow-md hover:border-(--color-accent)/30"
+                href={`/templates?category=${uc.slug}`}
+                className="flex w-35 flex-col items-center gap-2 rounded-(--radius-card) border bg-(--color-surface) px-4 py-4 text-center transition-all hover:shadow-md"
+                style={i === 0
+                  ? { borderColor: "var(--color-accent)", backgroundColor: "var(--color-accent-soft)" }
+                  : { borderColor: "var(--color-border)" }
+                }
               >
-                <span aria-hidden="true">{uc.emoji}</span>
-                {uc.label}
+                <CatIcon type={uc.type} />
+                <p className="text-[13px] font-medium text-(--color-text)">{uc.label}</p>
+                <p className="text-[11px] text-(--color-text-muted)">{uc.count} загвар</p>
               </Link>
             ))}
           </div>
@@ -251,8 +283,8 @@ export default async function LandingPage() {
                 className="flex flex-col gap-4 rounded-(--radius-card) border p-6"
                 style={
                   c.accent
-                    ? { backgroundColor: "var(--primary)", borderColor: "transparent", color: "#fff" }
-                    : { backgroundColor: "var(--surface)", borderColor: "var(--border)" }
+                    ? { backgroundColor: "var(--color-primary)", borderColor: "var(--color-border)", color: "#fff" }
+                    : { backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }
                 }
               >
                 <p
@@ -263,20 +295,20 @@ export default async function LandingPage() {
                 </p>
                 <p
                   className="text-[14px] leading-relaxed"
-                  style={{ color: c.accent ? "rgba(255,255,255,0.9)" : "var(--text-secondary)" }}
+                  style={{ color: c.accent ? "rgba(255,255,255,0.9)" : "var(--color-text-secondary)" }}
                 >
                   {c.text}
                 </p>
                 <div className="mt-auto">
                   <p
                     className="text-[12px] font-semibold"
-                    style={{ color: c.accent ? "#fff" : "var(--text)" }}
+                    style={{ color: c.accent ? "#fff" : "var(--color-text)" }}
                   >
                     {c.name}
                   </p>
                   <p
                     className="text-[11px]"
-                    style={{ color: c.accent ? "rgba(255,255,255,0.55)" : "var(--text-muted)" }}
+                    style={{ color: c.accent ? "rgba(255,255,255,0.55)" : "var(--color-text-muted)" }}
                   >
                     {c.role}
                   </p>
@@ -306,10 +338,10 @@ export default async function LandingPage() {
                 Урилга үүсгэх
               </Link>
               <Link
-                href="/pricing"
-                className="inline-flex h-11 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-6 text-[14px] font-medium text-(--color-text) transition-colors hover:bg-(--color-surface-soft)"
+                href="/templates"
+                className="inline-flex h-11 items-center justify-center rounded-(--radius-ctrl) px-6 text-[14px] font-medium text-(--color-text-secondary) transition-colors hover:text-(--color-text)"
               >
-                Үнийн мэдээлэл
+                Загварууд үзэх
               </Link>
             </div>
           </div>

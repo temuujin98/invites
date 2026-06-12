@@ -32,8 +32,8 @@ interface LandingHeroProps {
 
 export function LandingHero({ loggedIn = false }: LandingHeroProps) {
   return (
-    <section className="bg-(--color-bg) px-4 pb-18 pt-16 md:px-6 md:pt-16 md:pb-18">
-      <div className="mx-auto max-w-5xl">
+    <section className="overflow-visible bg-(--color-bg) px-4 pb-18 pt-16 md:px-6 md:pt-16 md:pb-18">
+      <div className="mx-auto max-w-5xl overflow-visible">
         <div className="flex flex-col items-center gap-10 md:flex-row md:items-center md:gap-16">
 
           {/* ── Text side ───────────────────────────────────── */}
@@ -111,12 +111,13 @@ export function LandingHero({ loggedIn = false }: LandingHeroProps) {
           </div>
 
           {/* ── Phone preview side ───────────────────────────── */}
+          {/* outer div matches design HeroComposition width:360 so chips have room */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
-            className="relative shrink-0"
-            style={{ width: 220 }}
+            className="relative hidden shrink-0 md:flex md:justify-center"
+            style={{ width: 360 }}
           >
             <PhonePreviewFrame
               canvasWidth={HERO_TEMPLATE.canvasWidth}
@@ -125,12 +126,13 @@ export function LandingHero({ loggedIn = false }: LandingHeroProps) {
               <InviteRenderer template={HERO_TEMPLATE} values={HERO_VALUES} mode="public" />
             </PhonePreviewFrame>
 
-            {/* Chip: template name — top-left */}
+            {/* Chip: template name — top-left, offset from 360px container edge */}
             <motion.div
               initial={{ opacity: 0, x: 12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.22, ease: "easeOut", delay: 0.45 }}
-              className="absolute -left-9 top-12 flex items-center gap-2 rounded-[10px] border border-(--color-border) bg-(--color-surface) px-3 py-2 shadow-md"
+              className="absolute top-12 flex items-center gap-2 rounded-[10px] border border-(--color-border) bg-(--color-surface) px-3 py-2 shadow-md"
+              style={{ left: -36 }}
             >
               <div className="flex h-5.5 w-5.5 items-center justify-center rounded-md border border-(--color-border) bg-(--color-bg)">
                 <span className="text-[9px] font-medium text-(--color-text-muted)">img</span>
@@ -146,7 +148,8 @@ export function LandingHero({ loggedIn = false }: LandingHeroProps) {
               initial={{ opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.22, ease: "easeOut", delay: 0.6 }}
-              className="absolute -right-10 top-36 rounded-[10px] border border-(--color-border) bg-(--color-surface) px-3 py-2 shadow-md"
+              className="absolute rounded-[10px] border border-(--color-border) bg-(--color-surface) px-3 py-2 shadow-md"
+              style={{ top: 150, right: -48 }}
             >
               <p className="text-[10px] text-(--color-text-muted)">Хуваалцах линк</p>
               <p className="text-[11px] font-medium text-(--color-accent)">invites.mn/i/anujin</p>
@@ -157,13 +160,29 @@ export function LandingHero({ loggedIn = false }: LandingHeroProps) {
               initial={{ opacity: 0, x: 12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.22, ease: "easeOut", delay: 0.75 }}
-              className="absolute -left-7 bottom-20 flex items-center gap-1.5 rounded-[10px] border border-(--color-border) bg-(--color-surface) px-3 py-2 shadow-md"
+              className="absolute flex items-center gap-1.5 rounded-[10px] border border-(--color-border) bg-(--color-surface) px-3 py-2 shadow-md"
+              style={{ bottom: 64, left: -28 }}
             >
               <span className="h-1.5 w-1.5 rounded-full bg-(--color-success)" />
               <span className="whitespace-nowrap text-[11px] font-medium text-(--color-text)">
                 24 зочин ирэхээ мэдэгдсэн
               </span>
             </motion.div>
+          </motion.div>
+
+          {/* Mobile: centered phone, no chips (no room) */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
+            className="flex justify-center md:hidden"
+          >
+            <PhonePreviewFrame
+              canvasWidth={HERO_TEMPLATE.canvasWidth}
+              canvasHeight={HERO_TEMPLATE.canvasHeight}
+            >
+              <InviteRenderer template={HERO_TEMPLATE} values={HERO_VALUES} mode="public" />
+            </PhonePreviewFrame>
           </motion.div>
 
         </div>
