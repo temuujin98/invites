@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { APP_URL } from "@/lib/constants";
 import { mockInvites, mockTemplates } from "@/lib/mock-data";
+import { InviteRenderer } from "@/components/invite/InviteRenderer";
 import { Drawer } from "@/components/ui/Drawer";
 import { Button } from "@/components/ui/Button";
 
@@ -448,26 +449,11 @@ export default function PublicInvitePage() {
         {/* ── Invite card ── */}
         <div className="w-full max-w-md overflow-hidden rounded-(--radius-card-lg) border border-(--color-border) bg-white shadow-lg">
 
-          {/* Hero photo area */}
-          <div className="relative flex h-48 items-end justify-center bg-(--color-surface-soft)">
-            <div
-              className="absolute inset-0 overflow-hidden"
-              style={{ backgroundImage: template.backgroundUrl ? `url(${template.backgroundUrl})` : undefined, backgroundSize: "cover", backgroundPosition: "center" }}
-              aria-hidden="true"
-            />
-            {/* Circular avatar overlapping bottom */}
-            <div className="relative z-10 mb-[-48px] flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-[3px] border-white bg-(--color-surface) shadow-md">
-              {invite.values.photo?.assetUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={invite.values.photo.assetUrl} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <span className="text-[10px] text-(--color-text-muted)" style={{ fontFamily: "monospace" }}>зураг</span>
-              )}
-            </div>
-          </div>
+          {/* ── Template artwork via InviteRenderer (D2: must use actual template) ── */}
+          <InviteRenderer template={template} values={invite.values} mode="public" />
 
-          {/* Card body */}
-          <div className="px-6 pb-6 pt-16 text-center">
+          {/* Card body — detail rows + actions below the rendered invite */}
+          <div className="px-6 pb-6 pt-5 text-center">
             {/* Eyebrow */}
             <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.32em] text-(--color-accent)">
               ТАНЫГ УРЬЖ БАЙНА
