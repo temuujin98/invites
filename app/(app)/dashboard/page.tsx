@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { mockInvites } from "@/lib/mock-data";
 import { formatDate } from "@/lib/format";
 import type { Invite, InviteStatus } from "@/types/invite";
 import { StatsCard } from "@/components/shared/StatsCard";
@@ -14,6 +13,7 @@ import { ActionMenu } from "@/components/shared/ActionMenu";
 import { StatusBadge } from "@/components/invite/StatusBadge";
 import { APP_URL } from "@/lib/constants";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { createClient } from "@/lib/supabase/client";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
@@ -113,13 +113,51 @@ const FILTER_LABELS: Record<FilterId, string> = {
 
 // ── Dashboard page ──────────────────────────────────────────────────────────
 
+function rowToInvite(row: Record<string, unknown>): Invite {
+  return {
+    id: row.id as string,
+    templateId: (row.template_id as string) ?? "",
+    templateSlug: (row.template_slug as string) ?? "",
+    userId: (row.user_id as string) ?? "",
+    title: (row.title as string) ?? "",
+    shareSlug: (row.share_slug as string) ?? "",
+    status: (row.status as InviteStatus) ?? "draft",
+    isPublic: (row.is_public as boolean) ?? false,
+    values: (row.values as Invite["values"]) ?? {},
+    eventDate: (row.event_date as string | undefined) ?? undefined,
+    eventLocation: (row.event_location as string | undefined) ?? undefined,
+    eventLocationUrl: (row.event_location_url as string | undefined) ?? undefined,
+    rsvpCount: (row.rsvp_count as number) ?? 0,
+    viewCount: (row.view_count as number) ?? 0,
+    createdAt: (row.created_at as string) ?? "",
+    updatedAt: (row.updated_at as string) ?? "",
+  };
+}
+
 export default function DashboardPage() {
   const router = useRouter();
-  const [invites, setInvites] = useState<Invite[]>(mockInvites);
+  const [invites, setInvites] = useState<Invite[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterId>("all");
   const [deleteTarget, setDeleteTarget] = useState<Invite | null>(null);
   const [archiveTarget, setArchiveTarget] = useState<Invite | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) { setLoading(false); return; }
+      const { data, error: err } = await supabase
+        .from("invites")
+        .select("id, template_id, template_slug, user_id, title, share_slug, status, is_public, values, event_date, event_location, event_location_url, rsvp_count, view_count, created_at, updated_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      if (err) { setError("Урилга уншихад алдаа гарлаа"); }
+      else { setInvites((data ?? []).map(rowToInvite)); }
+      setLoading(false);
+    });
+  }, []);
 
   // ── Stats ──
   const total = invites.length;
@@ -149,16 +187,30 @@ export default function DashboardPage() {
     setTimeout(() => setCopiedId(null), 2000);
   }
 
-  function handleArchive(invite: Invite) {
-    setInvites((prev) =>
-      prev.map((i) =>
-        i.id === invite.id ? { ...i, status: "archived" as InviteStatus } : i,
-      ),
-    );
+  async function handleArchive(invite: Invite) {
+    const supabase = createClient();
+    const { error: err } = await supabase
+      .from("invites")
+      .update({ status: "archived" })
+      .eq("id", invite.id);
+    if (!err) {
+      setInvites((prev) =>
+        prev.map((i) =>
+          i.id === invite.id ? { ...i, status: "archived" as InviteStatus } : i,
+        ),
+      );
+    }
   }
 
-  function handleDelete(invite: Invite) {
-    setInvites((prev) => prev.filter((i) => i.id !== invite.id));
+  async function handleDelete(invite: Invite) {
+    const supabase = createClient();
+    const { error: err } = await supabase
+      .from("invites")
+      .delete()
+      .eq("id", invite.id);
+    if (!err) {
+      setInvites((prev) => prev.filter((i) => i.id !== invite.id));
+    }
   }
 
   const tabs = FILTER_IDS.map((id) => ({
@@ -166,6 +218,22 @@ export default function DashboardPage() {
     label: FILTER_LABELS[id],
     count: tabCounts[id],
   }));
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-(--color-bg)">
+        <span className="text-sm text-(--color-text-muted)">Ачааллаж байна…</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-(--color-bg)">
+        <span className="text-sm text-(--color-error)">{error}</span>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-(--color-bg)">
