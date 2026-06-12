@@ -73,7 +73,26 @@ export async function POST(req: NextRequest) {
     .eq("id", inviteId)
     .single();
 
-  if (inviteErr || !invite) {
+  if (inviteErr) {
+    // Surface auth/config errors distinctly so they don't look like missing rows
+    const isAuthError =
+      inviteErr.message?.includes("JWT") ||
+      inviteErr.message?.includes("Invalid API") ||
+      inviteErr.code === "PGRST301";
+    console.error("[rsvp] invite lookup error:", inviteErr.message, inviteErr.code);
+    if (isAuthError) {
+      return NextResponse.json(
+        { ok: false, code: "SERVER_CONFIG_ERROR", message: "Серверийн тохиргооны алдаа." },
+        { status: 500 },
+      );
+    }
+    return NextResponse.json(
+      { ok: false, code: "NOT_FOUND", message: "Урилга олдсонгүй." },
+      { status: 404 },
+    );
+  }
+
+  if (!invite) {
     return NextResponse.json(
       { ok: false, code: "NOT_FOUND", message: "Урилга олдсонгүй." },
       { status: 404 },
