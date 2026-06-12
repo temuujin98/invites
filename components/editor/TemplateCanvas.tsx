@@ -29,6 +29,8 @@ const ADD_FIELD_TYPES: { type: FieldType; label: string }[] = [
   { type: "location", label: "Байршил" },
   { type: "image",    label: "Зураг" },
   { type: "qr",       label: "QR код" },
+  { type: "rsvp",     label: "RSVP" },
+  { type: "custom",   label: "Дурын" },
 ];
 
 function getPresetLabel(w: number, h: number): string {

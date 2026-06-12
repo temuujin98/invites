@@ -1,10 +1,12 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { mockCategories } from "@/lib/mock-data";
+import { createClient } from "@/lib/supabase/client";
 import type { InviteTemplate } from "@/types/template";
 
 interface Props {
@@ -35,6 +37,32 @@ export function TemplateSettingsPanel({ template, onChange, onPublishToggle }: P
   const categoryOptions = [
     ...mockCategories.map((c) => ({ value: c.id, label: `${c.icon} ${c.name}` })),
   ];
+  const bgInputRef = useRef<HTMLInputElement>(null);
+  const [bgUploading, setBgUploading] = useState(false);
+
+  async function handleBgFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBgUploading(true);
+    try {
+      const supabase = createClient();
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const path = `${template.id}/background.${ext}`;
+      const { error } = await supabase.storage
+        .from("template-backgrounds")
+        .upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data } = supabase.storage
+        .from("template-backgrounds")
+        .getPublicUrl(path);
+      onChange({ backgroundUrl: data.publicUrl });
+    } catch {
+      // upload failed — leave existing backgroundUrl unchanged
+    } finally {
+      setBgUploading(false);
+      if (bgInputRef.current) bgInputRef.current.value = "";
+    }
+  }
 
   const isCustomPreset = !CANVAS_PRESETS.some(
     (p) => p.width === template.canvasWidth && p.height === template.canvasHeight,
@@ -143,21 +171,30 @@ export function TemplateSettingsPanel({ template, onChange, onPublishToggle }: P
               </div>
             </div>
           ) : null}
+          <input
+            ref={bgInputRef}
+            type="file"
+            accept="image/*,video/*"
+            style={{ display: "none" }}
+            onChange={handleBgFileChange}
+          />
           <button
             type="button"
+            disabled={bgUploading}
+            onClick={() => bgInputRef.current?.click()}
             style={{
               width: "100%",
               height: 28,
               borderRadius: "var(--radius-ctrl)",
               border: "1px solid var(--color-border)",
               background: "var(--color-surface)",
-              color: "var(--color-text-secondary)",
+              color: bgUploading ? "var(--color-text-muted)" : "var(--color-text-secondary)",
               fontSize: 11,
-              cursor: "pointer",
+              cursor: bgUploading ? "default" : "pointer",
               marginBottom: 8,
             }}
           >
-            {template.backgroundUrl ? "Солих" : "Фон оруулах"}
+            {bgUploading ? "Байршуулж байна..." : template.backgroundUrl ? "Солих" : "Фон оруулах"}
           </button>
 
           {/* Thumbnail upload */}

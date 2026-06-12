@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import type { InviteTemplate } from "@/types/template";
 import { useEditorState } from "./useEditorState";
 import { TemplateSettingsPanel } from "./TemplateSettingsPanel";
@@ -66,9 +66,62 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
 
-  function handleSave() {
-    markSaved();
-    toast.show("Хадгалагдлаа", "success");
+  async function handleSave() {
+    try {
+      const supabase = createClient();
+      const { error: tplErr } = await supabase
+        .from("templates")
+        .update({
+          name: template.name,
+          slug: template.slug,
+          category_id: template.categoryId,
+          type: template.type,
+          canvas_width: template.canvasWidth,
+          canvas_height: template.canvasHeight,
+          status: template.status,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", template.id);
+      if (tplErr) throw tplErr;
+
+      // Upsert all fields
+      if (template.fields.length > 0) {
+        const fieldRows = template.fields.map((f) => ({
+          id: f.id,
+          template_id: template.id,
+          key: f.key,
+          label: f.label,
+          placeholder: f.placeholder ?? null,
+          type: f.type,
+          required: f.required,
+          x: f.x,
+          y: f.y,
+          width: f.width,
+          height: f.height,
+          font_family: f.fontFamily ?? null,
+          font_size: f.fontSize ?? null,
+          font_weight: f.fontWeight ?? null,
+          line_height: f.lineHeight ?? null,
+          max_chars: f.maxChars ?? null,
+          color: f.color ?? null,
+          align: f.align ?? null,
+          border_radius: f.borderRadius ?? null,
+          object_fit: f.objectFit ?? null,
+          visible: f.visible,
+          locked: f.locked,
+          layer_order: f.layerOrder,
+        }));
+        const { error: fieldsErr } = await supabase
+          .from("template_fields")
+          .upsert(fieldRows, { onConflict: "id" });
+        if (fieldsErr) throw fieldsErr;
+      }
+
+      markSaved();
+      toast.show("Хадгалагдлаа", "success");
+    } catch {
+      toast.show("Хадгалахад алдаа гарлаа", "error");
+    }
   }
 
   function validatePublish(): string[] {
@@ -94,14 +147,21 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
     setShowPublishConfirm(true);
   }
 
-  function handlePublishConfirm() {
+  async function handlePublishConfirm() {
     const newStatus = template.status === "published" ? "draft" : "published";
-    setStatus(newStatus);
-    markSaved();
-    toast.show(
-      newStatus === "published" ? "Нийтлэгдлээ" : "Ноорог болгосон",
-      "success",
-    );
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("templates")
+        .update({ status: newStatus })
+        .eq("id", template.id);
+      if (error) throw error;
+      setStatus(newStatus);
+      markSaved();
+      toast.show(newStatus === "published" ? "Нийтлэгдлээ" : "Ноорог болгосон", "success");
+    } catch {
+      toast.show("Алдаа гарлаа", "error");
+    }
   }
 
   const handleBackClick = useCallback(() => {

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { mockTemplates } from "@/lib/mock-data";
 import { RESERVED_SLUGS } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/client";
 import { InviteRenderer } from "@/components/invite/InviteRenderer";
 import { GeneratedInviteForm } from "@/components/invite/GeneratedInviteForm";
 import { PhonePreviewFrame } from "@/components/invite/PhonePreviewFrame";
@@ -45,8 +46,6 @@ function sanitizeSlug(raw: string): string {
   return raw.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-{2,}/g, "-");
 }
 
-// Mock taken slugs (besides reserved ones)
-const MOCK_TAKEN = new Set(["bat-erdene-solongo-hurim-2026", "anujin-6-nas-2026", "tsengel-graduation-2026"]);
 
 // ── localStorage helpers ──────────────────────────────────────────────────
 
@@ -170,9 +169,18 @@ function CreatePageInner() {
     }
     setSlugState("checking");
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      // Mock check
-      setSlugState(MOCK_TAKEN.has(slug) ? "taken" : "available");
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch("/api/slug-check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ slug }),
+        });
+        const json = (await res.json()) as { ok: boolean; data?: { available: boolean } };
+        setSlugState(json.ok && json.data?.available ? "available" : "taken");
+      } catch {
+        setSlugState("available"); // network error — optimistically allow, server will validate on publish
+      }
     }, 500);
   }, []);
 
@@ -206,12 +214,61 @@ function CreatePageInner() {
 
   // ── Publish ──
   async function handlePublish() {
-    if (slugState !== "available") return;
+    if (slugState !== "available" || !template) return;
     setPublishing(true);
-    await new Promise((r) => setTimeout(r, 900));
-    setPublishing(false);
-    clearDraft(templateSlug);
-    setPublished(true);
+    try {
+      const supabase = createClient();
+
+      // 1. Get authenticated user
+      const { data: { user }, error: authErr } = await supabase.auth.getUser();
+      if (authErr || !user) throw new Error("Нэвтрэх шаардлагатай");
+
+      // 2. Resolve real template_id from DB by slug
+      const { data: tplRow, error: tplErr } = await supabase
+        .from("templates")
+        .select("id")
+        .eq("slug", templateSlug)
+        .single();
+      if (tplErr || !tplRow) throw new Error("Загвар олдсонгүй");
+
+      // 3. Insert invite row
+      const { data: invite, error: invErr } = await supabase
+        .from("invites")
+        .insert({
+          user_id: user.id,
+          template_id: tplRow.id,
+          title: (values["event_title"]?.text ?? values["couple_names"]?.text ?? template.name),
+          share_slug: shareSlug,
+          is_public: isPublic,
+          status: "published",
+          event_date: values["event_date"]?.text ?? null,
+          published_at: new Date().toISOString(),
+        })
+        .select("id")
+        .single();
+      if (invErr || !invite) throw new Error(invErr?.message ?? "Урилга үүсгэхэд алдаа гарлаа");
+
+      // 4. Insert invite_values for all non-empty fields
+      const valueRows = Object.entries(values)
+        .filter(([, v]) => v.text || v.assetUrl)
+        .map(([field_key, v]) => ({
+          invite_id: invite.id,
+          field_key,
+          value_text: v.text ?? null,
+          value_asset_url: v.assetUrl ?? null,
+        }));
+      if (valueRows.length > 0) {
+        const { error: valErr } = await supabase.from("invite_values").insert(valueRows);
+        if (valErr) throw new Error(valErr.message);
+      }
+
+      clearDraft(templateSlug);
+      setPublishing(false);
+      setPublished(true);
+    } catch (err) {
+      setPublishing(false);
+      alert(err instanceof Error ? err.message : "Алдаа гарлаа");
+    }
   }
 
   // ── Not found ──
