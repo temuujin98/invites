@@ -47,36 +47,74 @@ function InvalidLinkState({ archived }: { archived?: boolean }) {
 
 // ── RSVP Sheet ────────────────────────────────────────────────────────────
 
-type RSVPChoice = "attending" | "declined" | "maybe";
+type RSVPChoice = "accepted" | "declined" | "maybe";
 
 const CHOICES: { value: RSVPChoice; label: string }[] = [
-  { value: "attending", label: "Ирнэ" },
+  { value: "accepted", label: "Ирнэ" },
   { value: "declined", label: "Ирэхгүй" },
   { value: "maybe", label: "Магадгүй" },
 ];
 
-function RSVPBottomSheet({ open, onClose, inviteTitle }: { open: boolean; onClose: () => void; inviteTitle?: string }) {
+function RSVPBottomSheet({
+  open,
+  onClose,
+  inviteId,
+  inviteTitle,
+}: {
+  open: boolean;
+  onClose: () => void;
+  inviteId: string;
+  inviteTitle?: string;
+}) {
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState(false);
-  const [choice, setChoice] = useState<RSVPChoice>("attending");
+  const [choice, setChoice] = useState<RSVPChoice>("accepted");
   const [partySize, setPartySize] = useState(1);
   const [note, setNote] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) { setNameError(true); return; }
     setNameError(false);
-    setSubmitted(true);
+    setApiError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/rsvp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          inviteId,
+          name: name.trim(),
+          attending: choice,
+          guestCount: choice === "accepted" ? partySize : 1,
+          note: note.trim() || undefined,
+        }),
+      });
+      const json = await res.json() as { ok: boolean; code?: string; message?: string };
+      if (!json.ok) {
+        setApiError(json.message ?? "Алдаа гарлаа. Дахин оролдоно уу.");
+        setLoading(false);
+        return;
+      }
+      setSubmitted(true);
+    } catch {
+      setApiError("Сүлжээний алдаа гарлаа. Дахин оролдоно уу.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleClose() {
     setSubmitted(false);
     setName("");
     setNameError(false);
-    setChoice("attending");
+    setChoice("accepted");
     setPartySize(1);
     setNote("");
+    setApiError(null);
     onClose();
   }
 
@@ -96,7 +134,7 @@ function RSVPBottomSheet({ open, onClose, inviteTitle }: { open: boolean; onClos
           </div>
           <div>
             <p className="text-base font-semibold text-(--color-text)">
-              {choice === "attending"
+              {choice === "accepted"
                 ? "Баярлалаа! Тантай уулзахыг тэсэн ядан хүлээнэ."
                 : choice === "maybe"
                   ? "Ойлголоо. Цаг боломж гарвал тавтай морилно уу."
@@ -156,7 +194,7 @@ function RSVPBottomSheet({ open, onClose, inviteTitle }: { open: boolean; onClos
 
           {/* Party size — only when attending */}
           <AnimatePresence>
-            {choice === "attending" && (
+            {choice === "accepted" && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
@@ -208,8 +246,18 @@ function RSVPBottomSheet({ open, onClose, inviteTitle }: { open: boolean; onClos
             />
           </div>
 
-          <Button type="submit" variant="accent" size="lg" className="w-full text-[15px]">
-            RSVP илгээх
+          {apiError && (
+            <p className="text-sm text-(--color-danger)">{apiError}</p>
+          )}
+
+          <Button
+            type="submit"
+            variant="accent"
+            size="lg"
+            className="w-full text-[15px]"
+            disabled={loading}
+          >
+            {loading ? "Илгээж байна…" : "RSVP илгээх"}
           </Button>
         </form>
       )}
@@ -626,6 +674,7 @@ export function PublicInviteClient({ shareSlug }: { shareSlug: string }) {
       <RSVPBottomSheet
         open={rsvpOpen}
         onClose={() => setRsvpOpen(false)}
+        inviteId={invite.id}
         inviteTitle={invite.title}
       />
 
