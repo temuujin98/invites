@@ -470,17 +470,18 @@ export function PublicInviteClient({ shareSlug }: { shareSlug: string }) {
           layerOrder: f.layer_order,
         }));
 
+        const tplSlug = tpl.slug as string;
         setTemplate({
           id: tpl.id as string,
-          slug: tpl.slug as string,
+          slug: tplSlug,
           name: tpl.name as string,
           categoryId: (tpl.category_id as string) ?? "",
           type: (tpl.type as "image" | "video") ?? "image",
           status: (tpl.status as "draft" | "published") ?? "published",
           canvasWidth: (tpl.canvas_width as number) ?? 1080,
           canvasHeight: (tpl.canvas_height as number) ?? 1920,
-          thumbnailUrl: "",
-          backgroundUrl: "",
+          thumbnailUrl: `/mock-templates/${tplSlug}.svg`,
+          backgroundUrl: `/mock-templates/${tplSlug}.svg`,
           fields,
         });
       }
