@@ -74,8 +74,9 @@ export default function RegisterPage() {
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    e.stopPropagation();
     setTouched({ name: true, email: true, password: true, confirmPassword: true });
     const errs = validate(values);
     setErrors(errs);
