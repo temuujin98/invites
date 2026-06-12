@@ -53,8 +53,7 @@ export function LandingHero({ loggedIn = false }: LandingHeroProps) {
               initial="hidden" animate="show" variants={fadeUp} custom={1}
               className="text-[30px] font-bold leading-[1.12] tracking-tight text-(--color-text) md:text-[44px]"
             >
-              Баярын урилгаа<br />
-              <span className="text-(--color-accent)">минутын дотор</span>
+              Баярын урилгаа<br />минутын дотор
             </motion.h1>
 
             {/* Sub */}

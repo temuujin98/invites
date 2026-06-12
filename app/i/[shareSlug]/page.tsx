@@ -5,11 +5,8 @@ import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { APP_URL } from "@/lib/constants";
 import { mockInvites, mockTemplates } from "@/lib/mock-data";
-import { InviteRenderer } from "@/components/invite/InviteRenderer";
 import { Drawer } from "@/components/ui/Drawer";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Textarea } from "@/components/ui/Textarea";
 
 // ── Invalid / Archived states ─────────────────────────────────────────────
 
@@ -304,7 +301,7 @@ function ShareSheet({ open, onClose, url, title }: { open: boolean; onClose: () 
   );
 }
 
-// ── Action bar ─────────────────────────────────────────────────────────────
+// ── Calendar button (inline, used inside card) ─────────────────────────────
 
 interface ActionBarProps {
   locationUrl?: string;
@@ -312,11 +309,10 @@ interface ActionBarProps {
   eventTime?: string;
   eventTitle: string;
   shareUrl: string;
-  onRSVP: () => void;
-  onShare: () => void;
+  calendarOnly?: boolean;
 }
 
-function ActionBar({ locationUrl, eventDate, eventTime, eventTitle, shareUrl, onRSVP, onShare }: ActionBarProps) {
+function ActionBar({ eventDate, eventTime, eventTitle, shareUrl, calendarOnly }: ActionBarProps) {
   function handleCalendar() {
     if (!eventDate) return;
     const [year, month, day] = eventDate.split("T")[0].split("-").map(Number);
@@ -349,63 +345,22 @@ function ActionBar({ locationUrl, eventDate, eventTime, eventTitle, shareUrl, on
     URL.revokeObjectURL(url);
   }
 
-  return (
-    <div className="sticky bottom-0 z-20 border-t border-(--color-border) bg-(--color-surface)/95 backdrop-blur-sm px-4 py-3">
-      <div className="mx-auto flex max-w-sm items-center gap-2">
-        {/* RSVP — primary */}
-        <Button variant="accent" size="lg" className="flex-1 text-[15px]" onClick={onRSVP}>
-          RSVP илгээх
-        </Button>
+  if (calendarOnly) {
+    return (
+      <button
+        type="button"
+        onClick={handleCalendar}
+        className="flex items-center justify-center gap-2 rounded-xl border border-(--color-border) bg-(--color-surface) py-3 text-[14px] font-medium text-(--color-text) transition-colors hover:bg-(--color-surface-soft)"
+      >
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+          <rect x="2" y="3" width="12" height="11" rx="2"/><line x1="2" y1="6.5" x2="14" y2="6.5"/><line x1="5.5" y1="1.5" x2="5.5" y2="4.5"/><line x1="10.5" y1="1.5" x2="10.5" y2="4.5"/>
+        </svg>
+        Календарт нэмэх
+      </button>
+    );
+  }
 
-        {/* Map */}
-        {locationUrl && (
-          <a
-            href={locationUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Газрын зураг"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
-          >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-              <path d="M9 1C6.24 1 4 3.24 4 6c0 3.75 5 11 5 11s5-7.25 5-11c0-2.76-2.24-5-5-5z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-              <circle cx="9" cy="6" r="1.5" stroke="currentColor" strokeWidth="1.4" />
-            </svg>
-          </a>
-        )}
-
-        {/* Calendar */}
-        {eventDate && (
-          <button
-            type="button"
-            aria-label="Календарт нэмэх"
-            onClick={handleCalendar}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
-          >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-              <rect x="2" y="3" width="14" height="13" rx="2" stroke="currentColor" strokeWidth="1.4" />
-              <path d="M2 7h14M6 1v4M12 1v4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-              <path d="M5.5 11h2v2h-2z" fill="currentColor" />
-            </svg>
-          </button>
-        )}
-
-        {/* Share */}
-        <button
-          type="button"
-          aria-label="Хуваалцах"
-          onClick={onShare}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
-        >
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-            <circle cx="14" cy="4" r="2" stroke="currentColor" strokeWidth="1.4" />
-            <circle cx="4" cy="9" r="2" stroke="currentColor" strokeWidth="1.4" />
-            <circle cx="14" cy="14" r="2" stroke="currentColor" strokeWidth="1.4" />
-            <path d="M6 8l6-3M6 10l6 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-          </svg>
-        </button>
-      </div>
-    </div>
-  );
+  return null;
 }
 
 // ── Public Invite Page ─────────────────────────────────────────────────────
@@ -444,70 +399,181 @@ export default function PublicInvitePage() {
 
   const shareUrl = `${APP_URL}/i/${invite.shareSlug}`;
 
+  const eventDateFormatted = invite.eventDate
+    ? (() => {
+        const d = new Date(invite.eventDate);
+        return `${d.getFullYear()} оны ${d.getMonth() + 1}-р сарын ${d.getDate()}`;
+      })()
+    : null;
+
+  const detailRows: { icon: React.ReactNode; label: string; value: string; sub?: string }[] = [];
+  if (eventDateFormatted) {
+    detailRows.push({
+      label: "Огноо",
+      value: eventDateFormatted,
+      icon: (
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+          <rect x="2" y="3" width="12" height="11" rx="2"/><line x1="2" y1="6.5" x2="14" y2="6.5"/><line x1="5.5" y1="1.5" x2="5.5" y2="4.5"/><line x1="10.5" y1="1.5" x2="10.5" y2="4.5"/>
+        </svg>
+      ),
+    });
+  }
+  if (invite.eventTime) {
+    detailRows.push({
+      label: "Цаг",
+      value: invite.eventTime,
+      icon: (
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+          <circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2 1.5"/>
+        </svg>
+      ),
+    });
+  }
+  if (invite.eventLocation) {
+    detailRows.push({
+      label: "Байршил",
+      value: invite.eventLocation,
+      sub: invite.eventLocationUrl ? undefined : undefined,
+      icon: (
+        <svg width="13" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+          <path d="M8 14.5s5-4.2 5-7.8A5 5 0 003 6.7c0 3.6 5 7.8 5 7.8z"/><circle cx="8" cy="6.8" r="1.8"/>
+        </svg>
+      ),
+    });
+  }
+
   return (
-    <div className="flex min-h-screen flex-col bg-(--color-bg)">
-      {/* ── Invite renderer — full width, zero chrome ── */}
-      <main className="flex-1 flex flex-col">
-        <div className="w-full max-w-sm mx-auto px-0">
-          <InviteRenderer template={template} values={invite.values} mode="public" />
-        </div>
+    <div className="min-h-screen" style={{ backgroundColor: "#F1EEE9", fontFamily: "var(--font-family)" }}>
+      <div className="flex min-h-screen flex-col items-center justify-start px-3.5 py-5 md:justify-center md:py-12 md:px-0">
+        {/* ── Invite card ── */}
+        <div className="w-full max-w-md overflow-hidden rounded-(--radius-card-lg) border border-(--color-border) bg-white shadow-lg">
 
-        {/* ── Event meta below the card ── */}
-        <div className="mx-auto w-full max-w-sm px-4 py-5 flex flex-col gap-3">
-          {invite.eventLocation && (
-            <div className="flex items-start gap-2.5">
-              <span className="mt-0.5 text-(--color-text-muted) shrink-0">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <path d="M8 1C5.79 1 4 2.79 4 5c0 3.25 4 10 4 10s4-6.75 4-10c0-2.21-1.79-4-4-4z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
-                  <circle cx="8" cy="5" r="1.5" stroke="currentColor" strokeWidth="1.3" />
-                </svg>
-              </span>
-              <span className="text-[15px] leading-relaxed text-(--color-text-secondary)">
-                {invite.eventLocation}
-              </span>
+          {/* Hero photo area */}
+          <div className="relative flex h-48 items-end justify-center bg-(--color-surface-soft)">
+            <div
+              className="absolute inset-0 overflow-hidden"
+              style={{ backgroundImage: template.backgroundUrl ? `url(${template.backgroundUrl})` : undefined, backgroundSize: "cover", backgroundPosition: "center" }}
+              aria-hidden="true"
+            />
+            {/* Circular avatar overlapping bottom */}
+            <div className="relative z-10 mb-[-48px] flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-[3px] border-white bg-(--color-surface) shadow-md">
+              {invite.values.photo?.assetUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={invite.values.photo.assetUrl} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <span className="text-[10px] text-(--color-text-muted)" style={{ fontFamily: "monospace" }}>зураг</span>
+              )}
             </div>
-          )}
-          {invite.eventDate && (
-            <div className="flex items-center gap-2.5">
-              <span className="text-(--color-text-muted) shrink-0">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <rect x="2" y="2.5" width="12" height="11" rx="2" stroke="currentColor" strokeWidth="1.3" />
-                  <path d="M2 6.5h12M5.5 1v3M10.5 1v3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          </div>
+
+          {/* Card body */}
+          <div className="px-6 pb-6 pt-16 text-center">
+            {/* Eyebrow */}
+            <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.32em] text-(--color-accent)">
+              ТАНЫГ УРЬЖ БАЙНА
+            </p>
+
+            {/* Title */}
+            <h1 className="mb-1.5 text-[26px] font-bold leading-[1.2] tracking-tight text-(--color-text)">
+              {invite.title}
+            </h1>
+
+            {/* Host */}
+            <p className="mb-6 text-[14px] text-(--color-text-secondary)">
+              {(invite.values.host_name?.text) ?? ""}
+            </p>
+
+            {/* Detail rows */}
+            {detailRows.length > 0 && (
+              <div className="mb-4 flex flex-col gap-3.5 rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) p-4 text-left">
+                {detailRows.map((row, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-(--color-accent-soft) text-(--color-accent)">
+                      {row.icon}
+                    </div>
+                    <div>
+                      <p className="mb-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-(--color-text-muted)">
+                        {row.label}
+                      </p>
+                      <p className="text-[14px] font-medium text-(--color-text)">{row.value}</p>
+                      {row.sub && <p className="mt-0.5 text-[12px] text-(--color-text-muted)">{row.sub}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Message */}
+            <p className="mb-5 px-2 text-[14px] leading-relaxed text-(--color-text-secondary)">
+              Та бүхнийг хүндэт зочноор урьж байна. Хүрэлцэн ирж, баярын баяр хөөрийг бидэнтэй хуваалцана уу.
+            </p>
+
+            {/* Action buttons */}
+            <div className="flex flex-col gap-2">
+              {/* RSVP — primary (bg-primary dark) */}
+              <button
+                type="button"
+                onClick={() => setRsvpOpen(true)}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border-0 py-3 text-[14px] font-medium text-white transition-colors"
+                style={{ backgroundColor: "var(--color-primary)" }}
+              >
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M2 4.5h12v8H2z"/><path d="M2 5l6 4 6-4"/>
                 </svg>
-              </span>
-              <span className="text-[15px] text-(--color-text-secondary)">
-                {new Date(invite.eventDate).getFullYear()}.{String(new Date(invite.eventDate).getMonth() + 1).padStart(2, "0")}.{String(new Date(invite.eventDate).getDate()).padStart(2, "0")}
-                {invite.eventTime && ` · ${invite.eventTime}`}
-              </span>
+                Ирэхээ мэдэгдэх
+              </button>
+
+              {/* Map + Calendar */}
+              <div className="grid grid-cols-2 gap-2">
+                {invite.eventLocationUrl && (
+                  <a
+                    href={invite.eventLocationUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-(--color-border) bg-(--color-surface) py-3 text-[14px] font-medium text-(--color-text) transition-colors hover:bg-(--color-surface-soft)"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M8 14.5s5-4.2 5-7.8A5 5 0 003 6.7c0 3.6 5 7.8 5 7.8z"/><circle cx="8" cy="6.8" r="1.8"/>
+                    </svg>
+                    Газрын зураг
+                  </a>
+                )}
+                {eventDateFormatted && (
+                  <ActionBar
+                    locationUrl={invite.eventLocationUrl}
+                    eventDate={invite.eventDate}
+                    eventTime={invite.eventTime}
+                    eventTitle={invite.title}
+                    shareUrl={shareUrl}
+                    calendarOnly
+                  />
+                )}
+              </div>
+
+              {/* Share */}
+              <button
+                type="button"
+                onClick={() => setShareOpen(true)}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-(--color-border) bg-(--color-surface) py-3 text-[14px] font-medium text-(--color-text) transition-colors hover:bg-(--color-surface-soft)"
+              >
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="3.5" r="1.8"/><circle cx="4" cy="8" r="1.8"/><circle cx="12" cy="12.5" r="1.8"/>
+                  <line x1="5.6" y1="7.1" x2="10.4" y2="4.4"/><line x1="5.6" y1="8.9" x2="10.4" y2="11.6"/>
+                </svg>
+                Хуваалцах
+              </button>
             </div>
-          )}
+
+            {/* invites.mn branding */}
+            <div className="mt-3 flex items-center justify-center gap-1.5 pt-2 text-[10px] text-(--color-text-muted)">
+              <div className="flex h-3 w-3 items-center justify-center rounded-[3px] bg-(--color-accent)">
+                <span className="text-[7px] font-bold text-white">i</span>
+              </div>
+              invites.mn дээр үүсгэв
+            </div>
+          </div>
         </div>
-      </main>
-
-      {/* ── Footer ── */}
-      <footer className="border-t border-(--color-border) py-4 text-center">
-        <a
-          href="/"
-          className="inline-flex items-center gap-1.5 text-[13px] text-(--color-text-muted) hover:text-(--color-text) transition-colors"
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-            <rect x="1" y="2" width="12" height="10" rx="2" stroke="currentColor" strokeWidth="1.2" />
-            <path d="M1 5l6 3.5L13 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-          </svg>
-          invites.mn дээр үүсгэв
-        </a>
-      </footer>
-
-      {/* ── Sticky action bar ── */}
-      <ActionBar
-        locationUrl={invite.eventLocationUrl}
-        eventDate={invite.eventDate}
-        eventTime={invite.eventTime}
-        eventTitle={invite.title}
-        shareUrl={shareUrl}
-        onRSVP={() => setRsvpOpen(true)}
-        onShare={() => setShareOpen(true)}
-      />
+      </div>
 
       {/* ── RSVP sheet ── */}
       <RSVPBottomSheet

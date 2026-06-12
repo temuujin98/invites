@@ -14,9 +14,9 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { Pagination } from "@/components/ui/Pagination";
 
 const SORT_OPTIONS = [
-  { value: "default", label: "Санал болгох" },
-  { value: "name-asc", label: "Нэрээр (А→Я)" },
-  { value: "name-desc", label: "Нэрээр (Я→А)" },
+  { value: "default", label: "Шинэ эхэндээ" },
+  { value: "popular", label: "Их ашиглагдсан" },
+  { value: "name-asc", label: "Нэрээр" },
 ];
 
 const PAGE_SIZE = 8;
@@ -71,7 +71,6 @@ function TemplatesContent() {
       );
     }
     if (sort === "name-asc") list.sort((a, b) => a.name.localeCompare(b.name));
-    if (sort === "name-desc") list.sort((a, b) => b.name.localeCompare(a.name));
 
     return list;
   }, [search, activeCategory, sort]);
@@ -299,9 +298,12 @@ function TemplatesContent() {
             </AnimatePresence>
           )}
 
-          {/* Pagination */}
+          {/* Pagination + count */}
           {!loading && totalPages > 1 && (
-            <div className="mt-8 flex justify-center">
+            <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+              <span className="text-[11px] text-(--color-text-muted)">
+                {filtered.length}-аас {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)}-г харуулж байна
+              </span>
               <Pagination page={page} totalPages={totalPages} onChange={setPage} />
             </div>
           )}

@@ -80,18 +80,13 @@ export default async function TemplateDetailPage({ params }: Props) {
           {/* Category + type badges */}
           <div className="flex items-center gap-2 flex-wrap">
             {category && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-(--color-surface-soft) border border-(--color-border) px-3 py-1 text-xs text-(--color-text-secondary)">
+              <span className="inline-flex items-center gap-1 rounded-md bg-(--color-accent-soft) px-2.5 py-1 text-xs font-medium text-(--color-accent)">
                 {category.icon} {category.name}
               </span>
             )}
-            <span className="inline-flex items-center rounded-full bg-(--color-surface-soft) border border-(--color-border) px-3 py-1 text-xs text-(--color-text-secondary)">
-              {template.type === "image" ? "🖼 Зурагт" : "🎬 Видеот"}
+            <span className="inline-flex items-center rounded-md bg-(--color-surface-soft) border border-(--color-border) px-2.5 py-1 text-xs text-(--color-text-secondary)">
+              {template.type === "image" ? "Зургийн урилга" : "Видео урилга"}
             </span>
-            {template.status === "published" && (
-              <span className="inline-flex items-center rounded-full bg-(--color-success-soft) border border-(--color-success)/30 px-3 py-1 text-xs text-(--color-success)">
-                ✓ Нийтлэгдсэн
-              </span>
-            )}
           </div>
 
           {/* Template name */}
@@ -126,21 +121,27 @@ export default async function TemplateDetailPage({ params }: Props) {
             {template.fields.filter((f) => f.visible).length} талбар
           </p>
 
-          {/* CTA */}
-          <div className="flex flex-col gap-2.5 pt-2">
+          {/* CTAs */}
+          <div className="flex flex-col gap-2.5 pt-2 sm:flex-row">
             <Link
               href={`/create/${template.slug}`}
-              className="inline-flex h-11 items-center justify-center rounded-(--radius-ctrl) bg-(--color-accent) px-6 text-[14px] font-medium text-white transition-colors hover:bg-(--color-accent-hover)"
+              className="inline-flex h-11 flex-1 items-center justify-center rounded-(--radius-ctrl) bg-(--color-accent) px-6 text-[14px] font-medium text-white transition-colors hover:bg-(--color-accent-hover)"
             >
               Энэ загвараар урилга үүсгэх
             </Link>
             <Link
-              href="/templates"
-              className="inline-flex h-9 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) px-5 text-[13px] font-medium text-(--color-text-secondary) transition-colors hover:bg-(--color-surface-soft)"
+              href={`/templates/${template.slug}/preview`}
+              className="inline-flex h-11 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-5 text-[14px] font-medium text-(--color-text-secondary) transition-colors hover:bg-(--color-surface-soft)"
             >
-              ← Загварууд руу буцах
+              Урьдчилан үзэх
             </Link>
           </div>
+          <Link
+            href="/templates"
+            className="text-xs text-(--color-text-muted) hover:text-(--color-text) transition-colors"
+          >
+            ← Загварууд руу буцах
+          </Link>
         </div>
       </div>
 
