@@ -1,14 +1,17 @@
 import Link from "next/link";
+import { LogoutButton } from "@/components/shared/LogoutButton";
 
-export function PublicHeader() {
+interface PublicHeaderProps {
+  user: { displayName: string } | null;
+}
+
+export function PublicHeader({ user }: PublicHeaderProps) {
   return (
-    <header className="sticky top-0 z-30 border-b border-(--color-border) bg-(--color-surface)/95 backdrop-blur-sm">
-      <div className="mx-auto flex h-[52px] max-w-5xl items-center justify-between gap-4 px-4 md:px-6">
+    <header className="sticky top-0 z-30 border-b border-(--color-border) bg-surface/95 backdrop-blur-sm">
+      <div className="mx-auto flex h-13 max-w-5xl items-center justify-between gap-4 px-4 md:px-6">
+
         {/* Logo */}
-        <Link
-          href="/"
-          className="text-sm font-bold text-(--color-text) tracking-tight"
-        >
+        <Link href="/" className="text-sm font-bold text-(--color-text) tracking-tight">
           invites
         </Link>
 
@@ -20,22 +23,43 @@ export function PublicHeader() {
           >
             Загварууд
           </Link>
-          <Link
-            href="/login"
-            className="text-xs font-medium text-(--color-text-secondary) hover:text-(--color-text) transition-colors"
-          >
-            Нэвтрэх
-          </Link>
+          {!user && (
+            <Link
+              href="/login"
+              className="text-xs font-medium text-(--color-text-secondary) hover:text-(--color-text) transition-colors"
+            >
+              Нэвтрэх
+            </Link>
+          )}
+          {user && (
+            <Link
+              href="/dashboard"
+              className="text-xs font-medium text-(--color-text-secondary) hover:text-(--color-text) transition-colors"
+            >
+              Хяналтын самбар
+            </Link>
+          )}
         </nav>
 
-        {/* CTA */}
-        <div className="hidden md:block">
-          <Link
-            href="/register"
-            className="inline-flex h-8 items-center rounded-(--radius-ctrl) bg-(--color-accent) px-4 text-xs font-medium text-white hover:bg-(--color-accent-hover) transition-colors"
-          >
-            Урилга үүсгэх
-          </Link>
+        {/* Right CTA / user menu */}
+        <div className="hidden md:flex items-center gap-3">
+          {!user ? (
+            <Link
+              href="/register"
+              className="inline-flex h-8 items-center rounded-(--radius-ctrl) bg-(--color-accent) px-4 text-xs font-medium text-white hover:bg-(--color-accent-hover) transition-colors"
+            >
+              Урилга үүсгэх
+            </Link>
+          ) : (
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-(--color-text-secondary) truncate max-w-30">
+                {user.displayName}
+              </span>
+              <LogoutButton className="inline-flex h-8 items-center rounded-(--radius-ctrl) border border-(--color-border) px-3 text-xs font-medium text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors">
+                Гарах
+              </LogoutButton>
+            </div>
+          )}
         </div>
 
         {/* Mobile hamburger */}
@@ -54,7 +78,7 @@ export function PublicHeader() {
             </svg>
           </summary>
           <nav
-            className="absolute right-0 top-10 z-50 flex min-w-[160px] flex-col rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) shadow-(--shadow-md) py-1"
+            className="absolute right-0 top-10 z-50 flex min-w-40 flex-col rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) shadow-md py-1"
             aria-label="Мобайл цэс"
           >
             <Link
@@ -63,21 +87,40 @@ export function PublicHeader() {
             >
               Загварууд
             </Link>
-            <Link
-              href="/login"
-              className="px-4 py-2.5 text-xs text-(--color-text) hover:bg-(--color-surface-soft) transition-colors"
-            >
-              Нэвтрэх
-            </Link>
-            <div className="my-1 border-t border-(--color-border)" />
-            <Link
-              href="/register"
-              className="px-4 py-2.5 text-xs font-medium text-(--color-accent) hover:bg-(--color-surface-soft) transition-colors"
-            >
-              Урилга үүсгэх
-            </Link>
+            {!user && (
+              <>
+                <Link
+                  href="/login"
+                  className="px-4 py-2.5 text-xs text-(--color-text) hover:bg-(--color-surface-soft) transition-colors"
+                >
+                  Нэвтрэх
+                </Link>
+                <div className="my-1 border-t border-(--color-border)" />
+                <Link
+                  href="/register"
+                  className="px-4 py-2.5 text-xs font-medium text-(--color-accent) hover:bg-(--color-surface-soft) transition-colors"
+                >
+                  Урилга үүсгэх
+                </Link>
+              </>
+            )}
+            {user && (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="px-4 py-2.5 text-xs font-medium text-(--color-accent) hover:bg-(--color-surface-soft) transition-colors"
+                >
+                  Хяналтын самбар
+                </Link>
+                <div className="my-1 border-t border-(--color-border)" />
+                <LogoutButton className="px-4 py-2.5 text-left text-xs text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors">
+                  Гарах
+                </LogoutButton>
+              </>
+            )}
           </nav>
         </details>
+
       </div>
     </header>
   );

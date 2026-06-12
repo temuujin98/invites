@@ -2,6 +2,7 @@ import Link from "next/link";
 import { mockTemplates, mockCategories } from "@/lib/mock-data";
 import { TemplateCard } from "@/components/invite/TemplateCard";
 import { LandingHero } from "@/components/public/LandingHero";
+import { createClient } from "@/lib/supabase/server";
 
 const publishedTemplates = mockTemplates.filter((t) => t.status === "published");
 
@@ -65,13 +66,15 @@ const USE_CASES = [
   { emoji: "🎉", label: "Бусад арга хэмжээ" },
 ];
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
   const featuredTemplates = publishedTemplates.slice(0, 4);
 
   return (
     <div className="flex flex-col">
       {/* ── Hero ──────────────────────────────────────────────────────── */}
-      <LandingHero />
+      <LandingHero loggedIn={!!user} />
 
       {/* ── How it works ──────────────────────────────────────────────── */}
       <section className="bg-(--color-surface) py-16 md:py-20">

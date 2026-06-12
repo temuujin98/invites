@@ -35,7 +35,11 @@ const fadeUp = {
   }),
 };
 
-export function LandingHero() {
+interface LandingHeroProps {
+  loggedIn?: boolean;
+}
+
+export function LandingHero({ loggedIn = false }: LandingHeroProps) {
   return (
     <section className="relative overflow-hidden bg-(--color-bg) py-16 md:py-24">
       <div className="mx-auto max-w-5xl px-4 md:px-6">
@@ -93,12 +97,21 @@ export function LandingHero() {
               >
                 Загвар сонгох
               </Link>
-              <Link
-                href="/register"
-                className="inline-flex h-11 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-6 text-[15px] font-medium text-(--color-text) hover:bg-(--color-surface-soft) transition-colors"
-              >
-                Үнэгүй бүртгэл
-              </Link>
+              {loggedIn ? (
+                <Link
+                  href="/dashboard"
+                  className="inline-flex h-11 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-6 text-[15px] font-medium text-(--color-text) hover:bg-(--color-surface-soft) transition-colors"
+                >
+                  Хяналтын самбар руу
+                </Link>
+              ) : (
+                <Link
+                  href="/register"
+                  className="inline-flex h-11 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-6 text-[15px] font-medium text-(--color-text) hover:bg-(--color-surface-soft) transition-colors"
+                >
+                  Үнэгүй бүртгэл
+                </Link>
+              )}
             </motion.div>
 
             {/* Social proof */}
