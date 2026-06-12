@@ -154,10 +154,10 @@ const CAT_USE_CASES = [
 function SecHead({ title, sub }: { title: string; sub: string }) {
   return (
     <div className="mb-9 text-center">
-      <h2 className="text-2xl font-bold tracking-tight text-(--color-text) md:text-[28px]">
+      <h2 className="text-[20px] font-bold tracking-tight text-(--color-text) md:text-2xl">
         {title}
       </h2>
-      <p className="mt-2 text-[14px] leading-relaxed text-(--color-text-secondary)">{sub}</p>
+      <p className="mt-2 text-[14px] leading-[1.55] text-(--color-text-secondary)">{sub}</p>
     </div>
   );
 }
@@ -232,9 +232,12 @@ export default async function LandingPage() {
             </div>
             <Link
               href="/templates"
-              className="shrink-0 text-[12px] font-medium text-(--color-text-secondary) transition-colors hover:text-(--color-text)"
+              className="inline-flex h-8 items-center gap-1 rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-3 text-[12px] font-medium text-(--color-text-secondary) transition-colors hover:bg-(--color-surface-soft) hover:text-(--color-text)"
             >
-              Бүгдийг үзэх →
+              Бүгдийг үзэх
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M4.5 2.5l3 3.5-3 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </Link>
           </div>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-5">
@@ -280,7 +283,7 @@ export default async function LandingPage() {
             {USE_CASES.map((c) => (
               <div
                 key={c.who}
-                className="flex flex-col gap-4 rounded-(--radius-card) border p-6"
+                className="flex flex-col gap-4 rounded-panel border p-6"
                 style={
                   c.accent
                     ? { backgroundColor: "var(--color-primary)", borderColor: "var(--color-border)", color: "#fff" }
@@ -322,7 +325,7 @@ export default async function LandingPage() {
       {/* ── Pricing / CTA (bg) ──────────────────────────────────────────── */}
       <section className="py-14 md:py-18">
         <div className="mx-auto max-w-5xl px-4 md:px-6">
-          <div className="rounded-xl border border-(--color-border) bg-(--color-surface) px-6 py-10 text-center shadow-sm md:px-14 md:py-10">
+          <div className="rounded-xl-panel border border-(--color-border) bg-(--color-surface) px-6 py-8 text-center shadow-sm md:px-14 md:py-10">
             <h2 className="text-2xl font-bold tracking-tight text-(--color-text) md:text-[26px]">
               Үнэгүй эхлээрэй
             </h2>

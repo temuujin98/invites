@@ -51,7 +51,7 @@ export function LandingHero({ loggedIn = false }: LandingHeroProps) {
             {/* H1 */}
             <motion.h1
               initial="hidden" animate="show" variants={fadeUp} custom={1}
-              className="text-[30px] font-bold leading-[1.12] tracking-tight text-(--color-text) md:text-[44px]"
+              className="text-[30px] font-bold leading-[1.12] tracking-[-0.02em] text-(--color-text) md:text-[44px] md:tracking-tight"
             >
               Баярын урилгаа<br />минутын дотор
             </motion.h1>
@@ -59,7 +59,7 @@ export function LandingHero({ loggedIn = false }: LandingHeroProps) {
             {/* Sub */}
             <motion.p
               initial="hidden" animate="show" variants={fadeUp} custom={2}
-              className="text-[15px] leading-relaxed text-(--color-text-secondary)"
+              className="max-w-105 text-[15px] leading-[1.6] text-(--color-text-secondary)"
             >
               Загвараа сонгоод, мэдээллээ оруулаад, линкээр хуваалцаарай.
               Дизайнер шаардлагагүй — ердөө гурван алхам.
