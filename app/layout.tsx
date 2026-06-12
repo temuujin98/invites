@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
+import { logEnvOnce } from "@/lib/supabase/check-env";
+
+logEnvOnce();
 
 const roboto = Roboto({
   subsets: ["latin", "cyrillic"],

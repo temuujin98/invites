@@ -24,6 +24,16 @@ NEXT_PUBLIC_APP_URL=https://invites.mn   # link/QR/ics generation-д
 
 ## Supabase
 
+### Auth — "Confirm email" тохиргоо (чухал)
+
+**Dev орчинд:** Supabase Dashboard → Authentication → Providers → Email → **"Confirm email" OFF**.
+- OFF байхад signup хийсэн хэрэглэгч шууд session авна, email confirmation шаардахгүй.
+- Тестэнд ашигласан email rate limit (3/цаг, free tier) тулгардаггүй.
+
+**Production руу шилжихэд:** "Confirm email" дахин асаана, confirmation email template монгол хэлрүү орчуулна.
+
+---
+
 - Client тусгаарлалт: `lib/supabase/server.ts` (cookies, SSR), `lib/supabase/client.ts` (browser anon), `lib/supabase/admin.ts` (service role, `import "server-only"` заавал).
 - Migrations: `supabase/migrations/` — Claude Code MCP-ээр `apply_migration` ашиглаж болно, гэхдээ **production project дээр шууд destructive SQL ажиллуулахгүй**; эхлээд migration файл үүсгэж харуулна.
 - Types: schema өөрчлөгдөх бүрт `types/database.ts` regenerate.

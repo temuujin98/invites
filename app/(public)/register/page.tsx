@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AuthLayout } from "@/components/shared/AuthLayout";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { createClient } from "@/lib/supabase/client";
 
 interface FormState {
   name: string;
@@ -47,6 +49,7 @@ function validate(values: FormState): FormErrors {
 }
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [values, setValues] = useState<FormState>({
     name: "",
     email: "",
@@ -79,9 +82,26 @@ export default function RegisterPage() {
     if (Object.keys(errs).length > 0) return;
 
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
+    setErrors({});
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signUp({
+      email: values.email,
+      password: values.password,
+      options: {
+        data: { display_name: values.name.trim() },
+      },
+    });
+
     setLoading(false);
-    setErrors({ general: "Бүртгэл үүсгэх функц Phase 7-д нэмэгдэнэ." });
+
+    if (error) {
+      setErrors({ general: error.message });
+      return;
+    }
+
+    router.push("/dashboard");
+    router.refresh();
   }
 
   return (
@@ -95,7 +115,7 @@ export default function RegisterPage() {
         </div>
 
         {errors.general && (
-          <div className="rounded-(--radius-ctrl) bg-(--color-danger-soft) border border-(--color-danger)/30 px-4 py-3">
+          <div className="rounded-(--radius-ctrl) bg-(--color-danger-soft) border border-danger/30 px-4 py-3">
             <p className="text-xs text-(--color-danger)">{errors.general}</p>
           </div>
         )}

@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AuthLayout } from "@/components/shared/AuthLayout";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { createClient } from "@/lib/supabase/client";
 
 interface FormState {
   email: string;
@@ -33,6 +35,7 @@ function validate(values: FormState): FormErrors {
 }
 
 export default function LoginPage() {
+  const router = useRouter();
   const [values, setValues] = useState<FormState>({ email: "", password: "" });
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
@@ -60,10 +63,23 @@ export default function LoginPage() {
     if (Object.keys(errs).length > 0) return;
 
     setLoading(true);
-    // Phase 7: real Supabase auth. Mock delay for now.
-    await new Promise((r) => setTimeout(r, 800));
+    setErrors({});
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email: values.email,
+      password: values.password,
+    });
+
     setLoading(false);
-    setErrors({ general: "Нэвтрэх функц Phase 7-д нэмэгдэнэ." });
+
+    if (error) {
+      setErrors({ general: error.message });
+      return;
+    }
+
+    router.push("/dashboard");
+    router.refresh();
   }
 
   return (
@@ -77,7 +93,7 @@ export default function LoginPage() {
         </div>
 
         {errors.general && (
-          <div className="rounded-(--radius-ctrl) bg-(--color-danger-soft) border border-(--color-danger)/30 px-4 py-3">
+          <div className="rounded-(--radius-ctrl) bg-(--color-danger-soft) border border-danger/30 px-4 py-3">
             <p className="text-xs text-(--color-danger)">{errors.general}</p>
           </div>
         )}
