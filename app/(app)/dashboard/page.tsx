@@ -169,15 +169,18 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-(--color-bg)">
-      <div className="mx-auto max-w-3xl px-4 py-6 md:py-10">
+      <div className="mx-auto max-w-4xl px-4 py-6 md:py-8">
         {/* ── Header ── */}
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <h1 className="text-xl font-bold text-(--color-text) md:text-2xl">
-            Миний урилгууд
-          </h1>
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight text-(--color-text) md:text-[20px]">
+              Сайн уу, хэрэглэгч
+            </h1>
+            <p className="mt-0.5 text-xs text-(--color-text-muted)">Урилгуудаа эндээс удирдаарай</p>
+          </div>
           <Link
             href="/templates"
-            className="inline-flex h-8 items-center gap-1.5 rounded-(--radius-ctrl) bg-(--color-accent) px-3 text-xs font-semibold text-white hover:bg-(--color-accent-hover) transition-colors"
+            className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-(--radius-ctrl) bg-(--color-accent) px-3 text-xs font-medium text-white transition-colors hover:bg-(--color-accent-hover)"
           >
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
               <path d="M5 1v8M1 5h8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
@@ -293,10 +296,10 @@ function InviteRow({ invite, copiedId, onEdit, onPreview, onCopy, onArchive, onD
   const isCopied = copiedId === invite.id;
 
   return (
-    <article className="flex items-center gap-3 rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) p-3 shadow-(--shadow-sm) transition-shadow hover:shadow-(--shadow-md)">
+    <article className="flex items-center gap-3 rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) p-3 shadow-sm transition-shadow hover:shadow-md">
       {/* Thumbnail */}
       <div
-        className="shrink-0 overflow-hidden rounded-[6px] bg-(--color-surface-soft)"
+        className="shrink-0 overflow-hidden rounded-md bg-(--color-surface-soft)"
         style={{ width: 44, height: 78 }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}

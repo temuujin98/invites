@@ -102,14 +102,17 @@ export default async function TemplateDetailPage({ params }: Props) {
           {/* Supported fields */}
           <div>
             <p className="mb-3 text-xs font-medium text-(--color-text-secondary)">
-              Дэмждэг талбарууд
+              Орлуулах боломжтой талбарууд
             </p>
             <div className="flex flex-wrap gap-2">
               {inputFieldTypes.map((type) => (
                 <span
                   key={type}
-                  className="rounded-(--radius-ctrl) bg-(--color-surface-soft) border border-(--color-border) px-3 py-1 text-xs text-(--color-text-secondary)"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-(--color-border) bg-(--color-surface-soft) px-2.5 py-1 text-[11px] text-(--color-text-secondary)"
                 >
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--color-success)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <polyline points="2,5 4.5,7.5 8,3"/>
+                  </svg>
                   {FIELD_TYPE_LABELS[type] ?? type}
                 </span>
               ))}
@@ -124,16 +127,16 @@ export default async function TemplateDetailPage({ params }: Props) {
           </p>
 
           {/* CTA */}
-          <div className="flex flex-col gap-3 pt-2">
+          <div className="flex flex-col gap-2.5 pt-2">
             <Link
               href={`/create/${template.slug}`}
-              className="inline-flex h-11 items-center justify-center rounded-(--radius-ctrl) bg-(--color-accent) px-6 text-[15px] font-medium text-white hover:bg-(--color-accent-hover) transition-colors"
+              className="inline-flex h-11 items-center justify-center rounded-(--radius-ctrl) bg-(--color-accent) px-6 text-[14px] font-medium text-white transition-colors hover:bg-(--color-accent-hover)"
             >
               Энэ загвараар урилга үүсгэх
             </Link>
             <Link
               href="/templates"
-              className="inline-flex h-10 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) px-5 text-sm font-medium text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
+              className="inline-flex h-9 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) px-5 text-[13px] font-medium text-(--color-text-secondary) transition-colors hover:bg-(--color-surface-soft)"
             >
               ← Загварууд руу буцах
             </Link>

@@ -126,56 +126,106 @@ function TemplatesContent() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 md:px-6 md:py-12">
       {/* Page header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-(--color-text) md:text-3xl">Загварууд</h1>
-        <p className="mt-1 text-[15px] text-(--color-text-secondary)">
-          Арга хэмжээндээ тохирсон загварыг сонго
+      <div className="mb-6">
+        <h1 className="text-[28px] font-bold tracking-tight text-(--color-text)">Загварууд</h1>
+        <p className="mt-1.5 text-[13px] text-(--color-text-secondary)">
+          78 загвараас баярт тань тохирохыг олоорой
         </p>
       </div>
 
-      {/* Search + sort row */}
-      <div className="mb-6 flex items-center gap-3">
-        <div className="flex-1 max-w-sm">
-          <SearchInput
-            value={search}
-            onChange={(v) => setSearch(v)}
-            placeholder="Загвар хайх..."
-          />
+      {/* Toolbar: category chips + search + sort */}
+      <div className="mb-6 flex flex-col gap-3">
+        {/* Desktop: chips left, search+sort right */}
+        <div className="hidden md:flex md:items-start md:justify-between md:gap-4">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setActiveCategory("all")}
+              className={[
+                "rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors border",
+                activeCategory === "all"
+                  ? "bg-(--color-accent) text-white border-transparent"
+                  : "border-(--color-border) text-(--color-text-secondary) hover:border-(--color-text-muted) hover:text-(--color-text)",
+              ].join(" ")}
+            >
+              Бүгд
+            </button>
+            {mockCategories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={[
+                  "rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors border",
+                  activeCategory === cat.id
+                    ? "bg-(--color-accent) text-white border-transparent"
+                    : "border-(--color-border) text-(--color-text-secondary) hover:border-(--color-text-muted) hover:text-(--color-text)",
+                ].join(" ")}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <div className="w-52">
+              <SearchInput value={search} onChange={(v) => setSearch(v)} placeholder="Загвар хайх..." />
+            </div>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              className="h-8.5 rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-3 text-xs text-(--color-text)"
+              aria-label="Эрэмбэлэх"
+            >
+              {SORT_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
-        <select
-          value={sort}
-          onChange={(e) => setSort(e.target.value)}
-          className="hidden h-[34px] rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-3 text-sm text-(--color-text) md:block"
-          aria-label="Эрэмбэлэх"
-        >
-          {SORT_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
+
+        {/* Mobile: search + filter button */}
+        <div className="flex items-center gap-2 md:hidden">
+          <div className="flex-1">
+            <SearchInput value={search} onChange={(v) => setSearch(v)} placeholder="Загвар хайх..." />
+          </div>
+          <Button variant="secondary" size="sm" onClick={() => setFilterDrawerOpen(true)}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M2 4h10M4 7h6M6 10h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+            Шүүлт
+          </Button>
+        </div>
+
+        {/* Mobile: category chip scroll */}
+        <div className="flex gap-2 overflow-x-auto pb-1 md:hidden" style={{ scrollbarWidth: "none" }}>
+          <button
+            onClick={() => setActiveCategory("all")}
+            className={[
+              "shrink-0 rounded-full px-3 py-1.5 text-xs font-medium border transition-colors",
+              activeCategory === "all"
+                ? "bg-(--color-accent) text-white border-transparent"
+                : "border-(--color-border) text-(--color-text-secondary)",
+            ].join(" ")}
+          >
+            Бүгд
+          </button>
+          {mockCategories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
+              className={[
+                "shrink-0 rounded-full px-3 py-1.5 text-xs font-medium border transition-colors",
+                activeCategory === cat.id
+                  ? "bg-(--color-accent) text-white border-transparent"
+                  : "border-(--color-border) text-(--color-text-secondary)",
+              ].join(" ")}
+            >
+              {cat.name}
+            </button>
           ))}
-        </select>
-        {/* Mobile filter trigger */}
-        <Button
-          variant="secondary"
-          size="sm"
-          className="md:hidden"
-          onClick={() => setFilterDrawerOpen(true)}
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-            <path d="M2 4h10M4 7h6M6 10h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-          Шүүлтүүр
-        </Button>
+        </div>
       </div>
 
-      <div className="flex gap-8">
-        {/* Sidebar category filter — desktop */}
-        <aside className="hidden w-44 shrink-0 md:block">
-          {CategoryFilters}
-        </aside>
-
-        {/* Main content */}
-        <div className="flex-1 min-w-0">
+      {/* Main content — no sidebar */}
+      <div className="flex-1 min-w-0">
           {/* Active filter chips */}
           {hasFilters && (
             <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -256,7 +306,6 @@ function TemplatesContent() {
             </div>
           )}
         </div>
-      </div>
 
       {/* Mobile filter drawer */}
       <Drawer

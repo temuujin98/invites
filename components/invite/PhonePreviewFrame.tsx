@@ -36,8 +36,9 @@ export function PhonePreviewFrame({
       {/* Screen: aspect ratio lives here so the invite fills it edge-to-edge.
           bg-surface-soft prevents sub-pixel gaps showing as a white line. */}
       <div
-        className="overflow-hidden bg-(--color-surface-soft)"
+        className="bg-(--color-surface-soft)"
         style={{
+          overflow: "hidden",
           margin: BEZEL,
           borderRadius: `calc(var(--radius-xl-panel) - ${BEZEL}px)`,
           aspectRatio: `${screenAspect}`,

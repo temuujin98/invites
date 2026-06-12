@@ -238,33 +238,50 @@ function CreatePageInner() {
       {/* ── Top bar ── */}
       <header className="sticky top-0 z-30 border-b border-(--color-border) bg-(--color-surface)/95 backdrop-blur-sm">
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-3 md:px-6">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
-            aria-label="Буцах"
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
+          {/* Logo mark */}
+          <Link href="/dashboard" className="flex shrink-0 items-center gap-2 mr-1">
+            <div className="flex h-6 w-6 items-center justify-center rounded-[7px] bg-(--color-accent)">
+              <span className="text-[12px] font-bold text-white">i</span>
+            </div>
+          </Link>
 
           <div className="flex flex-1 justify-center">
             <Stepper steps={STEPS} current={currentStep} />
           </div>
 
-          {/* Mobile preview toggle */}
+          {/* Save & exit — desktop */}
           <button
             type="button"
-            onClick={() => setPreviewOpen((o) => !o)}
-            className="flex h-8 items-center gap-1.5 rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-2.5 text-xs text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors md:hidden"
+            onClick={handleBack}
+            className="hidden md:flex h-8 items-center gap-1.5 rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-3 text-xs text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
           >
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <rect x="1" y="1" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.4" />
-              <path d="M4 4h4M4 6h4M4 8h2" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
-            </svg>
-            {previewOpen ? "Хаах" : "Харах"}
+            Хадгалаад гарах
           </button>
+
+          {/* Mobile: back icon + preview toggle */}
+          <div className="flex items-center gap-2 md:hidden">
+            <button
+              type="button"
+              onClick={handleBack}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
+              aria-label="Буцах"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPreviewOpen((o) => !o)}
+              className="flex h-8 items-center gap-1.5 rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-2.5 text-xs text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <rect x="1" y="1" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.4" />
+                <path d="M4 4h4M4 6h4M4 8h2" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
+              </svg>
+              {previewOpen ? "Хаах" : "Харах"}
+            </button>
+          </div>
         </div>
       </header>
 
