@@ -113,24 +113,37 @@ const FILTER_LABELS: Record<FilterId, string> = {
 
 // ── Dashboard page ──────────────────────────────────────────────────────────
 
-function rowToInvite(row: Record<string, unknown>): Invite {
+interface InviteRow {
+  id: string;
+  template_id: string;
+  user_id: string;
+  title: string;
+  share_slug: string | null;
+  status: InviteStatus;
+  is_public: boolean;
+  event_date: string | null;
+  created_at: string;
+  updated_at: string;
+  templates: { slug: string } | null;
+  rsvps: { count: number }[];
+}
+
+function rowToInvite(row: InviteRow): Invite {
   return {
-    id: row.id as string,
-    templateId: (row.template_id as string) ?? "",
-    templateSlug: (row.template_slug as string) ?? "",
-    userId: (row.user_id as string) ?? "",
-    title: (row.title as string) ?? "",
-    shareSlug: (row.share_slug as string) ?? "",
-    status: (row.status as InviteStatus) ?? "draft",
-    isPublic: (row.is_public as boolean) ?? false,
-    values: (row.values as Invite["values"]) ?? {},
-    eventDate: (row.event_date as string | undefined) ?? undefined,
-    eventLocation: (row.event_location as string | undefined) ?? undefined,
-    eventLocationUrl: (row.event_location_url as string | undefined) ?? undefined,
-    rsvpCount: (row.rsvp_count as number) ?? 0,
-    viewCount: (row.view_count as number) ?? 0,
-    createdAt: (row.created_at as string) ?? "",
-    updatedAt: (row.updated_at as string) ?? "",
+    id: row.id,
+    templateId: row.template_id,
+    templateSlug: row.templates?.slug ?? "",
+    userId: row.user_id,
+    title: row.title,
+    shareSlug: row.share_slug ?? "",
+    status: row.status,
+    isPublic: row.is_public,
+    values: {},
+    eventDate: row.event_date ?? undefined,
+    rsvpCount: row.rsvps?.[0]?.count ?? 0,
+    viewCount: 0,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 
@@ -150,11 +163,11 @@ export default function DashboardPage() {
       if (!user) { setLoading(false); return; }
       const { data, error: err } = await supabase
         .from("invites")
-        .select("id, template_id, template_slug, user_id, title, share_slug, status, is_public, values, event_date, event_location, event_location_url, rsvp_count, view_count, created_at, updated_at")
+        .select("id, template_id, user_id, title, share_slug, status, is_public, event_date, created_at, updated_at, templates ( slug ), rsvps ( count )")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       if (err) { setError("Урилга уншихад алдаа гарлаа"); }
-      else { setInvites((data ?? []).map(rowToInvite)); }
+      else { setInvites((data ?? []).map((r) => rowToInvite(r as unknown as InviteRow))); }
       setLoading(false);
     });
   }, []);

@@ -11,16 +11,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { shareSlug } = await params;
   const supabase = await createClient();
 
+  // Only real columns from invites table (docs/05); thumbnail resolved via assets in Phase 9
   const { data: invite } = await supabase
     .from("invites")
-    .select(`
-      id,
-      title,
-      status,
-      is_public,
-      event_date,
-      templates ( thumbnail_url )
-    `)
+    .select("id, title, status, is_public, event_date")
     .eq("share_slug", shareSlug)
     .single();
 
@@ -33,14 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? `${(invite.event_date as string).replace(/-/g, ".")} · invites.mn дээр үүсгэсэн урилга`
     : "invites.mn дээр үүсгэсэн урилга";
 
-  // D12: use template thumbnail as og:image (full rendered export is Phase 9)
-  const thumbnail =
-    (invite.templates as { thumbnail_url?: string } | null)?.thumbnail_url ?? null;
-  const ogImage = thumbnail
-    ? thumbnail.startsWith("http")
-      ? thumbnail
-      : `${APP_URL}${thumbnail}`
-    : `${APP_URL}/og-default.png`;
+  const ogImage = `${APP_URL}/og-default.png`;
 
   return {
     title,

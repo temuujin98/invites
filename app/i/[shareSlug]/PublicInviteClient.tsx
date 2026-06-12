@@ -333,7 +333,6 @@ interface InviteData {
   eventDate?: string;
   eventTime?: string;
   eventLocation?: string;
-  eventLocationUrl?: string;
   values: InviteValues;
 }
 
@@ -347,17 +346,45 @@ export function PublicInviteClient({ shareSlug }: { shareSlug: string }) {
   useEffect(() => {
     const supabase = createClient();
     (async () => {
+      // Fetch invite + template metadata (real columns only per docs/05)
       const { data: inv } = await supabase
         .from("invites")
         .select(`
-          id, title, share_slug, status, is_public,
-          event_date, event_location, event_location_url, values,
-          templates ( id, slug, name, canvas_width, canvas_height, thumbnail_url, background_url, field_config )
+          id, title, share_slug, status, is_public, event_date,
+          templates ( id, slug, name, type, status, category_id, canvas_width, canvas_height )
         `)
         .eq("share_slug", shareSlug)
         .single();
 
       if (!inv) { setInvite(null); return; }
+
+      const tplRaw = inv.templates;
+      const tpl = Array.isArray(tplRaw)
+        ? (tplRaw[0] as Record<string, unknown> | undefined) ?? null
+        : (tplRaw as Record<string, unknown> | null);
+
+      // Parallel: field values + template fields
+      const [{ data: fieldValues }, { data: tplFields }] = await Promise.all([
+        supabase
+          .from("invite_values")
+          .select("field_key, value_text, value_asset_url")
+          .eq("invite_id", inv.id),
+        tpl
+          ? supabase
+              .from("template_fields")
+              .select("id, key, label, placeholder, type, required, x, y, width, height, font_family, font_size, font_weight, line_height, max_chars, color, align, border_radius, object_fit, visible, locked, layer_order")
+              .eq("template_id", tpl.id as string)
+              .order("layer_order", { ascending: true })
+          : Promise.resolve({ data: [] }),
+      ]);
+
+      const valMap: InviteValues = {};
+      for (const v of fieldValues ?? []) {
+        valMap[v.field_key] = {
+          text: v.value_text ?? undefined,
+          assetUrl: v.value_asset_url ?? undefined,
+        };
+      }
 
       const invData: InviteData = {
         id: inv.id,
@@ -366,15 +393,35 @@ export function PublicInviteClient({ shareSlug }: { shareSlug: string }) {
         status: inv.status,
         isPublic: inv.is_public,
         eventDate: inv.event_date ?? undefined,
-        eventLocation: inv.event_location ?? undefined,
-        eventLocationUrl: inv.event_location_url ?? undefined,
-        values: (inv.values as InviteValues) ?? {},
+        eventTime: valMap["event_time"]?.text ?? undefined,
+        eventLocation: valMap["location"]?.text ?? undefined,
+        values: valMap,
       };
       setInvite(invData);
 
-      const tplRaw = inv.templates;
-      const tpl = Array.isArray(tplRaw) ? (tplRaw[0] as Record<string, unknown> ?? null) : (tplRaw as Record<string, unknown> | null);
       if (tpl) {
+        const fields: InviteTemplate["fields"] = (tplFields ?? []).map((f) => ({
+          id: f.id,
+          key: f.key,
+          label: f.label,
+          placeholder: f.placeholder ?? undefined,
+          type: f.type as InviteTemplate["fields"][number]["type"],
+          required: f.required,
+          x: f.x, y: f.y, width: f.width, height: f.height,
+          fontFamily: f.font_family ?? undefined,
+          fontSize: f.font_size ?? undefined,
+          fontWeight: f.font_weight ?? undefined,
+          lineHeight: f.line_height ?? undefined,
+          maxChars: f.max_chars ?? undefined,
+          color: f.color ?? undefined,
+          align: f.align as InviteTemplate["fields"][number]["align"],
+          borderRadius: f.border_radius ?? undefined,
+          objectFit: f.object_fit as InviteTemplate["fields"][number]["objectFit"],
+          visible: f.visible,
+          locked: f.locked,
+          layerOrder: f.layer_order,
+        }));
+
         setTemplate({
           id: tpl.id as string,
           slug: tpl.slug as string,
@@ -384,9 +431,9 @@ export function PublicInviteClient({ shareSlug }: { shareSlug: string }) {
           status: (tpl.status as "draft" | "published") ?? "published",
           canvasWidth: (tpl.canvas_width as number) ?? 1080,
           canvasHeight: (tpl.canvas_height as number) ?? 1920,
-          thumbnailUrl: (tpl.thumbnail_url as string) ?? "",
-          backgroundUrl: (tpl.background_url as string) ?? "",
-          fields: (tpl.field_config as InviteTemplate["fields"]) ?? [],
+          thumbnailUrl: "",
+          backgroundUrl: "",
+          fields,
         });
       }
     })();
@@ -452,7 +499,7 @@ export function PublicInviteClient({ shareSlug }: { shareSlug: string }) {
     detailRows.push({
       label: "Байршил",
       value: invite.eventLocation,
-      sub: invite.eventLocationUrl ? undefined : undefined,
+      sub: undefined,
       icon: (
         <svg width="13" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
           <path d="M8 14.5s5-4.2 5-7.8A5 5 0 003 6.7c0 3.6 5 7.8 5 7.8z"/><circle cx="8" cy="6.8" r="1.8"/>
@@ -531,7 +578,7 @@ export function PublicInviteClient({ shareSlug }: { shareSlug: string }) {
               <div className="grid grid-cols-2 gap-2">
                 {invite.eventLocation && (
                   <a
-                    href={invite.eventLocationUrl ?? `https://maps.google.com/?q=${encodeURIComponent(invite.eventLocation)}`}
+                    href={`https://maps.google.com/?q=${encodeURIComponent(invite.eventLocation)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 rounded-xl border border-(--color-border) bg-(--color-surface) py-3 text-[14px] font-medium text-(--color-text) transition-colors hover:bg-(--color-surface-soft)"
