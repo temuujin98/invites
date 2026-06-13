@@ -23,14 +23,16 @@ export default async function AdminTemplatesPage() {
   const templates: InviteTemplate[] = (rows ?? []).map((row) => {
     const bgAsset = Array.isArray(row.bg_asset) ? (row.bg_asset[0] ?? null) : row.bg_asset;
     const thumbAsset = Array.isArray(row.thumb_asset) ? (row.thumb_asset[0] ?? null) : row.thumb_asset;
+    const bgUrl = assetToUrl(bgAsset as { bucket: string; path: string } | null) || `/mock-templates/${row.slug}.svg`;
+    const thumbUrl = assetToUrl(thumbAsset as { bucket: string; path: string } | null) || bgUrl;
     return {
       id: row.id as string,
       name: row.name as string,
       slug: row.slug as string,
       categoryId: row.category_id as string,
       type: row.type as "image" | "video",
-      backgroundUrl: assetToUrl(bgAsset as { bucket: string; path: string } | null),
-      thumbnailUrl: assetToUrl(thumbAsset as { bucket: string; path: string } | null),
+      backgroundUrl: bgUrl,
+      thumbnailUrl: thumbUrl,
       canvasWidth: Number(row.canvas_width),
       canvasHeight: Number(row.canvas_height),
       status: row.status as "draft" | "published",

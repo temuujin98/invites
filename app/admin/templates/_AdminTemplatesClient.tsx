@@ -9,6 +9,7 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { FilterTabs } from "@/components/shared/FilterTabs";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { DropdownMenu } from "@/components/ui/DropdownMenu";
 import { EmptyState } from "@/components/shared/EmptyState";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
@@ -28,6 +29,16 @@ function IconList() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
       <path d="M1 3h12M1 7h12M1 11h12" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconDots() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <circle cx="2.5" cy="7" r="1.2" fill="currentColor" />
+      <circle cx="7" cy="7" r="1.2" fill="currentColor" />
+      <circle cx="11.5" cy="7" r="1.2" fill="currentColor" />
     </svg>
   );
 }
@@ -112,29 +123,26 @@ function TemplateGridCard({ template, onDuplicate, onTogglePublish, onDelete }: 
           <TplStatusBadge status={template.status} />
           <TypeBadge type={template.type} />
         </div>
-        {/* Row actions */}
-        <div className="mt-1 flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => onDuplicate(template)}
-            className="flex h-6 items-center gap-1 rounded-(--radius-ctrl) border border-(--color-border) px-2 text-[10px] text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
-          >
-            Хуулах
-          </button>
-          <button
-            type="button"
-            onClick={() => onTogglePublish(template)}
-            className="flex h-6 items-center gap-1 rounded-(--radius-ctrl) border border-(--color-border) px-2 text-[10px] text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
-          >
-            {template.status === "published" ? "Буцаах" : "Нийтлэх"}
-          </button>
-          <button
-            type="button"
-            onClick={() => onDelete(template)}
-            className="flex h-6 items-center gap-1 rounded-(--radius-ctrl) border border-(--color-danger)/30 px-2 text-[10px] text-(--color-danger) hover:bg-(--color-danger-soft) transition-colors ml-auto"
-          >
-            Устгах
-          </button>
+        <div className="mt-1 flex justify-end">
+          <DropdownMenu
+            align="right"
+            trigger={
+              <button
+                type="button"
+                aria-label="Үйлдлүүд"
+                className="flex h-6 w-6 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) text-(--color-text-muted) hover:bg-(--color-surface-soft) transition-colors"
+              >
+                <IconDots />
+              </button>
+            }
+            items={[
+              { label: "Засах",   onClick: () => { window.location.href = `/admin/templates/${template.id}/edit`; } },
+              { label: "Харах",   onClick: () => window.open(`/templates/${template.slug}`, "_blank") },
+              { label: "Хуулах",  onClick: () => onDuplicate(template) },
+              { label: template.status === "published" ? "Ноорог болгох" : "Нийтлэх", onClick: () => onTogglePublish(template) },
+              { label: "Устгах",  danger: true, onClick: () => onDelete(template) },
+            ]}
+          />
         </div>
       </div>
     </div>
@@ -171,42 +179,25 @@ function TemplateTableRow({ template, onDuplicate, onTogglePublish, onDelete }: 
       <td className="px-3 py-2.5"><TplStatusBadge status={template.status} /></td>
       <td className="px-3 py-2.5 text-[11px] text-(--color-text-muted)">2026.06.10</td>
       <td className="px-3 py-2.5">
-        <div className="flex items-center gap-1">
-          <Link
-            href={`/admin/templates/${template.id}/edit`}
-            className="flex h-6 items-center rounded-(--radius-ctrl) border border-(--color-border) px-2 text-[10px] text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
-          >
-            Засах
-          </Link>
-          <button
-            type="button"
-            onClick={() => onDuplicate(template)}
-            className="flex h-6 items-center rounded-(--radius-ctrl) border border-(--color-border) px-2 text-[10px] text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
-          >
-            Хуулах
-          </button>
-          <Link
-            href={`/templates/${template.slug}`}
-            target="_blank"
-            className="flex h-6 items-center rounded-(--radius-ctrl) border border-(--color-border) px-2 text-[10px] text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
-          >
-            Харах
-          </Link>
-          <button
-            type="button"
-            onClick={() => onTogglePublish(template)}
-            className="flex h-6 items-center rounded-(--radius-ctrl) border border-(--color-border) px-2 text-[10px] text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
-          >
-            {template.status === "published" ? "Буцаах" : "Нийтлэх"}
-          </button>
-          <button
-            type="button"
-            onClick={() => onDelete(template)}
-            className="flex h-6 items-center rounded-(--radius-ctrl) border border-(--color-danger)/30 px-2 text-[10px] text-(--color-danger) hover:bg-(--color-danger-soft) transition-colors"
-          >
-            Устгах
-          </button>
-        </div>
+        <DropdownMenu
+          align="right"
+          trigger={
+            <button
+              type="button"
+              aria-label="Үйлдлүүд"
+              className="flex h-7 w-7 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) text-(--color-text-muted) hover:bg-(--color-surface-soft) transition-colors"
+            >
+              <IconDots />
+            </button>
+          }
+          items={[
+            { label: "Засах",   onClick: () => { window.location.href = `/admin/templates/${template.id}/edit`; } },
+            { label: "Харах",   onClick: () => window.open(`/templates/${template.slug}`, "_blank") },
+            { label: "Хуулах",  onClick: () => onDuplicate(template) },
+            { label: template.status === "published" ? "Ноорог болгох" : "Нийтлэх", onClick: () => onTogglePublish(template) },
+            { label: "Устгах",  danger: true, onClick: () => onDelete(template) },
+          ]}
+        />
       </td>
     </tr>
   );
