@@ -9,6 +9,7 @@ interface InviteRendererProps {
   mode: "editor" | "preview" | "public";
   selectedFieldId?: string;
   onFieldSelect?: (id: string) => void;
+  onRsvpClick?: () => void;
   showSampleData?: boolean;
 }
 
@@ -34,9 +35,10 @@ interface FieldProps {
   scale: number;
   isSelected: boolean;
   onSelect?: () => void;
+  onRsvpClick?: () => void;
 }
 
-function ScaledField({ field, values, mode, scale, isSelected, onSelect }: FieldProps) {
+function ScaledField({ field, values, mode, scale, isSelected, onSelect, onRsvpClick }: FieldProps) {
   const style: React.CSSProperties = {
     position: "absolute",
     left: field.x * scale,
@@ -135,19 +137,19 @@ function ScaledField({ field, values, mode, scale, isSelected, onSelect }: Field
           ...style,
           backgroundColor: "rgba(0,0,0,0.06)",
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: 4 * scale,
+          padding: 4 * scale,
         }}
         role={mode === "editor" ? "button" : undefined}
         tabIndex={mode === "editor" ? 0 : undefined}
         onClick={handleClick}
         aria-label="QR код"
       >
+        {/* SVG fills the field bounds — width/height come from the container div (style) */}
         <svg
-          width={32 * scale}
-          height={32 * scale}
+          width="100%"
+          height="100%"
           viewBox="0 0 32 32"
           fill="none"
           aria-hidden="true"
@@ -160,14 +162,14 @@ function ScaledField({ field, values, mode, scale, isSelected, onSelect }: Field
           <rect x="5" y="21" width="6" height="6" rx="1" fill="currentColor" />
           <path d="M18 18h4v4h-4zM22 22h4v4h-4zM18 26h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
         </svg>
-        <span style={{ fontSize: 9 * scale, color: "rgba(0,0,0,0.4)", fontFamily: "sans-serif" }}>
-          QR
-        </span>
       </div>
     );
   }
 
   if (field.type === "rsvp") {
+    // In public/preview mode: wire to onRsvpClick so the canvas button opens the drawer.
+    // In editor mode: select the field.
+    const handleRsvpClick = mode === "editor" ? handleClick : onRsvpClick;
     return (
       <div
         style={{
@@ -176,11 +178,12 @@ function ScaledField({ field, values, mode, scale, isSelected, onSelect }: Field
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          cursor: handleRsvpClick ? "pointer" : "default",
         }}
-        role="button"
-        tabIndex={0}
-        onClick={handleClick}
-        aria-label="RSVP"
+        role={handleRsvpClick ? "button" : undefined}
+        tabIndex={handleRsvpClick ? 0 : undefined}
+        onClick={handleRsvpClick}
+        aria-label="RSVP илгээх"
       >
         <span
           style={{
@@ -219,6 +222,7 @@ export function InviteRenderer({
   mode,
   selectedFieldId,
   onFieldSelect,
+  onRsvpClick,
 }: InviteRendererProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -296,6 +300,7 @@ export function InviteRenderer({
               scale={scale}
               isSelected={mode === "editor" && selectedFieldId === field.id}
               onSelect={() => onFieldSelect?.(field.id)}
+              onRsvpClick={onRsvpClick}
             />
           ))}
     </div>

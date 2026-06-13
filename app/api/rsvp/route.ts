@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 
 // Simple in-memory IP rate limit: max 5 submissions per IP per 10 minutes
 const WINDOW_MS = 10 * 60 * 1000;
@@ -66,15 +66,26 @@ export async function POST(req: NextRequest) {
 
   const { inviteId, name, attending, guestCount, note } = parsed.data;
 
+  // Instantiate admin client — throws if env vars are missing or not a real JWT
+  let admin: ReturnType<typeof getAdminClient>;
+  try {
+    admin = getAdminClient();
+  } catch (err) {
+    console.error("[rsvp] admin client init failed:", err);
+    return NextResponse.json(
+      { ok: false, code: "SERVER_CONFIG_ERROR", message: "Серверийн тохиргооны алдаа." },
+      { status: 500 },
+    );
+  }
+
   // Verify invite exists, is published, and is public
-  const { data: invite, error: inviteErr } = await adminClient
+  const { data: invite, error: inviteErr } = await admin
     .from("invites")
     .select("id, status, is_public")
     .eq("id", inviteId)
     .single();
 
   if (inviteErr) {
-    // Surface auth/config errors distinctly so they don't look like missing rows
     const isAuthError =
       inviteErr.message?.includes("JWT") ||
       inviteErr.message?.includes("Invalid API") ||
@@ -107,7 +118,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Insert via service-role (no RLS INSERT policy on rsvps by design)
-  const { data: rsvp, error: insertErr } = await adminClient
+  const { data: rsvp, error: insertErr } = await admin
     .from("rsvps")
     .insert({
       invite_id: inviteId,

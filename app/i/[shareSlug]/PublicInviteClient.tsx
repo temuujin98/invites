@@ -564,7 +564,12 @@ export function PublicInviteClient({ shareSlug }: { shareSlug: string }) {
         <div className="w-full max-w-md overflow-hidden rounded-(--radius-card-lg) border border-(--color-border) bg-white shadow-lg">
 
           {/* ── Template artwork via InviteRenderer (D2: must use actual template) ── */}
-          <InviteRenderer template={template} values={invite.values} mode="public" />
+          <InviteRenderer
+            template={template}
+            values={invite.values}
+            mode="public"
+            onRsvpClick={() => setRsvpOpen(true)}
+          />
 
           {/* Card body — detail rows + actions below the rendered invite */}
           <div className="px-6 pb-6 pt-5 text-center">
