@@ -8,7 +8,7 @@ Connectors: **GitHub, Supabase, Vercel** холбогдсон. Claude Code эд�
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=        # SERVER ONLY — NEXT_PUBLIC_ prefix ХЭЗЭЭ Ч хэрэглэхгүй
+SUPABASE_SERVICE_ROLE_KEY=        # SERVER ONLY — NEXT_PUBLIC_ prefix ХЭЗЭЭ Ч хэрэглэхгүй; must be a real JWT (starts with "eyJ") — placeholder values pass naive truthy checks and cause silent NOT_FOUND errors at runtime
 
 # Email (Phase G)
 EMAIL_PROVIDER=resend
