@@ -77,7 +77,7 @@ export default async function EditTemplatePage({ params }: Props) {
     slug: row.slug as string,
     categoryId: row.category_id as string,
     type: row.type as "image" | "video",
-    backgroundUrl: assetToUrl(bgAssetRaw as { bucket: string; path: string } | null),
+    backgroundUrl: assetToUrl(bgAssetRaw as { bucket: string; path: string } | null) || `/mock-templates/${row.slug}.svg`,
     thumbnailUrl: assetToUrl(thumbAssetRaw as { bucket: string; path: string } | null),
     canvasWidth: Number(row.canvas_width),
     canvasHeight: Number(row.canvas_height),

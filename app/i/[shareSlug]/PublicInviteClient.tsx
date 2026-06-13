@@ -400,7 +400,7 @@ export function PublicInviteClient({ shareSlug }: { shareSlug: string }) {
         .from("invites")
         .select(`
           id, title, share_slug, status, is_public, event_date,
-          templates ( id, slug, name, type, status, category_id, canvas_width, canvas_height )
+          templates ( id, slug, name, type, status, category_id, canvas_width, canvas_height, bg_asset:assets!bg_asset_id ( id, bucket, path ) )
         `)
         .eq("share_slug", shareSlug)
         .single();
@@ -472,6 +472,11 @@ export function PublicInviteClient({ shareSlug }: { shareSlug: string }) {
         }));
 
         const tplSlug = tpl.slug as string;
+        const bgAssetRaw = tpl.bg_asset as { bucket: string; path: string } | { bucket: string; path: string }[] | null | undefined;
+        const bgAsset = Array.isArray(bgAssetRaw) ? (bgAssetRaw[0] ?? null) : (bgAssetRaw ?? null);
+        const bgUrl = bgAsset
+          ? supabase.storage.from(bgAsset.bucket).getPublicUrl(bgAsset.path).data.publicUrl
+          : `/mock-templates/${tplSlug}.svg`;
         setTemplate({
           id: tpl.id as string,
           slug: tplSlug,
@@ -482,7 +487,7 @@ export function PublicInviteClient({ shareSlug }: { shareSlug: string }) {
           canvasWidth: (tpl.canvas_width as number) ?? 1080,
           canvasHeight: (tpl.canvas_height as number) ?? 1920,
           thumbnailUrl: `/mock-templates/${tplSlug}.svg`,
-          backgroundUrl: `/mock-templates/${tplSlug}.svg`,
+          backgroundUrl: bgUrl,
           fields,
         });
       }
