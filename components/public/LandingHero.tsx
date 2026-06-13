@@ -32,12 +32,12 @@ interface LandingHeroProps {
 
 export function LandingHero({ loggedIn = false }: LandingHeroProps) {
   return (
-    <section className="overflow-visible bg-(--color-bg) px-4 pb-18 pt-16 md:px-6 md:pt-16 md:pb-18">
-      <div className="mx-auto max-w-5xl overflow-visible">
-        <div className="flex flex-col items-center gap-10 md:flex-row md:items-center md:gap-16">
+    <section className="overflow-x-hidden bg-(--color-bg) px-4 pb-14 pt-14 md:overflow-visible md:px-6 md:pt-16 md:pb-18">
+      <div className="mx-auto max-w-5xl md:overflow-visible">
+        <div className="flex flex-col items-center gap-8 md:flex-row md:items-center md:gap-16">
 
           {/* ── Text side ───────────────────────────────────── */}
-          <div className="flex flex-col gap-5 text-center md:flex-1 md:max-w-lg md:text-left">
+          <div className="flex w-full flex-col gap-5 text-center md:flex-1 md:max-w-lg md:text-left">
             {/* Badge */}
             <motion.div
               initial="hidden" animate="show" variants={fadeUp} custom={0}
@@ -170,19 +170,21 @@ export function LandingHero({ loggedIn = false }: LandingHeroProps) {
             </motion.div>
           </motion.div>
 
-          {/* Mobile: centered phone, no chips (no room) */}
+          {/* Mobile: compact phone preview */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
-            className="flex justify-center md:hidden"
+            transition={{ duration: 0.3, ease: "easeOut", delay: 0.15 }}
+            className="flex w-full justify-center md:hidden"
           >
-            <PhonePreviewFrame
-              canvasWidth={HERO_TEMPLATE.canvasWidth}
-              canvasHeight={HERO_TEMPLATE.canvasHeight}
-            >
-              <InviteRenderer template={HERO_TEMPLATE} values={HERO_VALUES} mode="public" />
-            </PhonePreviewFrame>
+            <div className="w-full max-w-[200px]">
+              <PhonePreviewFrame
+                canvasWidth={HERO_TEMPLATE.canvasWidth}
+                canvasHeight={HERO_TEMPLATE.canvasHeight}
+              >
+                <InviteRenderer template={HERO_TEMPLATE} values={HERO_VALUES} mode="public" />
+              </PhonePreviewFrame>
+            </div>
           </motion.div>
 
         </div>

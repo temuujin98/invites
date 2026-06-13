@@ -7,10 +7,7 @@ export function PublicFooter() {
         <div className="flex flex-col gap-10 md:flex-row md:justify-between">
           {/* Brand */}
           <div className="max-w-65">
-            <div className="mb-3 flex items-center gap-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded-[7px] bg-(--color-accent)">
-                <span className="text-[12px] font-bold text-white">i</span>
-              </div>
+            <div className="mb-3">
               <span className="text-[15px] font-semibold tracking-tight text-white">invites</span>
             </div>
             <p className="text-xs leading-relaxed text-white/55">

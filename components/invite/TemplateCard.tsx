@@ -66,7 +66,7 @@ export function TemplateCard({ template, category, href }: TemplateCardProps) {
         </p>
         {category && (
           <p className="text-[11px] text-(--color-text-muted)">
-            {category.icon} {category.name}
+            {category.name}
           </p>
         )}
       </div>

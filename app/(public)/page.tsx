@@ -199,15 +199,11 @@ export default async function LandingPage() {
         <div className="mx-auto max-w-5xl px-4 md:px-6">
           <SecHead title="Ямар ч баярт тохирно" sub="Төрөл бүрийн арга хэмжээнд зориулсан загварууд" />
           <div className="flex flex-wrap justify-center gap-3">
-            {CAT_USE_CASES.map((uc, i) => (
+            {CAT_USE_CASES.map((uc) => (
               <Link
                 key={uc.label}
                 href={`/templates?category=${uc.slug}`}
-                className="flex w-35 flex-col items-center gap-2 rounded-(--radius-card) border bg-(--color-surface) px-4 py-4 text-center transition-all hover:shadow-md"
-                style={i === 0
-                  ? { borderColor: "var(--color-accent)", backgroundColor: "var(--color-accent-soft)" }
-                  : { borderColor: "var(--color-border)" }
-                }
+                className="flex w-35 flex-col items-center gap-2 rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) px-4 py-4 text-center transition-all hover:border-(--color-accent) hover:shadow-md"
               >
                 <CatIcon type={uc.type} />
                 <p className="text-[13px] font-medium text-(--color-text)">{uc.label}</p>
@@ -322,34 +318,6 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── Pricing / CTA (bg) ──────────────────────────────────────────── */}
-      <section className="py-14 md:py-18">
-        <div className="mx-auto max-w-5xl px-4 md:px-6">
-          <div className="rounded-xl-panel border border-(--color-border) bg-(--color-surface) px-6 py-8 text-center shadow-sm md:px-14 md:py-10">
-            <h2 className="text-2xl font-bold tracking-tight text-(--color-text) md:text-[26px]">
-              Үнэгүй эхлээрэй
-            </h2>
-            <p className="mx-auto mt-2 max-w-sm text-[14px] leading-relaxed text-(--color-text-secondary)">
-              Бүртгэл үүсгээд анхны урилгаа үнэгүй хийгээрэй. Илүү олон загвар,
-              видео экспорт хэрэгтэй бол Pro руу ахиулаарай.
-            </p>
-            <div className="mt-6 flex flex-col items-center gap-2.5 sm:flex-row sm:justify-center">
-              <Link
-                href={user ? "/templates" : "/register"}
-                className="inline-flex h-11 items-center justify-center rounded-(--radius-ctrl) bg-(--color-accent) px-6 text-[14px] font-medium text-white transition-colors hover:bg-(--color-accent-hover)"
-              >
-                Урилга үүсгэх
-              </Link>
-              <Link
-                href="/templates"
-                className="inline-flex h-11 items-center justify-center rounded-(--radius-ctrl) px-6 text-[14px] font-medium text-(--color-text-secondary) transition-colors hover:text-(--color-text)"
-              >
-                Загварууд үзэх
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
 
     </div>
   );

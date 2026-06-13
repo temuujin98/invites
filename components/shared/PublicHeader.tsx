@@ -11,22 +11,22 @@ export function PublicHeader({ user }: PublicHeaderProps) {
       <div className="mx-auto flex h-13 max-w-5xl items-center justify-between gap-4 px-4 md:px-6">
 
         {/* Logo */}
-        <Link href="/" className="text-sm font-bold text-(--color-text) tracking-tight">
+        <Link href="/" className="text-[15px] font-semibold text-(--color-text) tracking-tight">
           invites
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-5 md:flex" aria-label="Нийтийн цэс">
+        <nav className="hidden items-center gap-6 md:flex" aria-label="Нийтийн цэс">
           <Link
             href="/templates"
-            className="text-xs font-medium text-(--color-text-secondary) hover:text-(--color-text) transition-colors"
+            className="text-[14px] font-medium text-(--color-text-secondary) hover:text-(--color-text) transition-colors"
           >
             Загварууд
           </Link>
           {!user && (
             <Link
               href="/login"
-              className="text-xs font-medium text-(--color-text-secondary) hover:text-(--color-text) transition-colors"
+              className="text-[14px] font-medium text-(--color-text-secondary) hover:text-(--color-text) transition-colors"
             >
               Нэвтрэх
             </Link>
@@ -34,7 +34,7 @@ export function PublicHeader({ user }: PublicHeaderProps) {
           {user && (
             <Link
               href="/dashboard"
-              className="text-xs font-medium text-(--color-text-secondary) hover:text-(--color-text) transition-colors"
+              className="text-[14px] font-medium text-(--color-text-secondary) hover:text-(--color-text) transition-colors"
             >
               Хяналтын самбар
             </Link>
@@ -46,7 +46,7 @@ export function PublicHeader({ user }: PublicHeaderProps) {
           {!user ? (
             <Link
               href="/register"
-              className="inline-flex h-8 items-center rounded-(--radius-ctrl) bg-(--color-accent) px-4 text-xs font-medium text-white hover:bg-(--color-accent-hover) transition-colors"
+              className="inline-flex h-9 items-center rounded-(--radius-ctrl) bg-(--color-accent) px-5 text-[14px] font-medium text-white hover:bg-(--color-accent-hover) transition-colors"
             >
               Урилга үүсгэх
             </Link>
