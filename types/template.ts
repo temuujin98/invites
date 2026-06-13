@@ -34,6 +34,9 @@ export interface InviteTemplate {
   canvasHeight: number;
   status: "draft" | "published";
   fields: TemplateFieldConfig[];
+  // Editor-only: set after a bg/thumb upload so handleSave can link the asset row
+  pendingBgAssetId?: string | null;
+  pendingThumbAssetId?: string | null;
 }
 
 export type InviteValues = Record<string, { text?: string; assetUrl?: string }>;

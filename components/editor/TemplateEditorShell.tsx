@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { InviteTemplate } from "@/types/template";
+import { RESERVED_SLUGS } from "@/lib/constants";
 import { useEditorState } from "./useEditorState";
 import { TemplateSettingsPanel } from "./TemplateSettingsPanel";
 import { TemplateCanvas } from "./TemplateCanvas";
@@ -53,6 +54,7 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
   const [publishErrors, setPublishErrors] = useState<string[]>([]);
   const [showPublishErrors, setShowPublishErrors] = useState(false);
   const [pendingNavHref, setPendingNavHref] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   // beforeunload guard
   useEffect(() => {
@@ -67,20 +69,58 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
   }, [isDirty]);
 
   async function handleSave() {
+    if (saving) return;
+
+    // Slug validation
+    const slug = template.slug.trim();
+    if (!slug || !/^[a-z0-9-]+$/.test(slug) || slug.length < 3 || slug.length > 60) {
+      toast.show("Slug нь 3–60 тэмдэгт, зөвхөн a-z, 0-9, - тэмдэгт агуулна", "error");
+      return;
+    }
+    if ((RESERVED_SLUGS as readonly string[]).includes(slug)) {
+      toast.show(`"${slug}" нь хориглогдсон slug`, "error");
+      return;
+    }
+
+    setSaving(true);
     try {
       const supabase = createClient();
+
+      // If slug changed, verify it's not used by another template
+      if (slug !== initialTemplate.slug) {
+        const { data: existing } = await supabase
+          .from("templates")
+          .select("id")
+          .eq("slug", slug)
+          .neq("id", template.id)
+          .maybeSingle();
+        if (existing) {
+          toast.show(`Slug "${slug}" аль хэдийн ашиглагдаж байна`, "error");
+          return;
+        }
+      }
+
+      // Persist bg_asset_id if we have a pending asset to link
+      const tplPatch: Record<string, unknown> = {
+        name: template.name,
+        slug,
+        category_id: template.categoryId,
+        type: template.type,
+        canvas_width: template.canvasWidth,
+        canvas_height: template.canvasHeight,
+        status: template.status,
+        updated_at: new Date().toISOString(),
+      };
+      if (template.pendingBgAssetId !== undefined) {
+        tplPatch.bg_asset_id = template.pendingBgAssetId;
+      }
+      if (template.pendingThumbAssetId !== undefined) {
+        tplPatch.thumb_asset_id = template.pendingThumbAssetId;
+      }
+
       const { error: tplErr } = await supabase
         .from("templates")
-        .update({
-          name: template.name,
-          slug: template.slug,
-          category_id: template.categoryId,
-          type: template.type,
-          canvas_width: template.canvasWidth,
-          canvas_height: template.canvasHeight,
-          status: template.status,
-          updated_at: new Date().toISOString(),
-        })
+        .update(tplPatch)
         .eq("id", template.id);
       if (tplErr) throw tplErr;
 
@@ -121,6 +161,8 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
       toast.show("Хадгалагдлаа", "success");
     } catch {
       toast.show("Хадгалахад алдаа гарлаа", "error");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -262,23 +304,24 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
 
         {/* Right side */}
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10 }}>
-          {isDirty ? (
+          {isDirty || saving ? (
             <button
               type="button"
               onClick={handleSave}
+              disabled={saving}
               style={{
                 height: 28,
                 paddingInline: 12,
                 borderRadius: "var(--radius-ctrl)",
                 border: "1px solid var(--color-accent)",
-                background: "var(--color-accent-soft)",
-                color: "var(--color-accent)",
+                background: saving ? "var(--color-surface-soft)" : "var(--color-accent-soft)",
+                color: saving ? "var(--color-text-muted)" : "var(--color-accent)",
                 fontSize: 11,
                 fontWeight: 500,
-                cursor: "pointer",
+                cursor: saving ? "default" : "pointer",
               }}
             >
-              Хадгалах
+              {saving ? "Хадгалж байна..." : "Хадгалах"}
             </button>
           ) : (
             <span style={{ fontSize: 11, color: "var(--color-text-muted)" }}>

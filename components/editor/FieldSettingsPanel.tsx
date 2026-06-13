@@ -5,6 +5,8 @@ import type { TemplateFieldConfig, FieldType } from "@/types/template";
 interface Props {
   field: TemplateFieldConfig;
   onUpdate: (patch: Partial<TemplateFieldConfig>) => void;
+  onDuplicate: () => void;
+  onDelete: () => void;
 }
 
 const TYPE_LABELS: Record<FieldType, string> = {
@@ -143,7 +145,7 @@ function AlignBtn({
   );
 }
 
-export function FieldSettingsPanel({ field, onUpdate }: Props) {
+export function FieldSettingsPanel({ field, onUpdate, onDuplicate, onDelete }: Props) {
   const isTextLike = ["text", "date", "time", "location", "custom", "rsvp"].includes(field.type);
 
   function numVal(v: number | undefined, fallback: number): number {
@@ -166,6 +168,7 @@ export function FieldSettingsPanel({ field, onUpdate }: Props) {
             <button
               type="button"
               title="Хуулах"
+              onClick={onDuplicate}
               style={{
                 background: "none",
                 border: "none",
@@ -181,6 +184,7 @@ export function FieldSettingsPanel({ field, onUpdate }: Props) {
             <button
               type="button"
               title="Устгах"
+              onClick={onDelete}
               style={{
                 background: "none",
                 border: "none",

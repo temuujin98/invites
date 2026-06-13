@@ -1,5 +1,19 @@
 "use client";
 
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import type { TemplateFieldConfig, FieldType } from "@/types/template";
 import { LayerItem } from "./LayerItem";
 
@@ -24,6 +38,58 @@ const ADD_TYPES: { type: FieldType; label: string }[] = [
   { type: "qr",       label: "QR код" },
 ];
 
+// Wrapper that makes a single LayerItem draggable
+function SortableLayerItem({
+  field,
+  isSelected,
+  onSelect,
+  onToggleLock,
+  onToggleVisible,
+  onDuplicate,
+  onDelete,
+}: {
+  field: TemplateFieldConfig;
+  isSelected: boolean;
+  onSelect: () => void;
+  onToggleLock: () => void;
+  onToggleVisible: () => void;
+  onDuplicate: () => void;
+  onDelete: () => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: field.id });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+      }}
+    >
+      <LayerItem
+        field={field}
+        isSelected={isSelected}
+        onSelect={onSelect}
+        onToggleLock={onToggleLock}
+        onToggleVisible={onToggleVisible}
+        onDuplicate={onDuplicate}
+        onDelete={onDelete}
+        dragHandleRef={setActivatorNodeRef}
+        dragHandleProps={{ ...attributes, ...listeners }}
+      />
+    </div>
+  );
+}
+
 export function LayerList({
   fields,
   selectedFieldId,
@@ -33,8 +99,26 @@ export function LayerList({
   onDuplicate,
   onDelete,
   onAdd,
+  onReorder,
 }: Props) {
-  const sorted = [...fields].sort((a, b) => b.layerOrder - a.layerOrder); // top layer first
+  // Top layer first (highest layerOrder first) — matches visual stacking
+  const sorted = [...fields].sort((a, b) => b.layerOrder - a.layerOrder);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+  );
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const fromIndex = sorted.findIndex((f) => f.id === active.id);
+    const toIndex = sorted.findIndex((f) => f.id === over.id);
+    if (fromIndex === -1 || toIndex === -1) return;
+    // sorted is high→low; reorderFields operates on low→high index order,
+    // so mirror the indices: position i in sorted = (n-1-i) in ascending order
+    const n = sorted.length;
+    onReorder(n - 1 - fromIndex, n - 1 - toIndex);
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -62,7 +146,7 @@ export function LayerList({
         <AddFieldDropdown onAdd={onAdd} />
       </div>
 
-      {/* Layer rows */}
+      {/* Sortable layer rows */}
       <div style={{ padding: "4px 6px", display: "flex", flexDirection: "column", gap: 1 }}>
         {sorted.length === 0 && (
           <p
@@ -76,18 +160,29 @@ export function LayerList({
             Талбар байхгүй
           </p>
         )}
-        {sorted.map((field) => (
-          <LayerItem
-            key={field.id}
-            field={field}
-            isSelected={field.id === selectedFieldId}
-            onSelect={() => onSelect(field.id)}
-            onToggleLock={() => onToggleLock(field.id)}
-            onToggleVisible={() => onToggleVisible(field.id)}
-            onDuplicate={() => onDuplicate(field.id)}
-            onDelete={() => onDelete(field.id)}
-          />
-        ))}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={sorted.map((f) => f.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {sorted.map((field) => (
+              <SortableLayerItem
+                key={field.id}
+                field={field}
+                isSelected={field.id === selectedFieldId}
+                onSelect={() => onSelect(field.id)}
+                onToggleLock={() => onToggleLock(field.id)}
+                onToggleVisible={() => onToggleVisible(field.id)}
+                onDuplicate={() => onDuplicate(field.id)}
+                onDelete={() => onDelete(field.id)}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
       </div>
     </div>
   );

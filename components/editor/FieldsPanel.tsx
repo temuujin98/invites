@@ -72,6 +72,8 @@ export function FieldsPanel({
           <FieldSettingsPanel
             field={selectedField}
             onUpdate={(patch) => onUpdateField(selectedField.id, patch)}
+            onDuplicate={() => onDuplicate(selectedField.id)}
+            onDelete={() => onDelete(selectedField.id)}
           />
         ) : (
           <div

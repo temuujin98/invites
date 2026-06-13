@@ -38,7 +38,10 @@ export function TemplateSettingsPanel({ template, onChange, onPublishToggle }: P
     ...mockCategories.map((c) => ({ value: c.id, label: `${c.icon} ${c.name}` })),
   ];
   const bgInputRef = useRef<HTMLInputElement>(null);
+  const thumbInputRef = useRef<HTMLInputElement>(null);
   const [bgUploading, setBgUploading] = useState(false);
+  const [thumbUploading, setThumbUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   async function handleBgFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -46,21 +49,69 @@ export function TemplateSettingsPanel({ template, onChange, onPublishToggle }: P
     setBgUploading(true);
     try {
       const supabase = createClient();
-      const ext = file.name.split(".").pop() ?? "jpg";
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+      const bucket = "template-backgrounds";
       const path = `${template.id}/background.${ext}`;
-      const { error } = await supabase.storage
-        .from("template-backgrounds")
+      const { error: uploadErr } = await supabase.storage
+        .from(bucket)
         .upload(path, file, { upsert: true });
-      if (error) throw error;
-      const { data } = supabase.storage
-        .from("template-backgrounds")
-        .getPublicUrl(path);
-      onChange({ backgroundUrl: data.publicUrl });
+      if (uploadErr) throw uploadErr;
+      const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
+
+      // Upsert asset row so handleSave can link bg_asset_id
+      const assetType: "image" | "video" = file.type.startsWith("video/") ? "video" : "image";
+      const { data: asset, error: assetErr } = await supabase
+        .from("assets")
+        .upsert(
+          { bucket, path, type: assetType, size_bytes: file.size },
+          { onConflict: "bucket,path", ignoreDuplicates: false },
+        )
+        .select("id")
+        .single();
+      if (assetErr) throw assetErr;
+
+      onChange({ backgroundUrl: urlData.publicUrl, pendingBgAssetId: asset.id });
     } catch {
-      // upload failed — leave existing backgroundUrl unchanged
+      setUploadError("Фон оруулахад алдаа гарлаа. Дахин оролдоно уу.");
     } finally {
       setBgUploading(false);
       if (bgInputRef.current) bgInputRef.current.value = "";
+    }
+  }
+
+  async function handleThumbFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setThumbUploading(true);
+    setUploadError(null);
+    try {
+      const supabase = createClient();
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+      const bucket = "template-thumbnails";
+      const path = `${template.id}/thumbnail.${ext}`;
+      const { error: uploadErr } = await supabase.storage
+        .from(bucket)
+        .upload(path, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
+      const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
+
+      const assetType: "image" | "video" = file.type.startsWith("video/") ? "video" : "image";
+      const { data: asset, error: assetErr } = await supabase
+        .from("assets")
+        .upsert(
+          { bucket, path, type: assetType, size_bytes: file.size },
+          { onConflict: "bucket,path", ignoreDuplicates: false },
+        )
+        .select("id")
+        .single();
+      if (assetErr) throw assetErr;
+
+      onChange({ thumbnailUrl: urlData.publicUrl, pendingThumbAssetId: asset.id });
+    } catch {
+      setUploadError("Thumbnail оруулахад алдаа гарлаа. Дахин оролдоно уу.");
+    } finally {
+      setThumbUploading(false);
+      if (thumbInputRef.current) thumbInputRef.current.value = "";
     }
   }
 
@@ -181,7 +232,7 @@ export function TemplateSettingsPanel({ template, onChange, onPublishToggle }: P
           <button
             type="button"
             disabled={bgUploading}
-            onClick={() => bgInputRef.current?.click()}
+            onClick={() => { setUploadError(null); bgInputRef.current?.click(); }}
             style={{
               width: "100%",
               height: 28,
@@ -194,23 +245,63 @@ export function TemplateSettingsPanel({ template, onChange, onPublishToggle }: P
               marginBottom: 8,
             }}
           >
-            {bgUploading ? "Байршуулж байна..." : template.backgroundUrl ? "Солих" : "Фон оруулах"}
+            {bgUploading ? "Байршуулж байна..." : template.backgroundUrl ? "Фон солих" : "Фон оруулах"}
           </button>
 
           {/* Thumbnail upload */}
-          <div
+          <SectionTitle>Thumbnail</SectionTitle>
+          {template.thumbnailUrl ? (
+            <div
+              style={{
+                border: "1px solid var(--color-border)",
+                borderRadius: "var(--radius-ctrl)",
+                padding: "8px",
+                display: "flex",
+                gap: 8,
+                alignItems: "center",
+                marginBottom: 6,
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={template.thumbnailUrl}
+                alt=""
+                style={{ width: 32, height: 32, objectFit: "cover", borderRadius: 3, flexShrink: 0 }}
+                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+              />
+              <p style={{ fontSize: 11, color: "var(--color-text)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
+                thumbnail
+              </p>
+            </div>
+          ) : null}
+          <input
+            ref={thumbInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={handleThumbFileChange}
+          />
+          <button
+            type="button"
+            disabled={thumbUploading}
+            onClick={() => { setUploadError(null); thumbInputRef.current?.click(); }}
             style={{
-              border: "1px dashed var(--color-border)",
+              width: "100%",
+              height: 28,
               borderRadius: "var(--radius-ctrl)",
-              padding: "10px 8px",
-              textAlign: "center",
-              cursor: "pointer",
+              border: "1px solid var(--color-border)",
+              background: "var(--color-surface)",
+              color: thumbUploading ? "var(--color-text-muted)" : "var(--color-text-secondary)",
+              fontSize: 11,
+              cursor: thumbUploading ? "default" : "pointer",
+              marginBottom: uploadError ? 4 : 0,
             }}
           >
-            <p style={{ fontSize: 10, color: "var(--color-text-muted)", lineHeight: 1.4 }}>
-              Зураг оруулах / хоосон бол автоматаар үүснэ
-            </p>
-          </div>
+            {thumbUploading ? "Байршуулж байна..." : template.thumbnailUrl ? "Thumbnail солих" : "Thumbnail оруулах"}
+          </button>
+          {uploadError && (
+            <p style={{ fontSize: 10, color: "var(--color-danger)", marginTop: 4 }}>{uploadError}</p>
+          )}
         </div>
 
         <Divider />

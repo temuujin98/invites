@@ -10,6 +10,8 @@ interface Props {
   onToggleVisible: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
+  dragHandleRef?: (node: HTMLElement | null) => void;
+  dragHandleProps?: React.HTMLAttributes<HTMLElement>;
 }
 
 // Inline SVG icons per field type (16×16 viewBox)
@@ -112,6 +114,8 @@ export function LayerItem({
   onToggleVisible,
   onDuplicate,
   onDelete,
+  dragHandleRef,
+  dragHandleProps,
 }: Props) {
   return (
     <div
@@ -137,10 +141,12 @@ export function LayerItem({
         position: "relative",
       }}
     >
-      {/* Drag handle */}
+      {/* Drag handle — wired to @dnd-kit activator */}
       <span
-        style={{ color: "var(--color-text-muted)", flexShrink: 0, cursor: "grab", fontSize: 12 }}
-        aria-hidden="true"
+        ref={dragHandleRef}
+        {...dragHandleProps}
+        style={{ color: "var(--color-text-muted)", flexShrink: 0, cursor: "grab", fontSize: 12, touchAction: "none" }}
+        aria-label="Дараалал өөрчлөх"
       >
         ⠿
       </span>
