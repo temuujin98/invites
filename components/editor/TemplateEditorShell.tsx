@@ -68,25 +68,23 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
 
-  async function handleSave() {
-    if (saving) return;
+  async function doSave(): Promise<boolean> {
+    if (saving) return false;
 
-    // Slug validation
     const slug = template.slug.trim();
     if (!slug || !/^[a-z0-9-]+$/.test(slug) || slug.length < 3 || slug.length > 60) {
       toast.show("Slug нь 3–60 тэмдэгт, зөвхөн a-z, 0-9, - тэмдэгт агуулна", "error");
-      return;
+      return false;
     }
     if ((RESERVED_SLUGS as readonly string[]).includes(slug)) {
       toast.show(`"${slug}" нь хориглогдсон slug`, "error");
-      return;
+      return false;
     }
 
     setSaving(true);
     try {
       const supabase = createClient();
 
-      // If slug changed, verify it's not used by another template
       if (slug !== initialTemplate.slug) {
         const { data: existing } = await supabase
           .from("templates")
@@ -96,11 +94,10 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
           .maybeSingle();
         if (existing) {
           toast.show(`Slug "${slug}" аль хэдийн ашиглагдаж байна`, "error");
-          return;
+          return false;
         }
       }
 
-      // Persist bg_asset_id if we have a pending asset to link
       const tplPatch: Record<string, unknown> = {
         name: template.name,
         slug,
@@ -124,7 +121,6 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
         .eq("id", template.id);
       if (tplErr) throw tplErr;
 
-      // Upsert all fields
       if (template.fields.length > 0) {
         const fieldRows = template.fields.map((f) => ({
           id: f.id,
@@ -158,18 +154,23 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
       }
 
       markSaved();
-      toast.show("Хадгалагдлаа", "success");
+      return true;
     } catch {
       toast.show("Хадгалахад алдаа гарлаа", "error");
+      return false;
     } finally {
       setSaving(false);
     }
   }
 
+  async function handleSave() {
+    const ok = await doSave();
+    if (ok) toast.show("Хадгалагдлаа", "success");
+  }
+
   function validatePublish(): string[] {
     const errors: string[] = [];
     if (!template.backgroundUrl) errors.push("Фон зураг байхгүй байна");
-    if (!template.thumbnailUrl) errors.push("Thumbnail байхгүй байна");
     if (template.fields.length === 0) errors.push("Нэг ч талбар байхгүй байна");
     return errors;
   }
@@ -190,6 +191,12 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
   }
 
   async function handlePublishConfirm() {
+    // Auto-save any pending field/meta edits before changing status
+    if (isDirty) {
+      const saved = await doSave();
+      if (!saved) return;
+    }
+
     const newStatus = template.status === "published" ? "draft" : "published";
     try {
       const supabase = createClient();
