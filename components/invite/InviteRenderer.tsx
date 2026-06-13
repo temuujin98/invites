@@ -287,10 +287,10 @@ export function InviteRenderer({
         />
       ) : null}
 
-      {/* Fields */}
+      {/* Fields — rsvp/qr suppressed in public mode (shown in page content section instead) */}
       {scale > 0 &&
         sortedFields
-          .filter((f) => f.visible)
+          .filter((f) => f.visible && (mode !== "public" || (f.type !== "rsvp" && f.type !== "qr")))
           .map((field) => (
             <ScaledField
               key={field.id}

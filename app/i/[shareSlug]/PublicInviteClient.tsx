@@ -387,6 +387,7 @@ interface InviteData {
 export function PublicInviteClient({ shareSlug }: { shareSlug: string }) {
   const [invite, setInvite] = useState<InviteData | null | "loading">("loading");
   const [template, setTemplate] = useState<InviteTemplate | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
   const [rsvpOpen, setRsvpOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -488,6 +489,17 @@ export function PublicInviteClient({ shareSlug }: { shareSlug: string }) {
     })();
   }, [shareSlug]);
 
+  // Generate QR for the share URL once the invite slug is known
+  useEffect(() => {
+    if (!invite || invite === "loading") return;
+    const url = `${APP_URL}/i/${invite.shareSlug}`;
+    import("qrcode").then((QRCode) => {
+      QRCode.toDataURL(url, { width: 160, margin: 1, color: { dark: "#1a1a2e", light: "#ffffff" } })
+        .then(setQrDataUrl)
+        .catch(() => undefined);
+    });
+  }, [invite]);
+
   // Loading
   if (invite === "loading") {
     return (
@@ -568,7 +580,6 @@ export function PublicInviteClient({ shareSlug }: { shareSlug: string }) {
             template={template}
             values={invite.values}
             mode="public"
-            onRsvpClick={() => setRsvpOpen(true)}
           />
 
           {/* Card body — detail rows + actions below the rendered invite */}
@@ -612,6 +623,19 @@ export function PublicInviteClient({ shareSlug }: { shareSlug: string }) {
             <p className="mb-5 px-2 text-[14px] leading-relaxed text-(--color-text-secondary)">
               Та бүхнийг хүндэт зочноор урьж байна. Хүрэлцэн ирж, баярын баяр хөөрийг бидэнтэй хуваалцана уу.
             </p>
+
+            {/* QR code — links to this invite page */}
+            {qrDataUrl && (
+              <div className="mb-5 flex flex-col items-center gap-2">
+                <div className="rounded-xl border border-(--color-border) bg-white p-3 shadow-sm">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={qrDataUrl} alt="QR код" width={120} height={120} />
+                </div>
+                <p className="text-[11px] text-(--color-text-muted)">
+                  Урилгын QR код — скан хийж нээнэ үү
+                </p>
+              </div>
+            )}
 
             {/* Action buttons */}
             <div className="flex flex-col gap-2">
