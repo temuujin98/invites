@@ -1,12 +1,15 @@
 import type { InviteTemplate } from "@/types/template";
 import { TemplateEditorShell } from "@/components/editor/TemplateEditorShell";
+import { fetchCategories } from "@/lib/db/templates";
 
-export default function NewTemplatePage() {
+export default async function NewTemplatePage() {
+  const categories = await fetchCategories();
+
   const blankTemplate: InviteTemplate = {
     id: `new-${Date.now()}`,
     name: "Шинэ загвар",
     slug: `new-template-${Date.now().toString(36)}`,
-    categoryId: "birthday",
+    categoryId: categories[0]?.id ?? "",
     type: "image",
     backgroundUrl: "",
     thumbnailUrl: "",
@@ -16,5 +19,5 @@ export default function NewTemplatePage() {
     fields: [],
   };
 
-  return <TemplateEditorShell initialTemplate={blankTemplate} />;
+  return <TemplateEditorShell initialTemplate={blankTemplate} categories={categories} />;
 }

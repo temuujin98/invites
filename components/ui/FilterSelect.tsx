@@ -17,8 +17,9 @@ interface FilterSelectProps {
 
 export function FilterSelect({ value, onChange, options, className = "" }: FilterSelectProps) {
   const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState({ top: 0, left: 0, width: 0 });
+  const [pos, setPos] = useState({ top: 0, left: 0, width: 0, flipUp: false });
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const selected = options.find((o) => o.value === value) ?? options[0];
 
@@ -28,19 +29,31 @@ export function FilterSelect({ value, onChange, options, className = "" }: Filte
     function reposition() {
       if (!triggerRef.current) return;
       const rect = triggerRef.current.getBoundingClientRect();
-      setPos({
-        top: rect.bottom + window.scrollY + 4,
-        left: rect.left + window.scrollX,
-        width: rect.width,
-      });
+      const panelHeight = panelRef.current?.offsetHeight ?? 200;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const flipUp = spaceBelow < panelHeight + 8 && rect.top > panelHeight + 8;
+
+      // Clamp left so panel never overflows right edge
+      const width = rect.width;
+      const left = Math.min(
+        rect.left + window.scrollX,
+        window.innerWidth + window.scrollX - width - 8,
+      );
+
+      const top = flipUp
+        ? rect.top + window.scrollY - panelHeight - 4
+        : rect.bottom + window.scrollY + 4;
+
+      setPos({ top, left, width, flipUp });
     }
 
     reposition();
 
     function handleOutside(e: MouseEvent) {
-      if (triggerRef.current && !triggerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      const target = e.target as Node;
+      const inTrigger = triggerRef.current?.contains(target);
+      const inPanel = panelRef.current?.contains(target);
+      if (!inTrigger && !inPanel) setOpen(false);
     }
 
     function handleEscape(e: KeyboardEvent) {
@@ -62,15 +75,17 @@ export function FilterSelect({ value, onChange, options, className = "" }: Filte
   const panel = open && typeof document !== "undefined"
     ? createPortal(
         <div
+          ref={panelRef}
           role="listbox"
           style={{
             position: "absolute",
             top: pos.top,
             left: pos.left,
-            minWidth: pos.width,
+            width: pos.width,
+            minWidth: 120,
             zIndex: 9999,
           }}
-          className="py-1 rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) shadow-lg"
+          className="py-1 rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) shadow-lg overflow-hidden"
         >
           {options.map((opt) => (
             <button
@@ -83,7 +98,7 @@ export function FilterSelect({ value, onChange, options, className = "" }: Filte
                 setOpen(false);
               }}
               className={[
-                "w-full px-3 py-1.5 text-left text-xs transition-colors duration-100 cursor-pointer",
+                "w-full px-3 py-1.5 text-left text-xs transition-colors duration-100 cursor-pointer truncate",
                 opt.value === value
                   ? "text-(--color-accent) bg-(--color-accent-soft) font-medium"
                   : "text-(--color-text) hover:bg-(--color-surface-soft)",
@@ -112,7 +127,7 @@ export function FilterSelect({ value, onChange, options, className = "" }: Filte
           className,
         ].join(" ")}
       >
-        <span>{selected.label}</span>
+        <span className="flex-1 truncate text-left">{selected?.label ?? "—"}</span>
         <svg
           width="10"
           height="10"

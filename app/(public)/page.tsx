@@ -1,10 +1,8 @@
 import Link from "next/link";
-import { mockTemplates, mockCategories } from "@/lib/mock-data";
 import { TemplateCard } from "@/components/invite/TemplateCard";
 import { LandingHero } from "@/components/public/LandingHero";
 import { createClient } from "@/lib/supabase/server";
-
-const publishedTemplates = mockTemplates.filter((t) => t.status === "published");
+import { fetchPublishedTemplates, fetchCategories } from "@/lib/db/templates";
 
 /* ── How-it-works ───────────────────────────────────────────────────────── */
 const HOW_IT_WORKS = [
@@ -164,7 +162,11 @@ function SecHead({ title, sub }: { title: string; sub: string }) {
 
 export default async function LandingPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const [{ data: { user } }, publishedTemplates, categories] = await Promise.all([
+    supabase.auth.getUser(),
+    fetchPublishedTemplates(),
+    fetchCategories(),
+  ]);
   const featuredTemplates = publishedTemplates.slice(0, 4);
 
   return (
@@ -238,7 +240,7 @@ export default async function LandingPage() {
           </div>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-5">
             {featuredTemplates.map((tpl) => {
-              const cat = mockCategories.find((c) => c.id === tpl.categoryId);
+              const cat = categories.find((c) => c.id === tpl.categoryId);
               return (
                 <TemplateCard
                   key={tpl.id}

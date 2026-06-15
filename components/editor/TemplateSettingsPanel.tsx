@@ -3,12 +3,12 @@
 import { useRef, useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { FilterSelect } from "@/components/ui/FilterSelect";
-import { mockCategories } from "@/lib/mock-data";
 import { createClient } from "@/lib/supabase/client";
-import type { InviteTemplate } from "@/types/template";
+import type { InviteTemplate, TemplateCategory } from "@/types/template";
 
 interface Props {
   template: InviteTemplate;
+  categories: TemplateCategory[];
   onChange: (patch: Partial<Omit<InviteTemplate, "fields">>) => void;
   onStatusToggle: () => void;
   togglingStatus?: boolean;
@@ -32,10 +32,8 @@ function Divider() {
   return <div style={{ height: 1, background: "var(--color-border-muted)", margin: "4px 0" }} />;
 }
 
-export function TemplateSettingsPanel({ template, onChange, onStatusToggle, togglingStatus }: Props) {
-  const categoryOptions = [
-    ...mockCategories.map((c) => ({ value: c.id, label: `${c.icon} ${c.name}` })),
-  ];
+export function TemplateSettingsPanel({ template, categories, onChange, onStatusToggle, togglingStatus }: Props) {
+  const categoryOptions = categories.map((c) => ({ value: c.id, label: `${c.icon} ${c.name}` }));
   const bgInputRef = useRef<HTMLInputElement>(null);
   const thumbInputRef = useRef<HTMLInputElement>(null);
   const [bgUploading, setBgUploading] = useState(false);

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { TemplateEditorShell } from "@/components/editor/TemplateEditorShell";
+import { fetchCategories } from "@/lib/db/templates";
 import type { InviteTemplate, TemplateFieldConfig } from "@/types/template";
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 export default async function EditTemplatePage({ params }: Props) {
   const { id } = await params;
   const supabase = await createClient();
+  const categories = await fetchCategories();
 
   const { data: row } = await supabase
     .from("templates")
@@ -85,5 +87,5 @@ export default async function EditTemplatePage({ params }: Props) {
     fields: fields.sort((a, b) => a.layerOrder - b.layerOrder),
   };
 
-  return <TemplateEditorShell initialTemplate={template} />;
+  return <TemplateEditorShell initialTemplate={template} categories={categories} />;
 }

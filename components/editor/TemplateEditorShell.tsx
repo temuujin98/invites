@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { InviteTemplate } from "@/types/template";
+import type { InviteTemplate, TemplateCategory } from "@/types/template";
 import { RESERVED_SLUGS } from "@/lib/constants";
 import { useEditorState } from "./useEditorState";
 import { TemplateSettingsPanel } from "./TemplateSettingsPanel";
@@ -24,7 +24,7 @@ function tplStatusLabel(status: "draft" | "published") {
 
 // ── Inner shell (needs toast context) ────────────────────────────────────────
 
-function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate }) {
+function EditorShellInner({ initialTemplate, categories }: { initialTemplate: InviteTemplate; categories: TemplateCategory[] }) {
   const router = useRouter();
   const toast = useToast();
 
@@ -339,6 +339,7 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
         <TemplateSettingsPanel
           template={template}
+          categories={categories}
           onChange={updateTemplateMeta}
           onStatusToggle={handleStatusToggle}
           togglingStatus={togglingStatus}
@@ -411,10 +412,10 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
 
 // ── Public export (wraps with ToastProvider) ──────────────────────────────
 
-export function TemplateEditorShell({ initialTemplate }: { initialTemplate: InviteTemplate }) {
+export function TemplateEditorShell({ initialTemplate, categories }: { initialTemplate: InviteTemplate; categories: TemplateCategory[] }) {
   return (
     <ToastProvider>
-      <EditorShellInner initialTemplate={initialTemplate} />
+      <EditorShellInner initialTemplate={initialTemplate} categories={categories} />
     </ToastProvider>
   );
 }

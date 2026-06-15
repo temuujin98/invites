@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { mockTemplates, mockCategories } from "@/lib/mock-data";
 import { TemplateCard } from "@/components/invite/TemplateCard";
 import { TemplateDetailPreview } from "@/components/public/TemplateDetailPreview";
+import { fetchPublishedTemplateBySlug, fetchPublishedTemplates, fetchCategories } from "@/lib/db/templates";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -22,16 +22,21 @@ const FIELD_TYPE_LABELS: Record<string, string> = {
 
 export default async function TemplateDetailPage({ params }: Props) {
   const { slug } = await params;
-  const template = mockTemplates.find((t) => t.slug === slug);
+
+  const [template, categories] = await Promise.all([
+    fetchPublishedTemplateBySlug(slug),
+    fetchCategories(),
+  ]);
 
   if (!template) {
     notFound();
   }
 
-  const category = mockCategories.find((c) => c.id === template.categoryId);
+  const category = categories.find((c) => c.id === template.categoryId);
 
   // Similar templates: same category, excluding current, up to 3
-  const similar = mockTemplates
+  const allTemplates = await fetchPublishedTemplates();
+  const similar = allTemplates
     .filter((t) => t.id !== template.id && t.categoryId === template.categoryId)
     .slice(0, 3);
 
@@ -151,7 +156,7 @@ export default async function TemplateDetailPage({ params }: Props) {
           <h2 className="mb-6 text-xl font-bold text-(--color-text)">Төстэй загварууд</h2>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
             {similar.map((tpl) => {
-              const cat = mockCategories.find((c) => c.id === tpl.categoryId);
+              const cat = categories.find((c) => c.id === tpl.categoryId);
               return (
                 <TemplateCard
                   key={tpl.id}
@@ -178,8 +183,4 @@ export default async function TemplateDetailPage({ params }: Props) {
       <div className="h-20 md:hidden" aria-hidden="true" />
     </div>
   );
-}
-
-export async function generateStaticParams() {
-  return mockTemplates.map((t) => ({ slug: t.slug }));
 }
