@@ -39,9 +39,14 @@ export function UserAvatarMenu({ displayName, email }: UserAvatarMenuProps) {
         onClick={() => setOpen((v) => !v)}
         aria-label="Хэрэглэгчийн цэс"
         aria-expanded={open}
-        className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-(--color-accent) text-[13px] font-bold text-white ring-2 ring-transparent transition-all duration-150 hover:ring-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+        className="group flex cursor-pointer items-center gap-2 focus-visible:outline-none"
       >
-        {initials}
+        <span className="hidden max-w-[140px] truncate text-[13px] font-medium text-(--color-text) sm:block">
+          {displayName}
+        </span>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--color-accent) text-[13px] font-bold text-white ring-2 ring-transparent transition-all duration-150 group-hover:ring-accent/30 group-focus-visible:ring-accent/50">
+          {initials}
+        </span>
       </button>
 
       {open && (

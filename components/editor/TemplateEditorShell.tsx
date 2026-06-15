@@ -88,8 +88,25 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
     setSaving(true);
     try {
       const supabase = createClient();
+      const isNew = template.id.startsWith("new-");
 
-      if (slug !== initialTemplate.slug) {
+      if (!template.categoryId) {
+        toast.show("Ангилал сонгоно уу", "error");
+        return false;
+      }
+
+      // Slug uniqueness: new → check all rows; existing → exclude self
+      if (isNew) {
+        const { data: existing } = await supabase
+          .from("templates")
+          .select("id")
+          .eq("slug", slug)
+          .maybeSingle();
+        if (existing) {
+          toast.show(`Slug "${slug}" аль хэдийн ашиглагдаж байна`, "error");
+          return false;
+        }
+      } else if (slug !== initialTemplate.slug) {
         const { data: existing } = await supabase
           .from("templates")
           .select("id")
@@ -120,16 +137,28 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
         tplPatch.thumb_asset_id = template.pendingThumbAssetId;
       }
 
-      const { error: tplErr } = await supabase
-        .from("templates")
-        .update(tplPatch)
-        .eq("id", template.id);
-      if (tplErr) throw tplErr;
+      let savedId = template.id;
+
+      if (isNew) {
+        const { data: created, error: insErr } = await supabase
+          .from("templates")
+          .insert({ ...tplPatch, status: "draft" })
+          .select("id")
+          .single();
+        if (insErr) throw insErr;
+        savedId = created.id as string;
+      } else {
+        const { error: tplErr } = await supabase
+          .from("templates")
+          .update(tplPatch)
+          .eq("id", template.id);
+        if (tplErr) throw tplErr;
+      }
 
       if (template.fields.length > 0) {
         const fieldRows = template.fields.map((f) => ({
           id: f.id,
-          template_id: template.id,
+          template_id: savedId,
           key: f.key,
           label: f.label,
           placeholder: f.placeholder ?? null,
@@ -159,9 +188,13 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
       }
 
       markSaved();
+      if (isNew) {
+        router.replace(`/admin/templates/${savedId}/edit`);
+      }
       return true;
-    } catch {
-      toast.show("Хадгалахад алдаа гарлаа", "error");
+    } catch (err) {
+      const msg = (err as { message?: string } | null)?.message ?? "Хадгалахад алдаа гарлаа";
+      toast.show(msg, "error");
       return false;
     } finally {
       setSaving(false);
