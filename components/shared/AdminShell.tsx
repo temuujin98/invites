@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { ReactNode, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -109,9 +110,9 @@ export function AdminShell({ children }: AdminShellProps) {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.12 }}
-                className="flex h-8 w-8 items-center justify-center rounded-(--radius-ctrl) bg-(--color-primary) text-white font-bold text-sm"
+                className="flex h-8 w-8 items-center justify-center"
               >
-                A
+                <Image src="/symbol.png" alt="invites.mn" width={32} height={32} className="rounded-(--radius-ctrl)" />
               </motion.span>
             ) : (
               <motion.div
@@ -122,9 +123,7 @@ export function AdminShell({ children }: AdminShellProps) {
                 transition={{ duration: 0.12 }}
                 className="flex items-center gap-2"
               >
-                <span className="text-sm font-bold text-(--color-text) tracking-tight">
-                  invites
-                </span>
+                <Image src="/logo.png" alt="invites.mn" height={24} width={120} style={{ width: "auto", height: 24 }} />
                 <span className="rounded-(--radius-ctrl) bg-(--color-primary) px-1.5 py-0.5 text-[10px] font-semibold text-white leading-none">
                   Admin
                 </span>

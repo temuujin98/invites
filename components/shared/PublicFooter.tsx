@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export function PublicFooter() {
@@ -8,7 +9,7 @@ export function PublicFooter() {
           {/* Brand */}
           <div className="max-w-65">
             <div className="mb-3">
-              <span className="text-[15px] font-semibold tracking-tight text-white">invites</span>
+              <Image src="/logo-white.png" alt="invites.mn" height={26} width={130} style={{ width: "auto", height: 26 }} />
             </div>
             <p className="text-xs leading-relaxed text-white/55">
               Монголын дижитал урилгын платформ. Минутын дотор гоё урилга.

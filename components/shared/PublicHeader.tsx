@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { LogoutButton } from "@/components/shared/LogoutButton";
 
@@ -11,8 +12,8 @@ export function PublicHeader({ user }: PublicHeaderProps) {
       <div className="mx-auto flex h-13 max-w-5xl items-center justify-between gap-4 px-4 md:px-6">
 
         {/* Logo */}
-        <Link href="/" className="text-[15px] font-semibold text-(--color-text) tracking-tight">
-          invites
+        <Link href="/" className="flex items-center shrink-0">
+          <Image src="/logo.png" alt="invites.mn" height={26} width={130} style={{ width: "auto", height: 26 }} priority />
         </Link>
 
         {/* Desktop nav */}

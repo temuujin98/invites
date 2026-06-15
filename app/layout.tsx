@@ -15,6 +15,9 @@ const roboto = Roboto({
 export const metadata: Metadata = {
   title: "Invites — Монгол дижитал урилга",
   description: "Монгол хэл дээрх дижитал урилга үүсгэх платформ",
+  openGraph: {
+    images: [{ url: "/logo-white.png", width: 1200, height: 630, alt: "invites.mn" }],
+  },
 };
 
 export default function RootLayout({

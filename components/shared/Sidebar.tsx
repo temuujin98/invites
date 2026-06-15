@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -74,9 +75,9 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.12 }}
-              className="flex h-8 w-8 items-center justify-center rounded-(--radius-ctrl) bg-(--color-accent) text-white font-bold text-sm"
+              className="flex h-8 w-8 items-center justify-center"
             >
-              i
+              <Image src="/symbol.png" alt="invites.mn" width={32} height={32} className="rounded-(--radius-ctrl)" />
             </motion.span>
           ) : (
             <motion.span
@@ -85,9 +86,8 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.12 }}
-              className="text-sm font-bold text-(--color-text) tracking-tight"
             >
-              invites
+              <Image src="/logo.png" alt="invites.mn" height={24} width={120} style={{ width: "auto", height: 24 }} />
             </motion.span>
           )}
         </AnimatePresence>
