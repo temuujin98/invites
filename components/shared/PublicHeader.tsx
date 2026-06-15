@@ -23,23 +23,17 @@ export function PublicHeader({ user }: PublicHeaderProps) {
           />
         </Link>
 
-        {/* Desktop nav — templates always visible; login only for guests */}
-        <nav className="hidden items-center gap-6 md:flex" aria-label="Нийтийн цэс">
-          <Link
-            href="/templates"
-            className="text-[14px] font-medium text-(--color-text-secondary) hover:text-(--color-text) transition-colors"
-          >
-            Загварууд
-          </Link>
-          {!user && (
+        {/* Desktop nav — login only for guests */}
+        {!user && (
+          <nav className="hidden items-center gap-6 md:flex" aria-label="Нийтийн цэс">
             <Link
               href="/login"
               className="text-[14px] font-medium text-(--color-text-secondary) hover:text-(--color-text) transition-colors"
             >
               Нэвтрэх
             </Link>
-          )}
-        </nav>
+          </nav>
+        )}
 
         {/* Right: CTA for guests / avatar for logged-in users */}
         <div className="flex items-center gap-3">
@@ -67,9 +61,6 @@ export function PublicHeader({ user }: PublicHeaderProps) {
                   className="absolute right-0 top-10 z-50 flex min-w-40 flex-col rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) shadow-md py-1"
                   aria-label="Мобайл цэс"
                 >
-                  <Link href="/templates" className="px-4 py-2.5 text-xs text-(--color-text) hover:bg-(--color-surface-soft) transition-colors">
-                    Загварууд
-                  </Link>
                   <Link href="/login" className="px-4 py-2.5 text-xs text-(--color-text) hover:bg-(--color-surface-soft) transition-colors">
                     Нэвтрэх
                   </Link>
