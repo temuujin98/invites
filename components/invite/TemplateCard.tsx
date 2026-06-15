@@ -44,13 +44,6 @@ export function TemplateCard({ template, category, href }: TemplateCardProps) {
           )}
         </span>
 
-        {/* PRO badge — top-right */}
-        {template.status === "published" && (
-          <span className="absolute right-2 top-2 rounded-sm bg-(--color-accent) px-1.5 py-0.5 text-[10px] font-bold text-white">
-            PRO
-          </span>
-        )}
-
         {/* Hover overlay */}
         <div className="absolute inset-0 flex items-end justify-center bg-primary/0 pb-4 opacity-0 transition-all duration-200 group-hover:bg-primary/25 group-hover:opacity-100">
           <span className="rounded-(--radius-ctrl) bg-(--color-surface) px-4 py-2 text-[12px] font-medium text-(--color-text) shadow-md">

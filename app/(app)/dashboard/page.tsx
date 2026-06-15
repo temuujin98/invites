@@ -155,12 +155,17 @@ export default function DashboardPage() {
   const [filter, setFilter] = useState<FilterId>("all");
   const [deleteTarget, setDeleteTarget] = useState<Invite | null>(null);
   const [archiveTarget, setArchiveTarget] = useState<Invite | null>(null);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState("хэрэглэгч");
 
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { setLoading(false); return; }
+      setDisplayName(
+        (user.user_metadata?.display_name as string | undefined) ||
+        user.email?.split("@")[0] ||
+        "хэрэглэгч",
+      );
       const { data, error: err } = await supabase
         .from("invites")
         .select("id, template_id, user_id, title, share_slug, status, is_public, event_date, created_at, updated_at, templates ( slug ), rsvps ( count )")
@@ -196,8 +201,6 @@ export default function DashboardPage() {
   function handleCopyLink(invite: Invite) {
     const url = `${APP_URL}/i/${invite.shareSlug}`;
     navigator.clipboard.writeText(url).catch(() => undefined);
-    setCopiedId(invite.id);
-    setTimeout(() => setCopiedId(null), 2000);
   }
 
   async function handleArchive(invite: Invite) {
@@ -255,7 +258,7 @@ export default function DashboardPage() {
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
             <h1 className="text-xl font-semibold tracking-tight text-(--color-text) md:text-[20px]">
-              Сайн уу, хэрэглэгч
+              Сайн уу, {displayName}
             </h1>
             <p className="mt-0.5 text-xs text-(--color-text-muted)">Урилгуудаа эндээс удирдаарай</p>
           </div>
@@ -320,7 +323,6 @@ export default function DashboardPage() {
               >
                 <InviteRow
                   invite={invite}
-                  copiedId={copiedId}
                   onEdit={() => router.push(`/invites/${invite.id}/edit`)}
                   onPreview={() => window.open(`/i/${invite.shareSlug}`, "_blank")}
                   onCopy={() => handleCopyLink(invite)}
@@ -365,7 +367,6 @@ export default function DashboardPage() {
 
 interface InviteRowProps {
   invite: Invite;
-  copiedId: string | null;
   onEdit: () => void;
   onPreview: () => void;
   onCopy: () => void;
@@ -373,9 +374,7 @@ interface InviteRowProps {
   onDelete: () => void;
 }
 
-function InviteRow({ invite, copiedId, onEdit, onPreview, onCopy, onArchive, onDelete }: InviteRowProps) {
-  const isCopied = copiedId === invite.id;
-
+function InviteRow({ invite, onEdit, onPreview, onCopy, onArchive, onDelete }: InviteRowProps) {
   return (
     <article className="flex items-center gap-3 rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) p-3 shadow-sm transition-shadow hover:shadow-md">
       {/* Thumbnail */}
@@ -413,44 +412,12 @@ function InviteRow({ invite, copiedId, onEdit, onPreview, onCopy, onArchive, onD
         </div>
       </div>
 
-      {/* Quick actions (desktop) */}
-      <div className="hidden shrink-0 items-center gap-1 sm:flex">
-        <button
-          type="button"
-          onClick={onEdit}
-          title="Засах"
-          className="flex h-7 items-center gap-1 rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-2 text-[11px] text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
-        >
-          <IconEdit />
-          Засах
-        </button>
-        <button
-          type="button"
-          onClick={onPreview}
-          title="Урьдчилан харах"
-          className="flex h-7 items-center gap-1 rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-2 text-[11px] text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
-        >
-          <IconEye />
-          Харах
-        </button>
-        <button
-          type="button"
-          onClick={onCopy}
-          title="Линк хуулах"
-          className="flex h-7 items-center gap-1 rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-2 text-[11px] transition-colors"
-          style={isCopied ? { color: "var(--color-success)" } : { color: "var(--color-text-secondary)" }}
-        >
-          <IconCopy />
-          {isCopied ? "Хуулагдлаа" : "Линк"}
-        </button>
-      </div>
-
-      {/* Overflow menu */}
+      {/* Action menu */}
       <div className="shrink-0">
         <ActionMenu
           items={[
             { label: "Засах", icon: <IconEdit />, onClick: onEdit },
-            { label: "Урьдчилан харах", icon: <IconEye />, onClick: onPreview },
+            { label: "Харах", icon: <IconEye />, onClick: onPreview },
             { label: "Линк хуулах", icon: <IconCopy />, onClick: onCopy },
             { label: "Архивлах", icon: <IconArchive />, onClick: onArchive },
             { label: "Устгах", icon: <IconTrash />, onClick: onDelete, danger: true },

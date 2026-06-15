@@ -63,20 +63,8 @@ export function LandingHero({ loggedIn = false }: LandingHeroProps) {
             </Link>
           </div>
 
-          {/* Social proof — plain text */}
-          <div className="mt-2 flex items-center justify-center gap-2">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-(--color-accent)" />
-            <p className="text-[13px] text-white/40">2,400+ урилга үүсгэгдсэн</p>
-          </div>
         </motion.div>
       </div>
-
-      {/* Bottom fade to page bg */}
-      <div
-        className="pointer-events-none absolute bottom-0 left-0 right-0 z-10 h-20"
-        style={{ background: "linear-gradient(to bottom, transparent, var(--bg))" }}
-        aria-hidden="true"
-      />
     </section>
   );
 }
