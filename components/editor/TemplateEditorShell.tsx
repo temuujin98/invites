@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { setTemplateStatus } from "@/app/admin/templates/actions";
 import type { InviteTemplate, TemplateCategory } from "@/types/template";
 import { RESERVED_SLUGS } from "@/lib/constants";
 import { useEditorState } from "./useEditorState";
@@ -173,7 +174,7 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
   }
 
   // Status toggle: auto-saves pending edits first so no content is lost,
-  // then flips status in a separate DB update. Save never touches status.
+  // then flips status via server action (service-role, bypasses RLS reliably).
   async function handleStatusToggle() {
     if (togglingStatus) return;
     setTogglingStatus(true);
@@ -183,19 +184,15 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
         if (!saved) return;
       }
       const newStatus = template.status === "published" ? "draft" : "published";
-      const supabase = createClient();
-      const { error } = await supabase
-        .from("templates")
-        .update({ status: newStatus })
-        .eq("id", template.id);
-      if (error) throw error;
+      const result = await setTemplateStatus(template.id, newStatus);
+      if (!result.ok) throw new Error(result.message);
       setStatus(newStatus);
       toast.show(
         newStatus === "published" ? "Идэвхтэй болгосон" : "Идэвхгүй болгосон",
         "success",
       );
-    } catch {
-      toast.show("Алдаа гарлаа", "error");
+    } catch (err) {
+      toast.show(err instanceof Error ? err.message : "Алдаа гарлаа", "error");
     } finally {
       setTogglingStatus(false);
     }

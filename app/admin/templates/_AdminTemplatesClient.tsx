@@ -12,6 +12,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { DropdownMenu } from "@/components/ui/DropdownMenu";
 import { FilterSelect } from "@/components/ui/FilterSelect";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { setTemplateStatus, deleteTemplate } from "./actions";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
@@ -274,18 +275,31 @@ export function AdminTemplatesClient({ initialTemplates }: { initialTemplates: I
     setTemplates((prev) => [copy, ...prev]);
   }
 
-  function handleTogglePublish(t: InviteTemplate) {
+  async function handleTogglePublish(t: InviteTemplate) {
+    const newStatus = t.status === "published" ? "draft" : "published";
+    // Optimistic update
     setTemplates((prev) =>
-      prev.map((x) =>
-        x.id === t.id
-          ? { ...x, status: x.status === "published" ? "draft" : "published" }
-          : x,
-      ),
+      prev.map((x) => (x.id === t.id ? { ...x, status: newStatus } : x)),
     );
+    const result = await setTemplateStatus(t.id, newStatus);
+    if (!result.ok) {
+      // Roll back on failure
+      setTemplates((prev) =>
+        prev.map((x) => (x.id === t.id ? { ...x, status: t.status } : x)),
+      );
+      alert(result.message);
+    }
   }
 
-  function handleDelete(t: InviteTemplate) {
+  async function handleDelete(t: InviteTemplate) {
+    // Optimistic update
     setTemplates((prev) => prev.filter((x) => x.id !== t.id));
+    const result = await deleteTemplate(t.id);
+    if (!result.ok) {
+      // Roll back on failure
+      setTemplates((prev) => [t, ...prev]);
+      alert(result.message);
+    }
   }
 
   const statusTabs = [
