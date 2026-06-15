@@ -7,6 +7,7 @@ import { AuthLayout } from "@/components/shared/AuthLayout";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/client";
+import { authErrorMessage } from "@/lib/auth-errors";
 
 interface FormState {
   name: string;
@@ -97,7 +98,7 @@ export default function RegisterPage() {
     setLoading(false);
 
     if (error) {
-      setErrors({ general: error.message });
+      setErrors({ general: authErrorMessage(error) });
       return;
     }
 
