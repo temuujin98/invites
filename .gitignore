@@ -47,3 +47,7 @@ coverage/
 
 # Misc
 *.pem
+
+# Verification / debug screenshots captured at repo root
+ss-*.png
+verify-*.png
