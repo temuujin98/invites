@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { TemplateCard } from "@/components/invite/TemplateCard";
 import { LandingHero } from "@/components/public/LandingHero";
+import { ShareQrVisual } from "@/components/public/ShareQrVisual";
 import { createClient } from "@/lib/supabase/server";
 import { fetchPublishedTemplates, fetchCategories } from "@/lib/db/templates";
 
@@ -83,30 +84,7 @@ const FEATURE_BLOCKS = [
     title: "QR код ба линк — хаанаас ч хуваалц",
     desc: "Урилга бүр өөрийн гэсэн QR код болон богино линктэй. Хэвлэмэл материалд тавих, мессенжерт илгээх — хаанаас ч хуваалцаарай.",
     pill: "Хуваалцах",
-    visual: (
-      <div className="flex h-full items-center justify-center rounded-(--radius-card) bg-(--color-surface) p-6">
-        <div className="flex flex-col items-center gap-4">
-          {/* QR mock */}
-          <div className="grid grid-cols-5 gap-1 rounded-md border border-(--color-border) bg-white p-3 shadow-sm">
-            {Array.from({ length: 25 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-4 w-4 rounded-sm"
-                style={{
-                  backgroundColor: [0,1,2,4,7,8,9,11,12,14,17,18,20,22,23,24].includes(i)
-                    ? "var(--color-primary)"
-                    : "transparent",
-                }}
-              />
-            ))}
-          </div>
-          <div className="flex items-center gap-2 rounded-full border border-(--color-border) bg-white px-4 py-2 shadow-sm">
-            <div className="h-1.5 w-1.5 rounded-full bg-(--color-accent)" />
-            <p className="text-[12px] font-semibold text-(--color-accent)">invites.mn/i/anujin</p>
-          </div>
-        </div>
-      </div>
-    ),
+    visual: <ShareQrVisual />,
   },
 ];
 
@@ -168,13 +146,12 @@ export default async function LandingPage() {
     fetchCategories(),
   ]);
   const featuredTemplates = publishedTemplates.slice(0, 6);
-  const heroTemplate = publishedTemplates.find((t) => t.slug === "wedding-luxury") ?? publishedTemplates[0];
 
   return (
     <div className="flex flex-col">
 
-      {/* ── 1. Hero — dark, invite card centerpiece ───────────────────────── */}
-      {heroTemplate && <LandingHero loggedIn={!!user} heroTemplate={heroTemplate} />}
+      {/* ── 1. Hero ───────────────────────────────────────────────────────── */}
+      <LandingHero loggedIn={!!user} />
 
       {/* ── 2. Template scroll strip — "see what people make" ────────────── */}
       {featuredTemplates.length > 0 && (
