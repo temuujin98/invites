@@ -54,7 +54,7 @@ function TplStatusBadge({ status }: { status: "published" | "draft" }) {
         ? "bg-(--color-success-soft) text-(--color-success)"
         : "bg-(--color-surface-soft) text-(--color-text-secondary)",
     ].join(" ")}>
-      {status === "published" ? "Нийтэлсэн" : "Ноорог"}
+      {status === "published" ? "Идэвхтэй" : "Идэвхгүй"}
     </span>
   );
 }
@@ -140,7 +140,7 @@ function TemplateGridCard({ template, onDuplicate, onTogglePublish, onDelete }: 
               { label: "Засах",   onClick: () => { window.location.href = `/admin/templates/${template.id}/edit`; } },
               { label: "Харах",   onClick: () => window.open(`/templates/${template.slug}`, "_blank") },
               { label: "Хуулах",  onClick: () => onDuplicate(template) },
-              { label: template.status === "published" ? "Нийтлэхээ болих" : "Нийтлэх", onClick: () => onTogglePublish(template) },
+              { label: template.status === "published" ? "Идэвхгүй болгох" : "Идэвхтэй болгох", onClick: () => onTogglePublish(template) },
               { label: "Устгах",  danger: true, onClick: () => onDelete(template) },
             ]}
           />
@@ -195,7 +195,7 @@ function TemplateTableRow({ template, onDuplicate, onTogglePublish, onDelete }: 
             { label: "Засах",   onClick: () => { window.location.href = `/admin/templates/${template.id}/edit`; } },
             { label: "Харах",   onClick: () => window.open(`/templates/${template.slug}`, "_blank") },
             { label: "Хуулах",  onClick: () => onDuplicate(template) },
-            { label: template.status === "published" ? "Нийтлэхээ болих" : "Нийтлэх", onClick: () => onTogglePublish(template) },
+            { label: template.status === "published" ? "Идэвхгүй болгох" : "Идэвхтэй болгох", onClick: () => onTogglePublish(template) },
             { label: "Устгах",  danger: true, onClick: () => onDelete(template) },
           ]}
         />
@@ -290,8 +290,8 @@ export function AdminTemplatesClient({ initialTemplates }: { initialTemplates: I
 
   const statusTabs = [
     { id: "all", label: "Бүгд", count: templates.length },
-    { id: "published", label: "Нийтэлсэн", count: templates.filter((t) => t.status === "published").length },
-    { id: "draft", label: "Ноорог", count: templates.filter((t) => t.status === "draft").length },
+    { id: "published", label: "Идэвхтэй", count: templates.filter((t) => t.status === "published").length },
+    { id: "draft", label: "Идэвхгүй", count: templates.filter((t) => t.status === "draft").length },
   ];
 
   return (

@@ -3,8 +3,6 @@
 import { useRef, useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { mockCategories } from "@/lib/mock-data";
 import { createClient } from "@/lib/supabase/client";
 import type { InviteTemplate } from "@/types/template";
@@ -12,7 +10,8 @@ import type { InviteTemplate } from "@/types/template";
 interface Props {
   template: InviteTemplate;
   onChange: (patch: Partial<Omit<InviteTemplate, "fields">>) => void;
-  onPublishToggle: () => void;
+  onStatusToggle: () => void;
+  togglingStatus?: boolean;
 }
 
 const CANVAS_PRESETS = [
@@ -33,7 +32,7 @@ function Divider() {
   return <div style={{ height: 1, background: "var(--color-border-muted)", margin: "4px 0" }} />;
 }
 
-export function TemplateSettingsPanel({ template, onChange, onPublishToggle }: Props) {
+export function TemplateSettingsPanel({ template, onChange, onStatusToggle, togglingStatus }: Props) {
   const categoryOptions = [
     ...mockCategories.map((c) => ({ value: c.id, label: `${c.icon} ${c.name}` })),
   ];
@@ -355,22 +354,60 @@ export function TemplateSettingsPanel({ template, onChange, onPublishToggle }: P
         </div>
       </div>
 
-      {/* Bottom: Status + Publish */}
-      <div style={{ marginTop: "auto", padding: "12px 14px", borderTop: "1px solid var(--color-border)", display: "flex", flexDirection: "column", gap: 8 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span style={{ fontSize: 11, color: "var(--color-text-muted)" }}>Төлөв</span>
-          <Badge variant={template.status === "published" ? "success" : "warning"} size="sm">
-            {template.status === "published" ? "Нийтэлсэн" : "Ноорог"}
-          </Badge>
-        </div>
-        <Button
-          variant={template.status === "published" ? "secondary" : "accent"}
-          size="sm"
-          onClick={onPublishToggle}
-          style={{ width: "100%" }}
+      {/* Bottom: Status toggle (independent of Save) */}
+      <div style={{ marginTop: "auto", padding: "12px 14px", borderTop: "1px solid var(--color-border)" }}>
+        <button
+          type="button"
+          disabled={togglingStatus}
+          onClick={onStatusToggle}
+          style={{
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "8px 10px",
+            borderRadius: "var(--radius-ctrl)",
+            border: "1px solid var(--color-border)",
+            background: "var(--color-surface)",
+            cursor: togglingStatus ? "default" : "pointer",
+            opacity: togglingStatus ? 0.6 : 1,
+          }}
         >
-          {template.status === "published" ? "Ноорог болгох" : "Нийтлэх"}
-        </Button>
+          <span style={{ fontSize: 11, color: "var(--color-text-secondary)", fontWeight: 500 }}>
+            {togglingStatus ? "Өөрчилж байна..." : (template.status === "published" ? "Идэвхгүй болгох" : "Идэвхтэй болгох")}
+          </span>
+          {/* Toggle pill */}
+          <span
+            style={{
+              display: "inline-flex",
+              width: 28,
+              height: 16,
+              borderRadius: 8,
+              background: template.status === "published" ? "var(--color-success)" : "var(--color-border)",
+              position: "relative",
+              flexShrink: 0,
+              transition: "background 0.18s",
+            }}
+          >
+            <span
+              style={{
+                position: "absolute",
+                top: 2,
+                left: template.status === "published" ? 14 : 2,
+                width: 12,
+                height: 12,
+                borderRadius: "50%",
+                background: "#fff",
+                transition: "left 0.18s",
+              }}
+            />
+          </span>
+        </button>
+        <p style={{ marginTop: 6, fontSize: 10, color: "var(--color-text-muted)", lineHeight: 1.4 }}>
+          {template.status === "published"
+            ? "Идэвхтэй — хэрэглэгчид харагдаж байна"
+            : "Идэвхгүй — зөвхөн та харна"}
+        </p>
       </div>
     </div>
   );

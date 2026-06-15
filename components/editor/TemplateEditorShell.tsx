@@ -17,6 +17,11 @@ import { ToastProvider, useToast } from "@/components/ui/Toast";
 import { InviteRenderer } from "@/components/invite/InviteRenderer";
 import { PhonePreviewFrame } from "@/components/invite/PhonePreviewFrame";
 
+// ── Shared label helper (DB values unchanged, only display differs) ──────────
+function tplStatusLabel(status: "draft" | "published") {
+  return status === "published" ? "Идэвхтэй" : "Идэвхгүй";
+}
+
 // ── Inner shell (needs toast context) ────────────────────────────────────────
 
 function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate }) {
@@ -49,12 +54,10 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
   } = useEditorState(initialTemplate);
 
   const [showPreview, setShowPreview] = useState(false);
-  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
   const [showUnsavedConfirm, setShowUnsavedConfirm] = useState(false);
-  const [publishErrors, setPublishErrors] = useState<string[]>([]);
-  const [showPublishErrors, setShowPublishErrors] = useState(false);
   const [pendingNavHref, setPendingNavHref] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [togglingStatus, setTogglingStatus] = useState(false);
 
   // beforeunload guard
   useEffect(() => {
@@ -98,6 +101,8 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
         }
       }
 
+      // Save persists content/meta only — never touches status column.
+      // Status is changed exclusively via handleStatusToggle below.
       const tplPatch: Record<string, unknown> = {
         name: template.name,
         slug,
@@ -105,7 +110,6 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
         type: template.type,
         canvas_width: template.canvasWidth,
         canvas_height: template.canvasHeight,
-        status: template.status,
         updated_at: new Date().toISOString(),
       };
       if (template.pendingBgAssetId !== undefined) {
@@ -168,37 +172,17 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
     if (ok) toast.show("Хадгалагдлаа", "success");
   }
 
-  function validatePublish(): string[] {
-    const errors: string[] = [];
-    if (!template.backgroundUrl) errors.push("Фон зураг байхгүй байна");
-    if (template.fields.length === 0) errors.push("Нэг ч талбар байхгүй байна");
-    return errors;
-  }
-
-  function handlePublishClick() {
-    if (template.status === "published") {
-      // Draft toggle — confirm directly
-      setShowPublishConfirm(true);
-      return;
-    }
-    const errs = validatePublish();
-    if (errs.length > 0) {
-      setPublishErrors(errs);
-      setShowPublishErrors(true);
-      return;
-    }
-    setShowPublishConfirm(true);
-  }
-
-  async function handlePublishConfirm() {
-    // Auto-save any pending field/meta edits before changing status
-    if (isDirty) {
-      const saved = await doSave();
-      if (!saved) return;
-    }
-
-    const newStatus = template.status === "published" ? "draft" : "published";
+  // Status toggle: auto-saves pending edits first so no content is lost,
+  // then flips status in a separate DB update. Save never touches status.
+  async function handleStatusToggle() {
+    if (togglingStatus) return;
+    setTogglingStatus(true);
     try {
+      if (isDirty) {
+        const saved = await doSave();
+        if (!saved) return;
+      }
+      const newStatus = template.status === "published" ? "draft" : "published";
       const supabase = createClient();
       const { error } = await supabase
         .from("templates")
@@ -206,10 +190,14 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
         .eq("id", template.id);
       if (error) throw error;
       setStatus(newStatus);
-      markSaved();
-      toast.show(newStatus === "published" ? "Нийтлэгдлээ" : "Ноорог болгосон", "success");
+      toast.show(
+        newStatus === "published" ? "Идэвхтэй болгосон" : "Идэвхгүй болгосон",
+        "success",
+      );
     } catch {
       toast.show("Алдаа гарлаа", "error");
+    } finally {
+      setTogglingStatus(false);
     }
   }
 
@@ -292,7 +280,7 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
         {/* Divider */}
         <span style={{ width: 1, height: 20, background: "var(--color-border)", flexShrink: 0 }} />
 
-        {/* Template name + status */}
+        {/* Template name + status badge */}
         <span
           style={{
             fontSize: 13,
@@ -306,11 +294,12 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
           {template.name || "Нэргүй загвар"}
         </span>
         <Badge variant={template.status === "published" ? "success" : "warning"} size="sm">
-          {template.status === "published" ? "Нийтэлсэн" : "Ноорог"}
+          {tplStatusLabel(template.status)}
         </Badge>
 
         {/* Right side */}
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10 }}>
+          {/* Хадгалах — content/meta only, never changes status */}
           {isDirty || saving ? (
             <button
               type="button"
@@ -332,7 +321,7 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
             </button>
           ) : (
             <span style={{ fontSize: 11, color: "var(--color-text-muted)" }}>
-              Хадгалагдсан · сая
+              Хадгалагдсан
             </span>
           )}
 
@@ -343,14 +332,6 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
           >
             Урьдчилан үзэх
           </Button>
-
-          <Button
-            variant="accent"
-            size="sm"
-            onClick={handlePublishClick}
-          >
-            {template.status === "published" ? "Ноорог болгох" : "Нийтлэх"}
-          </Button>
         </div>
       </div>
 
@@ -359,7 +340,8 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
         <TemplateSettingsPanel
           template={template}
           onChange={updateTemplateMeta}
-          onPublishToggle={handlePublishClick}
+          onStatusToggle={handleStatusToggle}
+          togglingStatus={togglingStatus}
         />
 
         <TemplateCanvas
@@ -410,44 +392,6 @@ function EditorShellInner({ initialTemplate }: { initialTemplate: InviteTemplate
               mode="preview"
             />
           </PhonePreviewFrame>
-        </div>
-      </Modal>
-
-      {/* ── Publish confirm ── */}
-      <ConfirmDialog
-        open={showPublishConfirm}
-        onClose={() => setShowPublishConfirm(false)}
-        onConfirm={handlePublishConfirm}
-        title={template.status === "published" ? "Ноорог болгох уу?" : "Нийтлэх үү?"}
-        message={
-          template.status === "published"
-            ? "Загварыг ноорог болгох уу? Хэрэглэгчид харахгүй болно."
-            : "Загварыг нийтлэх үү? Хэрэглэгчид харагдах болно."
-        }
-        confirmLabel={template.status === "published" ? "Ноорог болгох" : "Нийтлэх"}
-      />
-
-      {/* ── Publish validation errors modal ── */}
-      <Modal
-        open={showPublishErrors}
-        onClose={() => setShowPublishErrors(false)}
-        title="Нийтлэх боломжгүй"
-        size="sm"
-      >
-        <p style={{ fontSize: 12, color: "var(--color-text-secondary)", marginBottom: 10 }}>
-          Нийтлэхийн өмнө дараах зүйлсийг бөглөнө үү:
-        </p>
-        <ul style={{ paddingLeft: 16, margin: 0, display: "flex", flexDirection: "column", gap: 4 }}>
-          {publishErrors.map((err, i) => (
-            <li key={i} style={{ fontSize: 12, color: "var(--color-danger)" }}>
-              {err}
-            </li>
-          ))}
-        </ul>
-        <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
-          <Button variant="secondary" size="sm" onClick={() => setShowPublishErrors(false)}>
-            Хаах
-          </Button>
         </div>
       </Modal>
 

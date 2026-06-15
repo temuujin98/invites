@@ -92,8 +92,8 @@ export default function AdminDashboardPage() {
         {/* ── Stats ── */}
         <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           <StatsCard label="Нийт загвар" value={totalTemplates} icon={<IconTemplate />} />
-          <StatsCard label="Нийтэлсэн" value={publishedTemplates} icon={<IconPublished />} />
-          <StatsCard label="Ноорог" value={draftTemplates} icon={<IconDraft />} />
+          <StatsCard label="Идэвхтэй" value={publishedTemplates} icon={<IconPublished />} />
+          <StatsCard label="Идэвхгүй" value={draftTemplates} icon={<IconDraft />} />
           <StatsCard label="Хэрэглэгчийн урилга" value={totalInvites} icon={<IconInvites />} />
         </div>
 
@@ -170,7 +170,7 @@ export default function AdminDashboardPage() {
                       ? "bg-(--color-success-soft) text-(--color-success)"
                       : "bg-(--color-surface-soft) text-(--color-text-secondary)",
                   ].join(" ")}>
-                    {tpl.status === "published" ? "Нийтэлсэн" : "Ноорог"}
+                    {tpl.status === "published" ? "Идэвхтэй" : "Идэвхгүй"}
                   </span>
                 </div>
               ))}
