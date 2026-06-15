@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { InviteRenderer } from "@/components/invite/InviteRenderer";
 import { CanvasToolbar } from "./CanvasToolbar";
 import { FieldOverlay } from "./FieldOverlay";
@@ -56,7 +57,10 @@ export function TemplateCanvas({
   addField,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const fabRef = useRef<HTMLButtonElement>(null);
+  const addMenuPanelRef = useRef<HTMLDivElement>(null);
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [fabPos, setFabPos] = useState({ bottom: 0, right: 0 });
 
   const scale = zoom / 100;
   const screenW = Math.round(template.canvasWidth * scale);
@@ -75,6 +79,26 @@ export function TemplateCanvas({
   useEffect(() => {
     fitZoom();
   }, [fitZoom]);
+
+  // FAB add-menu: portal position + outside-click dismiss
+  useEffect(() => {
+    if (!showAddMenu) return;
+    if (fabRef.current) {
+      const rect = fabRef.current.getBoundingClientRect();
+      setFabPos({
+        bottom: window.innerHeight - rect.top + 8,
+        right: window.innerWidth - rect.right,
+      });
+    }
+    function handleOutside(e: MouseEvent) {
+      const t = e.target as Node;
+      if (!fabRef.current?.contains(t) && !addMenuPanelRef.current?.contains(t)) {
+        setShowAddMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [showAddMenu]);
 
   // Build sample values from fields
   const sampleValues: InviteValues = showSampleData
@@ -155,6 +179,7 @@ export function TemplateCanvas({
               mode="editor"
               selectedFieldId={selectedFieldId ?? undefined}
               onFieldSelect={setSelectedFieldId}
+              showSampleData={showSampleData}
             />
           </div>
 
@@ -193,85 +218,85 @@ export function TemplateCanvas({
       </div>
 
       {/* Add field FAB */}
-      <div
+      <button
+        ref={fabRef}
+        type="button"
+        aria-label="Талбар нэмэх"
+        onClick={() => setShowAddMenu((v) => !v)}
         style={{
           position: "absolute",
           bottom: 20,
           right: 20,
           zIndex: 20,
+          width: 36,
+          height: 36,
+          borderRadius: "50%",
+          border: "none",
+          background: "var(--color-accent)",
+          color: "#fff",
+          fontSize: 20,
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
+          lineHeight: 1,
         }}
       >
-        {showAddMenu && (
-          <div
-            style={{
-              position: "absolute",
-              bottom: 40,
-              right: 0,
-              background: "var(--color-surface)",
-              border: "1px solid var(--color-border)",
-              borderRadius: 8,
-              boxShadow: "0 4px 16px rgba(0,0,0,0.18)",
-              overflow: "hidden",
-              minWidth: 130,
-            }}
-          >
-            {ADD_FIELD_TYPES.map(({ type, label }) => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => {
-                  addField(type);
-                  setShowAddMenu(false);
-                }}
-                style={{
-                  display: "block",
-                  width: "100%",
-                  textAlign: "left",
-                  padding: "7px 12px",
-                  fontSize: 12,
-                  color: "var(--color-text)",
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  borderBottom: "1px solid var(--color-border-muted)",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.background =
-                    "var(--color-surface-soft)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        )}
+        {showAddMenu ? "×" : "+"}
+      </button>
 
-        <button
-          type="button"
-          aria-label="Талбар нэмэх"
-          onClick={() => setShowAddMenu((v) => !v)}
+      {/* Add field menu — portaled to body so it floats above all editor panels */}
+      {showAddMenu && typeof document !== "undefined" && createPortal(
+        <div
+          ref={addMenuPanelRef}
           style={{
-            width: 36,
-            height: 36,
-            borderRadius: "50%",
-            border: "none",
-            background: "var(--color-accent)",
-            color: "#fff",
-            fontSize: 20,
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
-            lineHeight: 1,
+            position: "fixed",
+            bottom: fabPos.bottom,
+            right: fabPos.right,
+            background: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+            borderRadius: 8,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.18)",
+            overflow: "hidden",
+            minWidth: 130,
+            zIndex: 9999,
           }}
         >
-          {showAddMenu ? "×" : "+"}
-        </button>
-      </div>
+          {ADD_FIELD_TYPES.map(({ type, label }) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => {
+                addField(type);
+                setShowAddMenu(false);
+              }}
+              style={{
+                display: "block",
+                width: "100%",
+                textAlign: "left",
+                padding: "7px 12px",
+                fontSize: 12,
+                color: "var(--color-text)",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                borderBottom: "1px solid var(--color-border-muted)",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background =
+                  "var(--color-surface-soft)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>,
+        document.body,
+      )}
     </div>
   );
 }

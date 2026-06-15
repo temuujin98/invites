@@ -15,6 +15,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { TemplateFieldConfig, FieldType } from "@/types/template";
+import { DropdownMenu } from "@/components/ui/DropdownMenu";
 import { LayerItem } from "./LayerItem";
 
 interface Props {
@@ -192,66 +193,27 @@ export function LayerList({
 
 function AddFieldDropdown({ onAdd }: { onAdd: (type: FieldType) => void }) {
   return (
-    <div style={{ position: "relative" }}>
-      <details style={{ listStyle: "none" }}>
-        <summary
+    <DropdownMenu
+      align="right"
+      trigger={
+        <span
           style={{
             fontSize: 11,
             color: "var(--color-accent)",
             cursor: "pointer",
             fontWeight: 500,
-            listStyle: "none",
             userSelect: "none",
             padding: "2px 4px",
             borderRadius: 4,
           }}
         >
           + Талбар нэмэх
-        </summary>
-        <div
-          style={{
-            position: "absolute",
-            right: 0,
-            top: "calc(100% + 4px)",
-            background: "var(--color-surface)",
-            border: "1px solid var(--color-border)",
-            borderRadius: 8,
-            boxShadow: "0 4px 16px rgba(0,0,0,0.14)",
-            overflow: "hidden",
-            minWidth: 120,
-            zIndex: 30,
-          }}
-        >
-          {ADD_TYPES.map(({ type, label }) => (
-            <button
-              key={type}
-              type="button"
-              onClick={() => onAdd(type)}
-              style={{
-                display: "block",
-                width: "100%",
-                textAlign: "left",
-                padding: "7px 12px",
-                fontSize: 12,
-                color: "var(--color-text)",
-                background: "transparent",
-                border: "none",
-                borderBottom: "1px solid var(--color-border-muted)",
-                cursor: "pointer",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background =
-                  "var(--color-surface-soft)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </details>
-    </div>
+        </span>
+      }
+      items={ADD_TYPES.map(({ type, label }) => ({
+        label,
+        onClick: () => onAdd(type),
+      }))}
+    />
   );
 }

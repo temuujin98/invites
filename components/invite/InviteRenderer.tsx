@@ -17,10 +17,15 @@ function resolveText(
   field: TemplateFieldConfig,
   values: InviteValues,
   mode: InviteRendererProps["mode"],
+  showSampleData?: boolean,
 ): string | null {
   const val = values[field.key]?.text;
   if (val) return val;
-  if (mode === "editor" || mode === "preview") {
+  if (mode === "editor") {
+    // Only show placeholder/label when sample data is on (or not specified = legacy true)
+    return showSampleData !== false ? (field.placeholder ?? field.label) : "";
+  }
+  if (mode === "preview") {
     return field.placeholder ?? field.label;
   }
   // public mode
@@ -36,9 +41,10 @@ interface FieldProps {
   isSelected: boolean;
   onSelect?: () => void;
   onRsvpClick?: () => void;
+  showSampleData?: boolean;
 }
 
-function ScaledField({ field, values, mode, scale, isSelected, onSelect, onRsvpClick }: FieldProps) {
+function ScaledField({ field, values, mode, scale, isSelected, onSelect, onRsvpClick, showSampleData }: FieldProps) {
   const style: React.CSSProperties = {
     position: "absolute",
     left: field.x * scale,
@@ -200,7 +206,7 @@ function ScaledField({ field, values, mode, scale, isSelected, onSelect, onRsvpC
   }
 
   // text / date / time / location / custom
-  const text = resolveText(field, values, mode);
+  const text = resolveText(field, values, mode, showSampleData);
   if (text === null) return null;
 
   return (
@@ -223,6 +229,7 @@ export function InviteRenderer({
   selectedFieldId,
   onFieldSelect,
   onRsvpClick,
+  showSampleData,
 }: InviteRendererProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -301,6 +308,7 @@ export function InviteRenderer({
               isSelected={mode === "editor" && selectedFieldId === field.id}
               onSelect={() => onFieldSelect?.(field.id)}
               onRsvpClick={onRsvpClick}
+              showSampleData={showSampleData}
             />
           ))}
     </div>
