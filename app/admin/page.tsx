@@ -189,13 +189,14 @@ export default async function AdminDashboardPage() {
               ) : recentTemplates.map((tpl) => (
                 <div key={tpl.id} className="flex items-center gap-3 px-3 py-2.5">
                   <div className="h-10 w-6 shrink-0 overflow-hidden rounded-[4px] bg-(--color-surface-soft)">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={tpl.thumbnailUrl}
-                      alt={tpl.name}
-                      className="h-full w-full object-cover"
-                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-                    />
+                    {tpl.thumbnailUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={tpl.thumbnailUrl}
+                        alt={tpl.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : null}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-xs font-medium text-(--color-text)">{tpl.name}</p>
