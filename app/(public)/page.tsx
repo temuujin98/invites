@@ -10,80 +10,102 @@ const HOW_IT_WORKS = [
     n: "01",
     title: "Загвар сонгоно",
     desc: "Баярын төрөлдөө тохирох загвараа сонгоорой. Хурим, төрсөн өдөр, корпоратив — бүгд байна.",
+    detail: "60+ загвараас сонго",
   },
   {
     n: "02",
     title: "Мэдээллээ оруулна",
     desc: "Нэр, огноо, байршлаа бөглөхөд урилга таны мэдээллээр шууд шинэчлэгдэнэ.",
+    detail: "Шууд урьдчилан харах",
   },
   {
     n: "03",
-    title: "Линкээр хуваалцана",
-    desc: "Зочдодоо линк эсвэл QR кодоор илгээгээд хариуг нь нэг дороос хүлээн аваарай.",
+    title: "Хуваалцана",
+    desc: "Зочдодоо линк эсвэл QR кодоор илгээгээд хариуг нэг дороос цуглуулаарай.",
+    detail: "invites.mn/i/таны-нэр",
   },
 ];
 
-/* ── Feature grid ───────────────────────────────────────────────────────── */
-const FEATURES = [
-  {
-    title: "Мэргэжлийн загварууд",
-    desc: "Дизайнерууд бүтээсэн загварууд тогтмол нэмэгдэнэ",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-        <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
-      </svg>
-    ),
-  },
+/* ── Zig-zag feature blocks ─────────────────────────────────────────────── */
+const FEATURE_BLOCKS = [
   {
     title: "Шууд урьдчилан харах",
-    desc: "Мэдээлэл оруулах бүрд урилга тань шууд шинэчлэгдэнэ",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M2.5 12C4 7.5 7.5 4.5 12 4.5S20 7.5 21.5 12C20 16.5 16.5 19.5 12 19.5S4 16.5 2.5 12z"/>
-        <circle cx="12" cy="12" r="3"/>
-      </svg>
+    desc: "Мэдээлэл оруулах бүрд урилга тань шууд шинэчлэгдэнэ. Огноо, нэр, байршлаа бөглөхөд ямар харагдахыг нь тэр даруй харна.",
+    pill: "Шуурхай засварлалт",
+    visual: (
+      <div className="flex h-full items-center justify-center rounded-(--radius-card) bg-(--color-surface) p-6">
+        <div className="w-full max-w-xs rounded-(--radius-card) border border-(--color-border) bg-white p-4 shadow-md">
+          <div className="mb-3 flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-(--color-accent)" />
+            <p className="text-[11px] font-semibold text-(--color-accent)">Шууд харагдаж байна</p>
+          </div>
+          <div className="space-y-2">
+            <div className="h-3 w-3/4 rounded-full bg-accent/20" />
+            <div className="h-2.5 w-1/2 rounded-full bg-(--color-surface-soft)" />
+            <div className="h-2.5 w-2/3 rounded-full bg-(--color-surface-soft)" />
+          </div>
+          <div className="mt-4 flex gap-2">
+            <div className="h-8 flex-1 rounded-(--radius-ctrl) bg-accent/15" />
+            <div className="h-8 flex-1 rounded-(--radius-ctrl) bg-(--color-surface-soft)" />
+          </div>
+        </div>
+      </div>
     ),
   },
   {
-    title: "Зочдын хариу",
-    desc: "Ирэх/ирэхгүй гэдэг хариуг онлайнаар нэг дороос цуглуулна",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M9 12l2 2 4-4"/><rect x="3" y="4" width="18" height="16" rx="2"/>
-        <path d="M3 9h18"/>
-      </svg>
+    title: "Зочдын хариуг нэг дороос",
+    desc: "Зочид тань ямар ч төхөөрөмжөөс ирэх/ирэхгүйгээ мэдэгдэнэ. Та бүх хариуг нэг самбараас харна — утас шаардлагагүй.",
+    pill: "RSVP хянах",
+    visual: (
+      <div className="flex h-full items-center justify-center rounded-(--radius-card) bg-(--color-surface) p-6">
+        <div className="w-full max-w-xs space-y-2">
+          {[
+            { name: "Б. Номин", status: "Ирнэ", color: "text-(--color-success)" },
+            { name: "Т. Билгүүн", status: "Ирнэ", color: "text-(--color-success)" },
+            { name: "Э. Анужин", status: "Ирэхгүй", color: "text-(--color-danger)" },
+            { name: "Д. Мөнхбат", status: "Хүлээгдэж байна", color: "text-(--color-text-muted)" },
+          ].map((g) => (
+            <div key={g.name} className="flex items-center justify-between rounded-(--radius-ctrl) border border-(--color-border) bg-white px-3 py-2">
+              <div className="flex items-center gap-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-(--color-accent-soft) text-[10px] font-bold text-(--color-accent)">
+                  {g.name[0]}
+                </div>
+                <p className="text-[12px] font-medium text-(--color-text)">{g.name}</p>
+              </div>
+              <p className={`text-[11px] font-medium ${g.color}`}>{g.status}</p>
+            </div>
+          ))}
+        </div>
+      </div>
     ),
   },
   {
-    title: "QR код автоматаар",
-    desc: "Хэвлэмэл материалд тавихад бэлэн QR код үүснэ",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-        <rect x="3" y="14" width="7" height="7"/>
-        <path d="M14 14h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z"/>
-      </svg>
-    ),
-  },
-  {
-    title: "Зураг ба видео татах",
-    desc: "Урилгаа зураг эсвэл видео хэлбэрээр татаж аваарай",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <rect x="4" y="4" width="10" height="16" rx="1.5"/>
-        <path d="M14 9l6-3.5v13L14 15"/>
-      </svg>
-    ),
-  },
-  {
-    title: "Нийтийн линк",
-    desc: "Урилга бүр өөрийн гэсэн товч, ойлгомжтой линктэй",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
-        <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
-      </svg>
+    title: "QR код ба линк — хаанаас ч хуваалц",
+    desc: "Урилга бүр өөрийн гэсэн QR код болон богино линктэй. Хэвлэмэл материалд тавих, мессенжерт илгээх — хаанаас ч хуваалцаарай.",
+    pill: "Хуваалцах",
+    visual: (
+      <div className="flex h-full items-center justify-center rounded-(--radius-card) bg-(--color-surface) p-6">
+        <div className="flex flex-col items-center gap-4">
+          {/* QR mock */}
+          <div className="grid grid-cols-5 gap-1 rounded-md border border-(--color-border) bg-white p-3 shadow-sm">
+            {Array.from({ length: 25 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-4 w-4 rounded-sm"
+                style={{
+                  backgroundColor: [0,1,2,4,7,8,9,11,12,14,17,18,20,22,23,24].includes(i)
+                    ? "var(--color-primary)"
+                    : "transparent",
+                }}
+              />
+            ))}
+          </div>
+          <div className="flex items-center gap-2 rounded-full border border-(--color-border) bg-white px-4 py-2 shadow-sm">
+            <div className="h-1.5 w-1.5 rounded-full bg-(--color-accent)" />
+            <p className="text-[12px] font-semibold text-(--color-accent)">invites.mn/i/anujin</p>
+          </div>
+        </div>
+      </div>
     ),
   },
 ];
@@ -95,12 +117,14 @@ const USE_CASES = [
     text: "Төрсөн өдөр, ой, угтах ёслол — дотны хүмүүстээ дулаан урилга илгээгээрэй.",
     name: "Б. Номин",
     role: "Хүүхдийн 1 насны ой",
+    emoji: "🎂",
   },
   {
     who: "Хосуудад",
     text: "Хуримын урилгаа хэдхэн минутад бэлдээд, зочдын хариуг нэг дороос харж байгаарай.",
     name: "Т. Билгүүн & Э. Анужин",
     role: "Хуримын урилга",
+    emoji: "💍",
     featured: true,
   },
   {
@@ -108,61 +132,28 @@ const USE_CASES = [
     text: "Нээлт, хүлээн авалт, дотоод арга хэмжээ — брэндийн өнгө аястай мэргэжлийн урилга.",
     name: "MCS Group",
     role: "Корпоратив эвент",
+    emoji: "🏢",
   },
 ];
 
-/* ── Category cards ─────────────────────────────────────────────────────── */
-function CatIcon({ type }: { type: string }) {
-  if (type === "wedding") return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-      <path d="M12 21C12 21 4 15 4 9.5C4 6.5 6.5 4 9 4c1.5 0 2.5.8 3 1.5C12.5 4.8 13.5 4 15 4c2.5 0 5 2.5 5 5.5C20 15 12 21 12 21z"/>
-    </svg>
-  );
-  if (type === "corporate") return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="3" y="7" width="18" height="14" rx="2"/>
-      <path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/>
-    </svg>
-  );
-  if (type === "opening") return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-    </svg>
-  );
-  if (type === "baby") return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="8"/>
-      <path d="M9 10h.01M15 10h.01M9.5 14.5c.83.67 2 1 2.5 1s1.67-.33 2.5-1"/>
-    </svg>
-  );
-  // birthday (default)
-  return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-      <path d="M12 8V4"/>
-      <circle cx="12" cy="3" r="1" fill="var(--color-accent)" stroke="none"/>
-      <rect x="4" y="10" width="16" height="10" rx="3"/>
-      <path d="M4 14h16M8 10V8a2 2 0 014 0v2M12 10V8a2 2 0 014 0v2"/>
-    </svg>
-  );
-}
-
-const CAT_USE_CASES = [
-  { type: "birthday",  label: "Төрсөн өдөр",  count: 24, slug: "birthday" },
-  { type: "wedding",   label: "Хурим",         count: 18, slug: "wedding" },
-  { type: "corporate", label: "Корпоратив",    count: 12, slug: "corporate" },
-  { type: "opening",   label: "Төгсөлт",       count: 9,  slug: "graduation" },
-  { type: "baby",      label: "Хүүхэд угтах",  count: 7,  slug: "baby-shower" },
-  { type: "opening",   label: "Нээлт",         count: 8,  slug: "opening" },
+/* ── Category data ──────────────────────────────────────────────────────── */
+const CATEGORIES = [
+  { label: "Хурим",        count: 18, slug: "wedding",     emoji: "💍" },
+  { label: "Төрсөн өдөр",  count: 24, slug: "birthday",    emoji: "🎂" },
+  { label: "Корпоратив",   count: 12, slug: "corporate",   emoji: "🏢" },
+  { label: "Төгсөлт",      count: 9,  slug: "graduation",  emoji: "🎓" },
+  { label: "Хүүхэд угтах", count: 7,  slug: "baby-shower", emoji: "🍼" },
+  { label: "Нээлт",        count: 8,  slug: "opening",     emoji: "✨" },
 ];
 
-/* ── Section heading helper ─────────────────────────────────────────────── */
-function SecHead({ title, sub, center = true }: { title: string; sub: string; center?: boolean }) {
+/* ── Section heading ────────────────────────────────────────────────────── */
+function SecHead({ title, sub, light = false }: { title: string; sub: string; light?: boolean }) {
   return (
-    <div className={`mb-10 ${center ? "text-center" : ""}`}>
-      <h2 className={`text-[26px] font-bold tracking-tight text-(--color-text) break-keep md:text-[32px] ${center ? "" : ""}`}>
+    <div className="mb-10 text-center">
+      <h2 className={`text-[26px] font-bold tracking-tight break-keep md:text-[34px] ${light ? "text-white" : "text-(--color-text)"}`}>
         {title}
       </h2>
-      <p className={`mt-2.5 text-[15px] leading-relaxed text-(--color-text-secondary) ${center ? "mx-auto max-w-lg" : ""}`}>
+      <p className={`mt-3 text-[15px] leading-relaxed ${light ? "text-white/60" : "text-(--color-text-secondary)"}`}>
         {sub}
       </p>
     </div>
@@ -176,85 +167,94 @@ export default async function LandingPage() {
     fetchPublishedTemplates(),
     fetchCategories(),
   ]);
-  const featuredTemplates = publishedTemplates.slice(0, 4);
+  const featuredTemplates = publishedTemplates.slice(0, 6);
   const heroTemplate = publishedTemplates.find((t) => t.slug === "wedding-luxury") ?? publishedTemplates[0];
 
   return (
     <div className="flex flex-col">
 
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      {/* ── 1. Hero — dark, invite card centerpiece ───────────────────────── */}
       {heroTemplate && <LandingHero loggedIn={!!user} heroTemplate={heroTemplate} />}
 
-      {/* ── How it works ─────────────────────────────────────────────────── */}
-      <section className="border-y border-(--color-border) bg-(--color-surface) py-16 md:py-20">
+      {/* ── 2. Template scroll strip — "see what people make" ────────────── */}
+      {featuredTemplates.length > 0 && (
+        <section className="border-b border-(--color-border) bg-(--color-surface) py-5">
+          <div className="mx-auto max-w-5xl px-4 md:px-6">
+            <p className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-(--color-text-muted)">
+              Сүүлд үүсгэгдсэн урилгууд
+            </p>
+            <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
+              {featuredTemplates.map((tpl) => {
+                const cat = categories.find((c) => c.id === tpl.categoryId);
+                return (
+                  <div key={tpl.id} className="w-28 shrink-0 md:w-36">
+                    <TemplateCard
+                      template={tpl}
+                      category={cat}
+                      href={`/templates/${tpl.slug}`}
+                    />
+                  </div>
+                );
+              })}
+              <Link
+                href="/templates"
+                className="flex w-28 shrink-0 flex-col items-center justify-center gap-2 rounded-(--radius-card) border border-(--color-border) bg-(--color-bg) text-center transition-colors hover:bg-(--color-surface-soft) md:w-36"
+              >
+                <span className="text-[20px] text-(--color-text-muted)">→</span>
+                <p className="text-[11px] font-medium text-(--color-text-muted)">Бүгдийг харах</p>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── 3. How it works ──────────────────────────────────────────────── */}
+      <section className="py-16 md:py-24">
         <div className="mx-auto max-w-5xl px-4 md:px-6">
-          <SecHead title="Хэрхэн ажилладаг вэ?" sub="Гурван энгийн алхам — урилга тань бэлэн" />
-
-          <div className="relative flex flex-col gap-8 md:flex-row md:gap-0">
-            {/* Connector line — desktop only */}
-            <div
-              className="pointer-events-none absolute top-9 hidden h-px w-full md:block"
-              style={{ background: "linear-gradient(to right, transparent 8%, var(--color-border) 20%, var(--color-border) 80%, transparent 92%)" }}
-              aria-hidden="true"
-            />
-
+          <SecHead title="Хэрхэн ажилладаг вэ?" sub="Гурван алхам — хэдхэн минутад урилга бэлэн" />
+          <div className="flex flex-col gap-6 md:flex-row md:gap-4">
             {HOW_IT_WORKS.map((s, i) => (
-              <div key={s.n} className="relative flex flex-1 flex-col items-start gap-4 md:items-center md:px-6 md:text-center">
-                {/* Step number circle */}
-                <div className="relative flex h-18 w-18 shrink-0 items-center justify-center rounded-full border-2 border-accent/20 bg-(--color-accent-soft)">
-                  <span className="text-[22px] font-bold text-(--color-accent)">{i + 1}</span>
-                  {/* White ring to sit over the connector line */}
-                  <div className="absolute -inset-1 hidden rounded-full border-4 border-(--color-surface) md:block" aria-hidden="true" />
+              <div
+                key={s.n}
+                className="relative flex flex-1 flex-col gap-4 rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) p-6"
+              >
+                {/* Connector arrow between steps — desktop only */}
+                {i < HOW_IT_WORKS.length - 1 && (
+                  <div className="absolute -right-3 top-8 z-10 hidden h-6 w-6 items-center justify-center rounded-full border border-(--color-border) bg-(--color-bg) text-(--color-text-muted) md:flex">
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                      <path d="M2 5h6M5.5 2.5L8 5l-2.5 2.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                )}
+                <div className="flex items-center gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--color-accent-soft) text-[15px] font-bold text-(--color-accent)">
+                    {i + 1}
+                  </span>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-(--color-text-muted)">{s.detail}</p>
                 </div>
-                <div>
-                  <p className="text-[16px] font-semibold text-(--color-text)">{s.title}</p>
-                  <p className="mt-1.5 text-[14px] leading-relaxed text-(--color-text-secondary)">{s.desc}</p>
-                </div>
+                <p className="text-[16px] font-bold text-(--color-text)">{s.title}</p>
+                <p className="text-[14px] leading-relaxed text-(--color-text-secondary)">{s.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Category cards ────────────────────────────────────────────────── */}
-      <section className="py-16 md:py-20">
-        <div className="mx-auto max-w-5xl px-4 md:px-6">
-          <SecHead title="Ямар ч баярт тохирно" sub="Төрөл бүрийн арга хэмжээнд зориулсан загварууд" />
-          <div className="grid grid-cols-3 gap-3 sm:grid-cols-6 md:gap-4">
-            {CAT_USE_CASES.map((uc) => (
-              <Link
-                key={uc.label}
-                href={`/templates?category=${uc.slug}`}
-                className="group flex flex-col items-center gap-3 rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) px-3 py-5 text-center transition-all duration-300 hover:border-accent/40 hover:bg-(--color-accent-soft) hover:shadow-md"
-              >
-                <div className="transition-transform duration-300 group-hover:scale-110">
-                  <CatIcon type={uc.type} />
-                </div>
-                <div>
-                  <p className="text-[13px] font-semibold text-(--color-text)">{uc.label}</p>
-                  <p className="mt-0.5 text-[11px] text-(--color-text-muted)">{uc.count} загвар</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Featured templates ───────────────────────────────────────────── */}
+      {/* ── 4. Featured templates (real DB) ──────────────────────────────── */}
       <section className="border-y border-(--color-border) bg-(--color-surface) py-16 md:py-20">
         <div className="mx-auto max-w-5xl px-4 md:px-6">
           <div className="mb-8 flex items-end justify-between">
             <div>
-              <h2 className="text-[26px] font-bold tracking-tight text-(--color-text) break-keep md:text-[32px]">
+              <h2 className="text-[26px] font-bold tracking-tight text-(--color-text) break-keep md:text-[34px]">
                 Онцлох загварууд
               </h2>
               <p className="mt-2 text-[15px] text-(--color-text-secondary)">
-                Хамгийн их ашиглагдаж буй загварууд
+                Дизайнерууд бүтээсэн, тогтмол нэмэгддэг
               </p>
             </div>
             <Link
               href="/templates"
-              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-4 text-[13px] font-medium text-(--color-text-secondary) transition-colors hover:bg-(--color-surface-soft) hover:text-(--color-text)"
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-4 text-[13px] font-medium text-(--color-text-secondary) transition-colors hover:bg-(--color-surface-soft)"
             >
               Бүгдийг үзэх
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
@@ -262,8 +262,8 @@ export default async function LandingPage() {
               </svg>
             </Link>
           </div>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-5">
-            {featuredTemplates.map((tpl) => {
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-3 md:gap-5">
+            {featuredTemplates.slice(0, 6).map((tpl) => {
               const cat = categories.find((c) => c.id === tpl.categoryId);
               return (
                 <TemplateCard
@@ -278,29 +278,66 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── Features ─────────────────────────────────────────────────────── */}
-      <section className="py-16 md:py-20">
+      {/* ── 5. Zig-zag feature blocks ────────────────────────────────────── */}
+      <section className="py-16 md:py-24">
         <div className="mx-auto max-w-5xl px-4 md:px-6">
-          <SecHead title="Хэрэгтэй бүхэн нэг дор" sub="Урилга үүсгэхээс эхлээд зочдын хариу хүлээж авах хүртэл" />
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {FEATURES.map((f) => (
+          <SecHead title="Хэрэгтэй бүхэн нэг дор" sub="Урилга үүсгэхээс зочдын хариу хүлээж авах хүртэл" />
+
+          <div className="flex flex-col gap-12 md:gap-16">
+            {FEATURE_BLOCKS.map((f, i) => (
               <div
                 key={f.title}
-                className="group flex flex-col gap-3.5 rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) p-5 transition-all duration-300 hover:border-accent/30 hover:shadow-md"
+                className={`flex flex-col gap-8 md:flex-row md:items-center md:gap-12 ${i % 2 === 1 ? "md:flex-row-reverse" : ""}`}
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-(--radius-ctrl) bg-(--color-accent-soft) text-(--color-accent) transition-colors duration-300 group-hover:bg-(--color-accent) group-hover:text-white">
-                  {f.icon}
+                {/* Text side */}
+                <div className="flex flex-1 flex-col gap-4">
+                  <span className="inline-flex w-fit items-center rounded-full bg-(--color-accent-soft) px-3 py-1 text-[11px] font-semibold text-(--color-accent)">
+                    {f.pill}
+                  </span>
+                  <h3 className="text-[20px] font-bold tracking-tight text-(--color-text) break-keep md:text-[24px]">
+                    {f.title}
+                  </h3>
+                  <p className="text-[14px] leading-[1.7] text-(--color-text-secondary)">
+                    {f.desc}
+                  </p>
                 </div>
-                <p className="text-[15px] font-semibold text-(--color-text)">{f.title}</p>
-                <p className="text-[14px] leading-relaxed text-(--color-text-secondary)">{f.desc}</p>
+
+                {/* Visual side */}
+                <div className="h-52 flex-1 overflow-hidden rounded-(--radius-card) border border-(--color-border) md:h-64">
+                  {f.visual}
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Use cases ────────────────────────────────────────────────────── */}
+      {/* ── 6. Category browser ──────────────────────────────────────────── */}
       <section className="border-y border-(--color-border) bg-(--color-surface) py-16 md:py-20">
+        <div className="mx-auto max-w-5xl px-4 md:px-6">
+          <SecHead title="Ямар ч баярт тохирно" sub="Төрөл бүрийн арга хэмжээнд зориулсан загварууд" />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6 md:gap-4">
+            {CATEGORIES.map((c) => (
+              <Link
+                key={c.slug}
+                href={`/templates?category=${c.slug}`}
+                className="group flex flex-col items-center gap-3 rounded-(--radius-card) border border-(--color-border) bg-(--color-bg) px-3 py-5 text-center transition-all duration-200 hover:border-accent/40 hover:bg-(--color-accent-soft) hover:shadow-md"
+              >
+                <span className="text-3xl transition-transform duration-200 group-hover:scale-110">
+                  {c.emoji}
+                </span>
+                <div>
+                  <p className="text-[13px] font-semibold text-(--color-text)">{c.label}</p>
+                  <p className="mt-0.5 text-[11px] text-(--color-text-muted)">{c.count} загвар</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 7. Social proof / use cases ──────────────────────────────────── */}
+      <section className="py-16 md:py-20">
         <div className="mx-auto max-w-5xl px-4 md:px-6">
           <SecHead title="Хэн ашигладаг вэ?" sub="Гэр бүлээс байгууллага хүртэл" />
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -308,25 +345,24 @@ export default async function LandingPage() {
               <div
                 key={c.who}
                 className={[
-                  "flex flex-col gap-4 rounded-(--radius-card) border p-6 transition-all duration-300",
+                  "flex flex-col gap-5 rounded-(--radius-card) border p-6 transition-all duration-200",
                   c.featured
-                    ? "border-transparent bg-(--color-primary) text-white"
-                    : "border-(--color-border) bg-(--color-bg) hover:border-accent/30 hover:shadow-md",
+                    ? "border-transparent bg-(--color-primary)"
+                    : "border-(--color-border) bg-(--color-surface) hover:border-accent/25 hover:shadow-md",
                 ].join(" ")}
               >
-                <p className={`text-[11px] font-semibold uppercase tracking-widest ${c.featured ? "text-white/55" : "text-(--color-accent)"}`}>
-                  {c.who}
-                </p>
-                <p className={`text-[14px] leading-relaxed ${c.featured ? "text-white/85" : "text-(--color-text-secondary)"}`}>
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{c.emoji}</span>
+                  <p className={`text-[11px] font-bold uppercase tracking-widest ${c.featured ? "text-white/50" : "text-(--color-accent)"}`}>
+                    {c.who}
+                  </p>
+                </div>
+                <p className={`flex-1 text-[14px] leading-relaxed ${c.featured ? "text-white/80" : "text-(--color-text-secondary)"}`}>
                   {c.text}
                 </p>
-                <div className={`mt-auto border-t pt-4 ${c.featured ? "border-white/12" : "border-(--color-border)"}`}>
-                  <p className={`text-[13px] font-semibold ${c.featured ? "text-white" : "text-(--color-text)"}`}>
-                    {c.name}
-                  </p>
-                  <p className={`mt-0.5 text-[12px] ${c.featured ? "text-white/50" : "text-(--color-text-muted)"}`}>
-                    {c.role}
-                  </p>
+                <div className={`border-t pt-4 ${c.featured ? "border-white/12" : "border-(--color-border)"}`}>
+                  <p className={`text-[13px] font-semibold ${c.featured ? "text-white" : "text-(--color-text)"}`}>{c.name}</p>
+                  <p className={`mt-0.5 text-[12px] ${c.featured ? "text-white/45" : "text-(--color-text-muted)"}`}>{c.role}</p>
                 </div>
               </div>
             ))}
@@ -334,45 +370,41 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── Final CTA ────────────────────────────────────────────────────── */}
-      <section className="py-16 md:py-24">
-        <div className="mx-auto max-w-5xl px-4 md:px-6">
-          <div
-            className="relative overflow-hidden rounded-(--radius-card) px-8 py-14 text-center md:px-16 md:py-20"
-            style={{ background: "linear-gradient(135deg, #2A2725 0%, #1A1816 100%)" }}
-          >
-            {/* Decorative glow */}
-            <div
-              className="pointer-events-none absolute left-1/2 top-0 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
-              style={{ background: "rgba(139,92,246,0.25)" }}
-              aria-hidden="true"
-            />
-            <div className="relative">
-              <p className="mb-3 text-[12px] font-semibold uppercase tracking-widest text-white/45">
-                Одоо эхлэцгээе
-              </p>
-              <h2 className="mb-4 text-[28px] font-bold leading-tight tracking-tight text-white break-keep md:text-[40px]">
-                Таны баярын урилга<br className="hidden sm:block" /> минутын дотор бэлэн
-              </h2>
-              <p className="mx-auto mb-8 max-w-sm text-[15px] leading-relaxed text-white/65">
-                Бүртгүүлэхэд зардал байхгүй. Загвараа сонгоод шууд эхлэцгээе.
-              </p>
-              <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-                <Link
-                  href={user ? "/templates" : "/register"}
-                  className="inline-flex h-12 items-center justify-center rounded-(--radius-ctrl) bg-(--color-accent) px-8 text-[15px] font-semibold text-white transition-all duration-300 hover:bg-(--color-accent-hover) active:scale-[0.98]"
-                  style={{ boxShadow: "0 4px 20px rgba(139,92,246,0.40)" }}
-                >
-                  Үнэгүй эхлэх
-                </Link>
-                <Link
-                  href="/templates"
-                  className="inline-flex h-12 items-center justify-center rounded-(--radius-ctrl) border border-white/20 px-8 text-[15px] font-medium text-white/80 transition-all duration-300 hover:border-white/40 hover:text-white active:scale-[0.98]"
-                >
-                  Загварууд үзэх
-                </Link>
-              </div>
-            </div>
+      {/* ── 8. Final CTA — full-bleed dark ───────────────────────────────── */}
+      <section
+        className="relative overflow-hidden py-20 md:py-28"
+        style={{ background: "linear-gradient(160deg, #1F1B2E 0%, #2A2725 100%)" }}
+      >
+        {/* Glow */}
+        <div
+          className="pointer-events-none absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
+          style={{ background: "rgba(139,92,246,0.20)" }}
+          aria-hidden="true"
+        />
+        <div className="relative mx-auto max-w-2xl px-4 text-center md:px-6">
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-white/35">
+            Одоо эхлэцгээе
+          </p>
+          <h2 className="mb-4 text-[28px] font-bold leading-tight tracking-tight text-white break-keep md:text-[42px]">
+            Таны баярын урилга<br className="hidden sm:block" /> минутын дотор бэлэн
+          </h2>
+          <p className="mx-auto mb-8 max-w-sm text-[15px] leading-relaxed text-white/55">
+            Бүртгүүлэхэд зардал байхгүй. Загвараа сонгоод шууд эхлэцгээе.
+          </p>
+          <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <Link
+              href={user ? "/templates" : "/register"}
+              className="inline-flex h-13 items-center justify-center rounded-(--radius-ctrl) bg-(--color-accent) px-10 text-[15px] font-semibold text-white transition-all duration-300 hover:bg-(--color-accent-hover) active:scale-[0.98]"
+              style={{ boxShadow: "0 4px 24px rgba(139,92,246,0.45)" }}
+            >
+              Үнэгүй эхлэх
+            </Link>
+            <Link
+              href="/templates"
+              className="inline-flex h-13 items-center justify-center rounded-(--radius-ctrl) border border-white/20 px-10 text-[15px] font-medium text-white/75 transition-all duration-300 hover:border-white/40 hover:text-white active:scale-[0.98]"
+            >
+              Загварууд үзэх
+            </Link>
           </div>
         </div>
       </section>
