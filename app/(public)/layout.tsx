@@ -10,13 +10,13 @@ export default async function PublicLayout({
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  let headerUser: { displayName: string } | null = null;
+  let headerUser: { displayName: string; email: string } | null = null;
   if (user) {
     const displayName =
       (user.user_metadata?.display_name as string | undefined) ||
       user.email?.split("@")[0] ||
       "Хэрэглэгч";
-    headerUser = { displayName };
+    headerUser = { displayName, email: user.email ?? "" };
   }
 
   return (
