@@ -23,22 +23,19 @@ export function PublicHeader({ user }: PublicHeaderProps) {
           />
         </Link>
 
-        {/* Desktop nav — login only for guests */}
-        {!user && (
-          <nav className="hidden items-center gap-6 md:flex" aria-label="Нийтийн цэс">
-            <Link
-              href="/login"
-              className="text-[14px] font-medium text-(--color-text-secondary) hover:text-(--color-text) transition-colors"
-            >
-              Нэвтрэх
-            </Link>
-          </nav>
-        )}
 
         {/* Right: CTA for guests / avatar for logged-in users */}
         <div className="flex items-center gap-3">
           {!user ? (
             <>
+              {/* Desktop login (secondary) */}
+              <Link
+                href="/login"
+                className="hidden md:inline-flex h-9 items-center rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-bg) px-5 text-[14px] font-medium text-(--color-text) hover:bg-(--color-surface-soft) transition-colors"
+              >
+                Нэвтрэх
+              </Link>
+
               {/* Desktop register CTA */}
               <Link
                 href="/register"
