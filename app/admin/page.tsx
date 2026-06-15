@@ -1,7 +1,5 @@
-"use client";
-
 import Link from "next/link";
-import { mockTemplates, mockInvites } from "@/lib/mock-admin-data";
+import { createClient } from "@/lib/supabase/server";
 import { StatsCard } from "@/components/shared/StatsCard";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/invite/StatusBadge";
@@ -67,19 +65,56 @@ function QuickActionCard({ href, icon, label, description }: {
 
 // ── Page ──────────────────────────────────────────────────────────────────
 
-export default function AdminDashboardPage() {
-  const totalTemplates = mockTemplates.length;
-  const publishedTemplates = mockTemplates.filter((t) => t.status === "published").length;
-  const draftTemplates = mockTemplates.filter((t) => t.status === "draft").length;
-  const totalInvites = mockInvites.length;
+export default async function AdminDashboardPage() {
+  const supabase = await createClient();
 
-  const recentTemplates = [...mockTemplates]
-    .sort((a, b) => b.id.localeCompare(a.id))
-    .slice(0, 5);
+  const [
+    { count: totalTemplates },
+    { count: publishedCount },
+    { count: draftCount },
+    { count: totalInvites },
+    { data: recentTemplateRows },
+    { data: recentInviteRows },
+  ] = await Promise.all([
+    supabase.from("templates").select("*", { count: "exact", head: true }),
+    supabase.from("templates").select("*", { count: "exact", head: true }).eq("status", "published"),
+    supabase.from("templates").select("*", { count: "exact", head: true }).eq("status", "draft"),
+    supabase.from("invites").select("*", { count: "exact", head: true }),
+    supabase
+      .from("templates")
+      .select(`id, name, slug, status,
+        thumb_asset: assets!thumb_asset_id ( bucket, path )`)
+      .order("created_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("invites")
+      .select("id, title, event_date, status")
+      .order("updated_at", { ascending: false })
+      .limit(5),
+  ]);
 
-  const recentInvites = [...mockInvites]
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
-    .slice(0, 5);
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+
+  const recentTemplates = (recentTemplateRows ?? []).map((row) => {
+    const thumb = Array.isArray(row.thumb_asset) ? (row.thumb_asset[0] ?? null) : row.thumb_asset;
+    const thumbnailUrl = thumb
+      ? `${SUPABASE_URL}/storage/v1/object/public/${(thumb as { bucket: string; path: string }).bucket}/${(thumb as { bucket: string; path: string }).path}`
+      : "";
+    return {
+      id: row.id as string,
+      name: row.name as string,
+      slug: row.slug as string,
+      status: row.status as "draft" | "published",
+      thumbnailUrl,
+    };
+  });
+
+  const recentInvites = (recentInviteRows ?? []).map((row) => ({
+    id: row.id as string,
+    title: row.title as string,
+    eventDate: (row.event_date as string | null) ?? undefined,
+    status: row.status as "draft" | "published" | "archived",
+  }));
 
   return (
     <div className="flex flex-1 flex-col overflow-y-auto">
@@ -91,10 +126,10 @@ export default function AdminDashboardPage() {
 
         {/* ── Stats ── */}
         <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-          <StatsCard label="Нийт загвар" value={totalTemplates} icon={<IconTemplate />} />
-          <StatsCard label="Идэвхтэй" value={publishedTemplates} icon={<IconPublished />} />
-          <StatsCard label="Идэвхгүй" value={draftTemplates} icon={<IconDraft />} />
-          <StatsCard label="Хэрэглэгчийн урилга" value={totalInvites} icon={<IconInvites />} />
+          <StatsCard label="Нийт загвар" value={totalTemplates ?? 0} icon={<IconTemplate />} />
+          <StatsCard label="Идэвхтэй" value={publishedCount ?? 0} icon={<IconPublished />} />
+          <StatsCard label="Идэвхгүй" value={draftCount ?? 0} icon={<IconDraft />} />
+          <StatsCard label="Хэрэглэгчийн урилга" value={totalInvites ?? 0} icon={<IconInvites />} />
         </div>
 
         {/* ── Quick actions ── */}
@@ -149,7 +184,9 @@ export default function AdminDashboardPage() {
               </Link>
             </div>
             <div className="rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) divide-y divide-(--color-border)">
-              {recentTemplates.map((tpl) => (
+              {recentTemplates.length === 0 ? (
+                <p className="px-3 py-4 text-xs text-(--color-text-muted)">Загвар байхгүй байна</p>
+              ) : recentTemplates.map((tpl) => (
                 <div key={tpl.id} className="flex items-center gap-3 px-3 py-2.5">
                   <div className="h-10 w-6 shrink-0 overflow-hidden rounded-[4px] bg-(--color-surface-soft)">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -188,7 +225,9 @@ export default function AdminDashboardPage() {
               </Link>
             </div>
             <div className="rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) divide-y divide-(--color-border)">
-              {recentInvites.map((inv) => (
+              {recentInvites.length === 0 ? (
+                <p className="px-3 py-4 text-xs text-(--color-text-muted)">Урилга байхгүй байна</p>
+              ) : recentInvites.map((inv) => (
                 <div key={inv.id} className="flex items-center gap-3 px-3 py-2.5">
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-xs font-medium text-(--color-text)">{inv.title}</p>

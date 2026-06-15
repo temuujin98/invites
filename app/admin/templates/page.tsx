@@ -1,10 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import type { InviteTemplate, TemplateFieldConfig } from "@/types/template";
 import { AdminTemplatesClient } from "./_AdminTemplatesClient";
+import { fetchCategories } from "@/lib/db/templates";
 
 export default async function AdminTemplatesPage() {
   const supabase = await createClient();
   const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const categories = await fetchCategories();
 
   const { data: rows } = await supabase
     .from("templates")
@@ -40,5 +42,5 @@ export default async function AdminTemplatesPage() {
     };
   });
 
-  return <AdminTemplatesClient initialTemplates={templates} />;
+  return <AdminTemplatesClient initialTemplates={templates} categories={categories} />;
 }

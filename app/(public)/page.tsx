@@ -168,12 +168,13 @@ export default async function LandingPage() {
     fetchCategories(),
   ]);
   const featuredTemplates = publishedTemplates.slice(0, 4);
+  const heroTemplate = publishedTemplates.find((t) => t.slug === "wedding-luxury") ?? publishedTemplates[0];
 
   return (
     <div className="flex flex-col">
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <LandingHero loggedIn={!!user} />
+      {heroTemplate && <LandingHero loggedIn={!!user} heroTemplate={heroTemplate} />}
 
       {/* ── How it works (surface band) ──────────────────────────────────── */}
       <section className="border-y border-(--color-border) bg-(--color-surface) py-14 md:py-14">

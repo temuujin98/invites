@@ -2,8 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { mockCategories } from "@/lib/mock-admin-data";
-import type { InviteTemplate } from "@/types/template";
+import type { InviteTemplate, TemplateCategory } from "@/types/template";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { FilterTabs } from "@/components/shared/FilterTabs";
@@ -79,13 +78,14 @@ function TypeBadge({ type }: { type: "image" | "video" }) {
 
 interface TemplateCardActionsProps {
   template: InviteTemplate;
+  categories: TemplateCategory[];
   onDuplicate: (t: InviteTemplate) => void;
   onTogglePublish: (t: InviteTemplate) => void;
   onDelete: (t: InviteTemplate) => void;
 }
 
-function TemplateGridCard({ template, onDuplicate, onTogglePublish, onDelete }: TemplateCardActionsProps) {
-  const categoryName = mockCategories.find((c) => c.id === template.categoryId)?.name ?? "—";
+function TemplateGridCard({ template, categories, onDuplicate, onTogglePublish, onDelete }: TemplateCardActionsProps) {
+  const categoryName = categories.find((c) => c.id === template.categoryId)?.name ?? "—";
 
   return (
     <div className="group flex flex-col rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) overflow-hidden hover:border-(--color-accent)/40 hover:shadow-(--shadow-md) transition-all">
@@ -153,8 +153,8 @@ function TemplateGridCard({ template, onDuplicate, onTogglePublish, onDelete }: 
 
 // ── Table row ──────────────────────────────────────────────────────────────
 
-function TemplateTableRow({ template, onDuplicate, onTogglePublish, onDelete }: TemplateCardActionsProps) {
-  const categoryName = mockCategories.find((c) => c.id === template.categoryId)?.name ?? "—";
+function TemplateTableRow({ template, categories, onDuplicate, onTogglePublish, onDelete }: TemplateCardActionsProps) {
+  const categoryName = categories.find((c) => c.id === template.categoryId)?.name ?? "—";
 
   return (
     <tr className="border-b border-(--color-border) last:border-0 hover:bg-(--color-surface-soft) transition-colors">
@@ -244,7 +244,7 @@ function GridSkeleton() {
 type FilterStatus = "all" | "published" | "draft";
 type FilterType = "all" | "image" | "video";
 
-export function AdminTemplatesClient({ initialTemplates }: { initialTemplates: InviteTemplate[] }) {
+export function AdminTemplatesClient({ initialTemplates, categories }: { initialTemplates: InviteTemplate[]; categories: TemplateCategory[] }) {
   const [templates, setTemplates] = useState(initialTemplates);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
@@ -341,7 +341,7 @@ export function AdminTemplatesClient({ initialTemplates }: { initialTemplates: I
             onChange={setFilterCategory}
             options={[
               { value: "all", label: "Бүх ангилал" },
-              ...mockCategories.map((c) => ({ value: c.id, label: c.name })),
+              ...categories.map((c) => ({ value: c.id, label: c.name })),
             ]}
           />
           <FilterSelect
@@ -413,6 +413,7 @@ export function AdminTemplatesClient({ initialTemplates }: { initialTemplates: I
                     <TemplateTableRow
                       key={t.id}
                       template={t}
+                      categories={categories}
                       onDuplicate={handleDuplicate}
                       onTogglePublish={handleTogglePublish}
                       onDelete={setDeleteTarget}
@@ -438,6 +439,7 @@ export function AdminTemplatesClient({ initialTemplates }: { initialTemplates: I
                 <TemplateGridCard
                   key={t.id}
                   template={t}
+                  categories={categories}
                   onDuplicate={handleDuplicate}
                   onTogglePublish={handleTogglePublish}
                   onDelete={setDeleteTarget}

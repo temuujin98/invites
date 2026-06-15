@@ -4,10 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { PhonePreviewFrame } from "@/components/invite/PhonePreviewFrame";
 import { InviteRenderer } from "@/components/invite/InviteRenderer";
-import { mockTemplates } from "@/lib/mock-data";
-import type { InviteValues } from "@/types/template";
-
-const HERO_TEMPLATE = mockTemplates[1]!;
+import type { InviteTemplate, InviteValues } from "@/types/template";
 
 const HERO_VALUES: InviteValues = {
   couple_names: { text: "Бат-Эрдэнэ & Солонго" },
@@ -28,9 +25,10 @@ const fadeUp = {
 
 interface LandingHeroProps {
   loggedIn?: boolean;
+  heroTemplate: InviteTemplate;
 }
 
-export function LandingHero({ loggedIn = false }: LandingHeroProps) {
+export function LandingHero({ loggedIn = false, heroTemplate }: LandingHeroProps) {
   return (
     <section className="overflow-x-hidden bg-(--color-bg) px-4 pb-14 pt-14 md:overflow-visible md:px-6 md:pt-16 md:pb-18">
       <div className="mx-auto max-w-5xl md:overflow-visible">
@@ -120,10 +118,10 @@ export function LandingHero({ loggedIn = false }: LandingHeroProps) {
             style={{ width: 360 }}
           >
             <PhonePreviewFrame
-              canvasWidth={HERO_TEMPLATE.canvasWidth}
-              canvasHeight={HERO_TEMPLATE.canvasHeight}
+              canvasWidth={heroTemplate.canvasWidth}
+              canvasHeight={heroTemplate.canvasHeight}
             >
-              <InviteRenderer template={HERO_TEMPLATE} values={HERO_VALUES} mode="public" />
+              <InviteRenderer template={heroTemplate} values={HERO_VALUES} mode="public" />
             </PhonePreviewFrame>
 
             {/* Chip: template name — top-left, offset from 360px container edge */}
@@ -177,12 +175,12 @@ export function LandingHero({ loggedIn = false }: LandingHeroProps) {
             transition={{ duration: 0.3, ease: "easeOut", delay: 0.15 }}
             className="flex w-full justify-center md:hidden"
           >
-            <div className="w-full max-w-[200px]">
+            <div className="w-full max-w-50">
               <PhonePreviewFrame
-                canvasWidth={HERO_TEMPLATE.canvasWidth}
-                canvasHeight={HERO_TEMPLATE.canvasHeight}
+                canvasWidth={heroTemplate.canvasWidth}
+                canvasHeight={heroTemplate.canvasHeight}
               >
-                <InviteRenderer template={HERO_TEMPLATE} values={HERO_VALUES} mode="public" />
+                <InviteRenderer template={heroTemplate} values={HERO_VALUES} mode="public" />
               </PhonePreviewFrame>
             </div>
           </motion.div>
