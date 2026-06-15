@@ -26,6 +26,7 @@ export function DropdownMenu({
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0, right: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -43,9 +44,10 @@ export function DropdownMenu({
     reposition();
 
     function handleOutside(e: MouseEvent) {
-      if (triggerRef.current && !triggerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      const target = e.target as Node;
+      const inTrigger = triggerRef.current?.contains(target);
+      const inPanel = panelRef.current?.contains(target);
+      if (!inTrigger && !inPanel) setOpen(false);
     }
 
     function handleEscape(e: KeyboardEvent) {
@@ -67,6 +69,7 @@ export function DropdownMenu({
   const panel = open && typeof document !== "undefined"
     ? createPortal(
         <div
+          ref={panelRef}
           role="menu"
           style={{
             position: "absolute",
