@@ -131,7 +131,7 @@ function TemplateGridCard({ template, onDuplicate, onTogglePublish, onDelete }: 
               <button
                 type="button"
                 aria-label="Үйлдлүүд"
-                className="flex h-6 w-6 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) text-(--color-text-muted) hover:bg-(--color-surface-soft) transition-colors"
+                className="flex h-6 w-6 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) text-(--color-text-muted) hover:bg-(--color-surface-soft) transition-colors cursor-pointer"
               >
                 <IconDots />
               </button>
@@ -186,7 +186,7 @@ function TemplateTableRow({ template, onDuplicate, onTogglePublish, onDelete }: 
             <button
               type="button"
               aria-label="Үйлдлүүд"
-              className="flex h-7 w-7 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) text-(--color-text-muted) hover:bg-(--color-surface-soft) transition-colors"
+              className="flex h-7 w-7 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) text-(--color-text-muted) hover:bg-(--color-surface-soft) transition-colors cursor-pointer"
             >
               <IconDots />
             </button>

@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
+import { FilterSelect } from "@/components/ui/FilterSelect";
 import { mockCategories } from "@/lib/mock-data";
 import { createClient } from "@/lib/supabase/client";
 import type { InviteTemplate } from "@/types/template";
@@ -150,12 +150,17 @@ export function TemplateSettingsPanel({ template, onChange, onStatusToggle, togg
               onChange={(e) => onChange({ slug: e.target.value })}
               placeholder="zagvar-ner"
             />
-            <Select
-              label="Ангилал"
-              value={template.categoryId}
-              onChange={(e) => onChange({ categoryId: e.target.value })}
-              options={categoryOptions}
-            />
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 4 }}>
+                Ангилал
+              </p>
+              <FilterSelect
+                value={template.categoryId}
+                onChange={(v) => onChange({ categoryId: v })}
+                options={categoryOptions}
+                className="w-full"
+              />
+            </div>
             {/* Type segment */}
             <div>
               <p style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: 4 }}>
