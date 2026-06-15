@@ -10,6 +10,7 @@ import { FilterTabs } from "@/components/shared/FilterTabs";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { DropdownMenu } from "@/components/ui/DropdownMenu";
+import { FilterSelect } from "@/components/ui/FilterSelect";
 import { EmptyState } from "@/components/shared/EmptyState";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
@@ -139,7 +140,7 @@ function TemplateGridCard({ template, onDuplicate, onTogglePublish, onDelete }: 
               { label: "Засах",   onClick: () => { window.location.href = `/admin/templates/${template.id}/edit`; } },
               { label: "Харах",   onClick: () => window.open(`/templates/${template.slug}`, "_blank") },
               { label: "Хуулах",  onClick: () => onDuplicate(template) },
-              { label: template.status === "published" ? "Ноорог болгох" : "Нийтлэх", onClick: () => onTogglePublish(template) },
+              { label: template.status === "published" ? "Нийтлэхээ болих" : "Нийтлэх", onClick: () => onTogglePublish(template) },
               { label: "Устгах",  danger: true, onClick: () => onDelete(template) },
             ]}
           />
@@ -194,7 +195,7 @@ function TemplateTableRow({ template, onDuplicate, onTogglePublish, onDelete }: 
             { label: "Засах",   onClick: () => { window.location.href = `/admin/templates/${template.id}/edit`; } },
             { label: "Харах",   onClick: () => window.open(`/templates/${template.slug}`, "_blank") },
             { label: "Хуулах",  onClick: () => onDuplicate(template) },
-            { label: template.status === "published" ? "Ноорог болгох" : "Нийтлэх", onClick: () => onTogglePublish(template) },
+            { label: template.status === "published" ? "Нийтлэхээ болих" : "Нийтлэх", onClick: () => onTogglePublish(template) },
             { label: "Устгах",  danger: true, onClick: () => onDelete(template) },
           ]}
         />
@@ -302,7 +303,7 @@ export function AdminTemplatesClient({ initialTemplates }: { initialTemplates: I
           actions={
             <Link href="/admin/templates/new">
               <Button variant="accent" size="sm">
-                + Загвар нэмэх
+                + Нэмэх
               </Button>
             </Link>
           }
@@ -321,27 +322,23 @@ export function AdminTemplatesClient({ initialTemplates }: { initialTemplates: I
             activeId={filterStatus}
             onChange={(id) => setFilterStatus(id as FilterStatus)}
           />
-          {/* Category filter */}
-          <select
+          <FilterSelect
             value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-            className="h-7 rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-2 text-xs text-(--color-text) focus:outline-none focus:border-(--color-accent) cursor-pointer"
-          >
-            <option value="all">Бүх ангилал</option>
-            {mockCategories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-          {/* Type filter */}
-          <select
+            onChange={setFilterCategory}
+            options={[
+              { value: "all", label: "Бүх ангилал" },
+              ...mockCategories.map((c) => ({ value: c.id, label: c.name })),
+            ]}
+          />
+          <FilterSelect
             value={filterType}
-            onChange={(e) => setFilterType(e.target.value as FilterType)}
-            className="h-7 rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-2 text-xs text-(--color-text) focus:outline-none focus:border-(--color-accent) cursor-pointer"
-          >
-            <option value="all">Бүх төрөл</option>
-            <option value="image">Зураг</option>
-            <option value="video">Видео</option>
-          </select>
+            onChange={(v) => setFilterType(v as FilterType)}
+            options={[
+              { value: "all", label: "Бүх төрөл" },
+              { value: "image", label: "Зураг" },
+              { value: "video", label: "Видео" },
+            ]}
+          />
 
           {/* View toggle */}
           <div className="ml-auto flex items-center gap-1 rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) p-0.5">

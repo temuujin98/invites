@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface MenuItem {
   label: string;
@@ -23,13 +24,26 @@ export function DropdownMenu({
   className = "",
 }: DropdownMenuProps) {
   const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState({ top: 0, left: 0, right: 0 });
+  const triggerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
 
+    function reposition() {
+      if (!triggerRef.current) return;
+      const rect = triggerRef.current.getBoundingClientRect();
+      setPos({
+        top: rect.bottom + window.scrollY + 4,
+        left: rect.left + window.scrollX,
+        right: window.innerWidth - rect.right - window.scrollX,
+      });
+    }
+
+    reposition();
+
     function handleOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (triggerRef.current && !triggerRef.current.contains(e.target as Node)) {
         setOpen(false);
       }
     }
@@ -40,24 +54,29 @@ export function DropdownMenu({
 
     document.addEventListener("mousedown", handleOutside);
     document.addEventListener("keydown", handleEscape);
+    window.addEventListener("scroll", reposition, true);
+    window.addEventListener("resize", reposition);
     return () => {
       document.removeEventListener("mousedown", handleOutside);
       document.removeEventListener("keydown", handleEscape);
+      window.removeEventListener("scroll", reposition, true);
+      window.removeEventListener("resize", reposition);
     };
   }, [open]);
 
-  return (
-    <div ref={containerRef} className={`relative inline-flex ${className}`}>
-      <div onClick={() => setOpen((v) => !v)} className="cursor-pointer">
-        {trigger}
-      </div>
-      {open && (
+  const panel = open && typeof document !== "undefined"
+    ? createPortal(
         <div
           role="menu"
-          className={[
-            "absolute top-full mt-1 z-50 min-w-40 py-1 rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) shadow-(--shadow-lg)",
-            align === "right" ? "right-0" : "left-0",
-          ].join(" ")}
+          style={{
+            position: "absolute",
+            top: pos.top,
+            ...(align === "right"
+              ? { right: pos.right }
+              : { left: pos.left }),
+            zIndex: 9999,
+          }}
+          className="min-w-40 py-1 rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) shadow-lg"
         >
           {items.map((item, i) => (
             <button
@@ -81,8 +100,17 @@ export function DropdownMenu({
               {item.label}
             </button>
           ))}
-        </div>
-      )}
+        </div>,
+        document.body,
+      )
+    : null;
+
+  return (
+    <div ref={triggerRef} className={`relative inline-flex ${className}`}>
+      <div onClick={() => setOpen((v) => !v)} className="cursor-pointer">
+        {trigger}
+      </div>
+      {panel}
     </div>
   );
 }

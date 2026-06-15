@@ -106,6 +106,24 @@ function EyeIcon({ visible }: { visible: boolean }) {
   );
 }
 
+function DuplicateIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M11 5V3.5A1.5 1.5 0 009.5 2H3.5A1.5 1.5 0 002 3.5v6A1.5 1.5 0 003.5 11H5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function DeleteIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M3 5h10M6 5V3h4v2M7 8v4M9 8v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4 5l1 9h6l1-9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function LayerItem({
   field,
   isSelected,
@@ -127,7 +145,7 @@ export function LayerItem({
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 6,
+        gap: 4,
         padding: "5px 8px",
         borderRadius: 7,
         cursor: "pointer",
@@ -156,7 +174,7 @@ export function LayerItem({
         <FieldTypeIcon type={field.type} />
       </span>
 
-      {/* Key */}
+      {/* Key — fills remaining space */}
       <span
         style={{
           flex: 1,
@@ -166,12 +184,82 @@ export function LayerItem({
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
           color: isSelected ? "var(--color-accent)" : "var(--color-text)",
+          minWidth: 0,
         }}
       >
         {field.key}
       </span>
 
-      {/* Lock icon */}
+      {/*
+        Right-side controls — always in normal flow, never absolutely positioned.
+        Lock and eye are always visible; duplicate and delete are opacity-0 until
+        hover, then fade in. This prevents any overlay from covering the lock/eye.
+      */}
+
+      {/* Duplicate — hover-only, visually distinct from lock */}
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onDuplicate(); }}
+        title="Хуулах"
+        className="layer-hover-action"
+        style={{
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          padding: "2px 3px",
+          flexShrink: 0,
+          color: "var(--color-text-secondary)",
+          borderRadius: 3,
+          opacity: 0,
+          transition: "opacity 100ms",
+        }}
+        aria-label="Давхарга хуулах"
+      >
+        <DuplicateIcon />
+      </button>
+
+      {/* Delete — hover-only */}
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onDelete(); }}
+        title="Устгах"
+        className="layer-hover-action"
+        style={{
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          padding: "2px 3px",
+          flexShrink: 0,
+          color: "var(--color-danger)",
+          borderRadius: 3,
+          opacity: 0,
+          transition: "opacity 100ms",
+        }}
+        aria-label="Давхарга устгах"
+      >
+        <DeleteIcon />
+      </button>
+
+      {/* Eye — always visible */}
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onToggleVisible(); }}
+        title={field.visible ? "Нуух" : "Харуулах"}
+        style={{
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          padding: "2px 3px",
+          flexShrink: 0,
+          color: "var(--color-text-muted)",
+          opacity: field.visible ? 0.5 : 0.3,
+        }}
+        aria-label={field.visible ? "Нуух" : "Харуулах"}
+      >
+        <EyeIcon visible={field.visible} />
+      </button>
+
+      {/* Lock — always visible, toggles position-lock only */}
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); onToggleLock(); }}
@@ -180,7 +268,7 @@ export function LayerItem({
           background: "none",
           border: "none",
           cursor: "pointer",
-          padding: 2,
+          padding: "2px 3px",
           flexShrink: 0,
           color: field.locked
             ? "var(--color-accent)"
@@ -192,75 +280,8 @@ export function LayerItem({
         <LockIcon locked={field.locked} />
       </button>
 
-      {/* Eye icon */}
-      <button
-        type="button"
-        onClick={(e) => { e.stopPropagation(); onToggleVisible(); }}
-        style={{
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: 2,
-          flexShrink: 0,
-          color: field.visible ? "var(--color-text-muted)" : "var(--color-text-muted)",
-          opacity: field.visible ? 0.5 : 0.3,
-        }}
-        aria-label={field.visible ? "Нуух" : "Харуулах"}
-      >
-        <EyeIcon visible={field.visible} />
-      </button>
-
-      {/* Hover actions */}
-      <span
-        className="layer-item-actions"
-        style={{
-          display: "none",
-          alignItems: "center",
-          gap: 2,
-          position: "absolute",
-          right: 8,
-          top: "50%",
-          transform: "translateY(-50%)",
-          background: isSelected ? "var(--color-accent-soft)" : "var(--color-surface)",
-          borderRadius: 4,
-        }}
-      >
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); onDuplicate(); }}
-          title="Хуулах"
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: "2px 4px",
-            fontSize: 10,
-            color: "var(--color-text-secondary)",
-            borderRadius: 3,
-          }}
-        >
-          ⎘
-        </button>
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          title="Устгах"
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: "2px 4px",
-            fontSize: 10,
-            color: "var(--color-danger)",
-            borderRadius: 3,
-          }}
-        >
-          ✕
-        </button>
-      </span>
-
       <style>{`
-        .group:hover .layer-item-actions { display: flex !important; }
+        .group:hover .layer-hover-action { opacity: 1 !important; }
       `}</style>
     </div>
   );
