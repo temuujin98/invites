@@ -397,7 +397,7 @@ export default async function LandingPage() {
               className="inline-flex h-13 items-center justify-center rounded-(--radius-ctrl) bg-(--color-accent) px-10 text-[15px] font-semibold text-white transition-all duration-300 hover:bg-(--color-accent-hover) active:scale-[0.98]"
               style={{ boxShadow: "0 4px 24px rgba(139,92,246,0.45)" }}
             >
-              Үнэгүй эхлэх
+              Эхлэх
             </Link>
             <Link
               href="/templates"
