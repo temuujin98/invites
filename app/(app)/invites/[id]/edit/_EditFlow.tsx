@@ -1,216 +1,134 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import { RESERVED_SLUGS } from "@/lib/constants";
-import { InviteRenderer } from "@/components/invite/InviteRenderer";
-import { GeneratedInviteForm } from "@/components/invite/GeneratedInviteForm";
+import { SECTION_REGISTRY } from "@/lib/sections/registry";
+import { SectionRenderer } from "@/components/invite/SectionRenderer";
+import { SectionContentForm } from "@/components/invite/SectionContentForm";
 import { PhonePreviewFrame } from "@/components/invite/PhonePreviewFrame";
-import { ImageCropUpload } from "@/components/shared/ImageCropUpload";
-import { Stepper } from "@/components/ui/Stepper";
 import { Button } from "@/components/ui/Button";
 import { Toggle } from "@/components/ui/Toggle";
-import { APP_URL } from "@/lib/constants";
-import type { InviteTemplate, InviteValues, TemplateFieldConfig } from "@/types/template";
+import { Input } from "@/components/ui/Input";
+import type {
+  SectionTemplate,
+  InviteSectionContent,
+  SectionContentValue,
+} from "@/types/section";
 
-type StepKey = "info" | "location" | "photo" | "publish";
-type SlugState = "idle" | "checking" | "available" | "taken" | "invalid";
+// ── Types ─────────────────────────────────────────────────────────────────────
 
-const STEPS: { key: StepKey; label: string }[] = [
-  { key: "info",     label: "Мэдээлэл" },
-  { key: "location", label: "Байршил" },
-  { key: "photo",    label: "Зураг" },
-  { key: "publish",  label: "Хадгалах" },
-];
-
-const STEP_INDEX: Record<StepKey, number> = { info: 0, location: 1, photo: 2, publish: 3 };
-
-function isValidSlugChar(s: string): boolean {
-  return /^[a-z0-9-]+$/.test(s);
+interface ContentSection {
+  id: string;
+  type: string;
+  label: string;
+  description: string;
+  schema: ReturnType<typeof SECTION_REGISTRY[keyof typeof SECTION_REGISTRY]["contentSchema"]["slice"]>;
 }
 
-function sanitizeSlug(raw: string): string {
-  return raw.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-{2,}/g, "-");
-}
-
-function infoFields(fields: TemplateFieldConfig[]): TemplateFieldConfig[] {
-  const INFO_TYPES = new Set(["text", "date", "time", "custom"]);
-  return fields.filter((f) => INFO_TYPES.has(f.type) && f.key !== "location");
-}
-
-function locationFields(fields: TemplateFieldConfig[]): TemplateFieldConfig[] {
-  return fields.filter((f) => f.type === "location");
-}
-
-function imageFields(fields: TemplateFieldConfig[]): TemplateFieldConfig[] {
-  return fields.filter((f) => f.type === "image");
-}
-
-function SlugStatusIcon({ state }: { state: SlugState }) {
-  if (state === "checking") return (
-    <svg className="animate-spin text-(--color-text-muted)" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" strokeDasharray="8 8" />
-    </svg>
-  );
-  if (state === "available") return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" className="text-(--color-success)">
-      <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M4.5 7l2 2 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-  if (state === "taken" || state === "invalid") return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" className="text-(--color-danger)">
-      <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M5 5l4 4M9 5l-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-  return null;
-}
-
-function slugMessage(state: SlugState, currentSlug: string, originalSlug: string): { text: string; color: string } | null {
-  if (state === "checking") return { text: "Шалгаж байна...", color: "text-(--color-text-muted)" };
-  if (state === "available" || (state === "taken" && currentSlug === originalSlug))
-    return { text: "Ашиглах боломжтой", color: "text-(--color-success)" };
-  if (state === "taken") return { text: "Энэ холбоос аль хэдийн ашиглагдаж байна", color: "text-(--color-danger)" };
-  if (state === "invalid") return { text: "Зөвхөн a–z, 0–9, зураас (-) ашиглана (3–60 тэмдэгт)", color: "text-(--color-danger)" };
-  return null;
-}
-
-interface EditFlowProps {
+export interface EditFlowProps {
   inviteId: string;
   inviteTitle: string;
   shareSlug: string;
   isPublic: boolean;
-  template: InviteTemplate;
-  initialValues: InviteValues;
+  template: SectionTemplate;
+  initialContent: InviteSectionContent;
 }
+
+// ── Derive editable sections ──────────────────────────────────────────────────
+
+function deriveContentSections(template: SectionTemplate): ContentSection[] {
+  return [...template.sections]
+    .sort((a, b) => a.order - b.order)
+    .filter((s) => {
+      if (!s.enabled) return false;
+      const entry = SECTION_REGISTRY[s.type];
+      return entry.hasContent && entry.contentSchema.length > 0;
+    })
+    .map((s) => {
+      const entry = SECTION_REGISTRY[s.type];
+      return {
+        id: s.id,
+        type: s.type,
+        label: entry.label,
+        description: entry.description,
+        schema: entry.contentSchema,
+      };
+    });
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
 
 export function EditFlow({
   inviteId,
   inviteTitle,
-  shareSlug: initialShareSlug,
+  shareSlug,
   isPublic: initialIsPublic,
   template,
-  initialValues,
+  initialContent,
 }: EditFlowProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  const stepParam = (searchParams.get("step") ?? "info") as StepKey;
-  const currentStepKey: StepKey = STEP_INDEX[stepParam] !== undefined ? stepParam : "info";
-  const currentStep = STEP_INDEX[currentStepKey];
-
-  const [values, setValues] = useState<InviteValues>(initialValues);
-  const [shareSlug, setShareSlug] = useState(initialShareSlug);
+  const [content, setContent] = useState<InviteSectionContent>(initialContent);
+  const [title, setTitle] = useState(inviteTitle);
   const [isPublic, setIsPublic] = useState(initialIsPublic);
-  const [previewOpen, setPreviewOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [openSectionId, setOpenSectionId] = useState<string | null>(null);
 
-  const originalSlug = initialShareSlug;
-  const [slugState, setSlugState] = useState<SlugState>("available");
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const contentSections = useMemo(() => deriveContentSections(template), [template]);
 
-  const checkSlug = useCallback(
-    (slug: string) => {
-      if (!slug) { setSlugState("idle"); return; }
-      if (!isValidSlugChar(slug) || slug.length < 3 || slug.length > 60) {
-        setSlugState("invalid"); return;
-      }
-      if ((RESERVED_SLUGS as readonly string[]).includes(slug)) {
-        setSlugState("taken"); return;
-      }
-      if (slug === originalSlug) { setSlugState("available"); return; }
-      setSlugState("checking");
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(async () => {
-        try {
-          const res = await fetch("/api/slug-check", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ slug }),
-          });
-          const json = (await res.json()) as { ok: boolean; data?: { available: boolean } };
-          setSlugState(json.ok && json.data?.available ? "available" : "taken");
-        } catch {
-          setSlugState("available");
-        }
-      }, 500);
-    },
-    [originalSlug],
-  );
-
-  useEffect(() => {
-    checkSlug(shareSlug);
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [shareSlug, checkSlug]);
-
-  function goToStep(key: StepKey) {
-    const url = new URL(window.location.href);
-    url.searchParams.set("step", key);
-    router.push(url.pathname + url.search);
-  }
-
-  function handleNext() {
-    const next = STEPS[currentStep + 1];
-    if (next) goToStep(next.key);
-  }
-
-  function handleBack() {
-    if (currentStep === 0) router.push("/dashboard");
-    else { const prev = STEPS[currentStep - 1]; if (prev) goToStep(prev.key); }
+  function handleSectionChange(sectionId: string, v: SectionContentValue) {
+    setContent((prev) => ({ ...prev, [sectionId]: v }));
   }
 
   async function handleSave() {
-    if (slugState !== "available") return;
     setSaving(true);
     setSaveError(null);
     try {
       const supabase = createClient();
 
-      // Upsert invite_values
-      const valueRows = Object.entries(values)
-        .filter(([, v]) => v.text || v.assetUrl)
-        .map(([field_key, v]) => ({
-          invite_id: inviteId,
-          field_key,
-          value_text: v.text ?? null,
-          value_asset_url: v.assetUrl ?? null,
-        }));
+      // Extract denormalized fields from the details section
+      const detailsSection = template.sections.find(
+        (s) => s.type === "details" && s.enabled,
+      );
+      const detailsContent: SectionContentValue = detailsSection
+        ? (content[detailsSection.id] ?? {})
+        : {};
+      const eventDate = (detailsContent["date"] as string | undefined) ?? null;
+      const eventTime = (detailsContent["time"] as string | undefined) ?? null;
+      const eventLocation =
+        (detailsContent["location"] as string | undefined) ?? null;
 
-      // Delete old values then re-insert (upsert on composite key)
-      await supabase.from("invite_values").delete().eq("invite_id", inviteId);
-      if (valueRows.length > 0) {
-        const { error: valErr } = await supabase.from("invite_values").insert(valueRows);
-        if (valErr) throw valErr;
-      }
-
-      // Update invite metadata
-      const { error: invErr } = await supabase
+      const { error } = await supabase
         .from("invites")
         .update({
-          share_slug: shareSlug,
+          title,
           is_public: isPublic,
+          content,
+          event_date: eventDate,
+          event_time: eventTime,
+          event_location: eventLocation,
           updated_at: new Date().toISOString(),
         })
         .eq("id", inviteId);
-      if (invErr) throw invErr;
+
+      if (error) throw new Error(error.message ?? "Хадгалахад алдаа гарлаа");
 
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Хадгалахад алдаа гарлаа");
+      setSaveError(
+        err instanceof Error ? err.message : "Хадгалахад алдаа гарлаа",
+      );
     } finally {
       setSaving(false);
     }
   }
-
-  const imgFields = imageFields(template.fields);
-  const canSave = slugState === "available";
 
   return (
     <div className="min-h-screen bg-(--color-bg)">
@@ -219,7 +137,7 @@ export function EditFlow({
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-3 md:px-6">
           <button
             type="button"
-            onClick={handleBack}
+            onClick={() => router.push("/dashboard")}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
             aria-label="Буцах"
           >
@@ -228,26 +146,32 @@ export function EditFlow({
             </svg>
           </button>
 
-          <div className="flex flex-1 flex-col gap-0.5 justify-center">
-            <p className="text-xs font-semibold text-(--color-text) truncate">{inviteTitle}</p>
+          <div className="flex flex-1 flex-col gap-0.5 min-w-0">
+            <p className="text-xs font-semibold text-(--color-text) truncate">{title || inviteTitle}</p>
             <p className="text-[11px] text-(--color-text-muted) hidden sm:block">Засварлах</p>
           </div>
 
-          <div className="flex-1 flex justify-center">
-            <Stepper steps={STEPS} current={currentStep} />
-          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/i/${shareSlug}`}
+              target="_blank"
+              className="hidden sm:flex h-8 items-center gap-1.5 rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-3 text-xs text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
+            >
+              Урилга харах →
+            </Link>
 
-          <button
-            type="button"
-            onClick={() => setPreviewOpen((o) => !o)}
-            className="flex h-8 items-center gap-1.5 rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-2.5 text-xs text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors md:hidden"
-          >
-            {previewOpen ? "Хаах" : "Харах"}
-          </button>
+            <button
+              type="button"
+              onClick={() => setPreviewOpen((o) => !o)}
+              className="flex h-8 items-center gap-1.5 rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-2.5 text-xs text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors md:hidden"
+            >
+              {previewOpen ? "Хаах" : "Харах"}
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* ── Mobile preview ── */}
+      {/* ── Mobile collapsible preview ── */}
       <AnimatePresence>
         {previewOpen && (
           <motion.div
@@ -260,8 +184,10 @@ export function EditFlow({
           >
             <div className="flex justify-center py-4 px-4">
               <div className="w-40">
-                <PhonePreviewFrame canvasWidth={template.canvasWidth} canvasHeight={template.canvasHeight}>
-                  <InviteRenderer template={template} values={values} mode="preview" />
+                <PhonePreviewFrame canvasWidth={390} canvasHeight={844}>
+                  <div className="overflow-y-auto h-full">
+                    <SectionRenderer template={template} content={content} mode="create" />
+                  </div>
                 </PhonePreviewFrame>
               </div>
             </div>
@@ -272,175 +198,157 @@ export function EditFlow({
       {/* ── Main layout ── */}
       <div className="mx-auto max-w-5xl px-4 py-6 md:px-6 md:py-10">
         <div className="flex gap-10">
-          <div className="flex-1 min-w-0">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentStepKey}
-                initial={{ opacity: 0, x: 12 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -12 }}
-                transition={{ duration: 0.18, ease: "easeOut" as const }}
-              >
-                {currentStepKey === "info" && (
-                  <StepInfo template={template} values={values} onChange={setValues} />
-                )}
-                {currentStepKey === "location" && (
-                  <StepLocation template={template} values={values} onChange={setValues} />
-                )}
-                {currentStepKey === "photo" && (
-                  <StepPhoto imgFields={imgFields} values={values} onChange={setValues} />
-                )}
-                {currentStepKey === "publish" && (
-                  <StepSave
-                    shareSlug={shareSlug}
-                    onSlugChange={(v) => setShareSlug(sanitizeSlug(v))}
-                    slugState={slugState}
-                    originalSlug={originalSlug}
-                    isPublic={isPublic}
-                    onPublicChange={setIsPublic}
-                  />
-                )}
-              </motion.div>
-            </AnimatePresence>
+          {/* ── Form column ── */}
+          <div className="flex-1 min-w-0 flex flex-col gap-4">
+            {/* Invite title */}
+            <div className="rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) px-4 py-4">
+              <Input
+                label="Урилгын гарчиг"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder={inviteTitle}
+                maxLength={120}
+              />
+            </div>
 
-            {saveError && (
-              <p className="mt-4 text-xs text-(--color-danger)">{saveError}</p>
+            {/* Per-section content blocks */}
+            {contentSections.length === 0 ? (
+              <p className="text-xs text-(--color-text-muted) px-1">
+                Энэ загварт засварлах хэсэг байхгүй.
+              </p>
+            ) : (
+              contentSections.map((sec) => {
+                const isOpen = openSectionId === sec.id;
+                return (
+                  <div
+                    key={sec.id}
+                    className="rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) overflow-hidden"
+                  >
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setOpenSectionId(isOpen ? null : sec.id)
+                      }
+                      className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-(--color-surface-soft) transition-colors"
+                      aria-expanded={isOpen}
+                    >
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-sm font-semibold text-(--color-text)">
+                          {sec.label}
+                        </span>
+                        <span className="text-xs text-(--color-text-muted)">
+                          {sec.description}
+                        </span>
+                      </div>
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 14 14"
+                        fill="none"
+                        aria-hidden="true"
+                        className={[
+                          "shrink-0 text-(--color-text-muted) transition-transform duration-150",
+                          isOpen ? "rotate-180" : "",
+                        ].join(" ")}
+                      >
+                        <path
+                          d="M3 5l4 4 4-4"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+
+                    <AnimatePresence initial={false}>
+                      {isOpen && (
+                        <motion.div
+                          key="body"
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.18, ease: "easeOut" as const }}
+                          className="overflow-hidden"
+                        >
+                          <div className="border-t border-(--color-border) px-4 py-4">
+                            <SectionContentForm
+                              fields={sec.schema}
+                              value={content[sec.id] ?? {}}
+                              onChange={(v) => handleSectionChange(sec.id, v)}
+                            />
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })
             )}
 
-            <div className="mt-8 flex items-center justify-between">
-              <Button variant="secondary" size="md" onClick={handleBack}>
-                {currentStep === 0 ? "← Dashboard" : "← Буцах"}
+            {/* Visibility toggle */}
+            <div className="flex items-center justify-between rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) px-4 py-3">
+              <div>
+                <p className="text-sm font-medium text-(--color-text)">Нийтэд харагдах</p>
+                <p className="mt-0.5 text-xs text-(--color-text-muted)">
+                  {isPublic
+                    ? "Холбоос мэдэх хэн ч харж болно"
+                    : "Зөвхөн та болон танд холбоос илгээсэн хүмүүс харна"}
+                </p>
+              </div>
+              <Toggle checked={isPublic} onChange={setIsPublic} />
+            </div>
+
+            {saveError && (
+              <p className="text-xs text-(--color-danger)" role="alert">
+                {saveError}
+              </p>
+            )}
+
+            {/* Action row */}
+            <div className="flex items-center justify-between pt-2">
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={() => router.push("/dashboard")}
+              >
+                ← Буцах
               </Button>
 
-              {currentStep < STEPS.length - 1 ? (
-                <Button variant="accent" size="md" onClick={handleNext}>
-                  Дараах →
-                </Button>
-              ) : (
-                <Button variant="accent" size="md" onClick={handleSave} loading={saving} disabled={!canSave}>
-                  {saved ? "Хадгалагдлаа ✓" : "Хадгалах"}
-                </Button>
-              )}
+              <Button
+                variant="accent"
+                size="md"
+                onClick={handleSave}
+                loading={saving}
+              >
+                {saved ? "Хадгалагдлаа ✓" : "Хадгалах"}
+              </Button>
             </div>
           </div>
 
+          {/* ── Sticky desktop preview ── */}
           <div className="hidden w-56 shrink-0 md:block">
             <div className="sticky top-24">
               <p className="mb-3 text-center text-[11px] font-medium uppercase tracking-wider text-(--color-text-muted)">
                 Урьдчилан харах
               </p>
-              <PhonePreviewFrame canvasWidth={template.canvasWidth} canvasHeight={template.canvasHeight}>
-                <InviteRenderer template={template} values={values} mode="preview" />
+              <PhonePreviewFrame canvasWidth={390} canvasHeight={844}>
+                <div className="overflow-y-auto h-full">
+                  <SectionRenderer template={template} content={content} mode="create" />
+                </div>
               </PhonePreviewFrame>
+              <div className="mt-3 flex justify-center">
+                <Link
+                  href={`/i/${shareSlug}`}
+                  target="_blank"
+                  className="text-xs text-(--color-text-muted) hover:text-(--color-accent) transition-colors"
+                >
+                  Урилга харах →
+                </Link>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Step components ────────────────────────────────────────────────────────
-
-function StepInfo({ template, values, onChange }: { template: InviteTemplate; values: InviteValues; onChange: (v: InviteValues) => void }) {
-  const fields = infoFields(template.fields);
-  return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h2 className="text-base font-bold text-(--color-text)">Арга хэмжээний мэдээлэл</h2>
-        <p className="mt-0.5 text-xs text-(--color-text-muted)">Үндсэн мэдээллийг засварлана уу</p>
-      </div>
-      {fields.length > 0 ? (
-        <GeneratedInviteForm fields={fields} values={values} onChange={onChange} />
-      ) : (
-        <p className="text-xs text-(--color-text-muted)">Энэ загварт нэмэлт текст талбар байхгүй.</p>
-      )}
-    </div>
-  );
-}
-
-function StepLocation({ template, values, onChange }: { template: InviteTemplate; values: InviteValues; onChange: (v: InviteValues) => void }) {
-  const fields = locationFields(template.fields);
-  return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h2 className="text-base font-bold text-(--color-text)">Байршил</h2>
-        <p className="mt-0.5 text-xs text-(--color-text-muted)">Арга хэмжээ болох газрын мэдээлэл</p>
-      </div>
-      {fields.length > 0 ? (
-        <GeneratedInviteForm fields={fields} values={values} onChange={onChange} />
-      ) : (
-        <p className="text-xs text-(--color-text-muted)">Энэ загварт байршлын талбар байхгүй.</p>
-      )}
-    </div>
-  );
-}
-
-function StepPhoto({ imgFields, values, onChange }: { imgFields: TemplateFieldConfig[]; values: InviteValues; onChange: (v: InviteValues) => void }) {
-  return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h2 className="text-base font-bold text-(--color-text)">Зураг</h2>
-        <p className="mt-0.5 text-xs text-(--color-text-muted)">Урилгандаа зургийг шинэчлэнэ үү</p>
-      </div>
-      {imgFields.length > 0 ? (
-        <div className="flex flex-col gap-5">
-          {imgFields.map((field) => (
-            <ImageCropUpload
-              key={field.id}
-              label={field.label}
-              value={values[field.key]?.assetUrl}
-              withCrop
-              onImage={(url) => onChange({ ...values, [field.key]: { assetUrl: url } })}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="rounded-(--radius-card) border border-dashed border-(--color-border) bg-(--color-surface-soft) py-10 text-center">
-          <p className="text-xs text-(--color-text-muted)">Энэ загварт зургийн талбар байхгүй.</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function StepSave({
-  shareSlug, onSlugChange, slugState, originalSlug, isPublic, onPublicChange,
-}: {
-  shareSlug: string; onSlugChange: (v: string) => void; slugState: SlugState;
-  originalSlug: string; isPublic: boolean; onPublicChange: (v: boolean) => void;
-}) {
-  const msg = slugMessage(slugState, shareSlug, originalSlug);
-  const BASE_URL = `${APP_URL}/i/`;
-  return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h2 className="text-base font-bold text-(--color-text)">Тохиргоо</h2>
-        <p className="mt-0.5 text-xs text-(--color-text-muted)">Урилгын холбоос болон харагдах байдлыг тохируулна уу</p>
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-(--color-text-secondary)">Урилгын холбоос</label>
-        <div className="flex items-center rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) focus-within:border-(--color-accent) focus-within:ring-2 focus-within:ring-[var(--focus-ring)] transition-colors overflow-hidden">
-          <span className="shrink-0 border-r border-(--color-border) bg-(--color-surface-soft) px-2.5 py-[7px] text-xs text-(--color-text-muted) select-none">{BASE_URL}</span>
-          <input
-            type="text" value={shareSlug} onChange={(e) => onSlugChange(e.target.value)}
-            className="flex-1 min-w-0 bg-transparent px-2.5 py-[7px] text-sm text-(--color-text) focus:outline-none placeholder:text-(--color-text-muted)"
-            spellCheck={false} autoCapitalize="off" autoCorrect="off"
-          />
-          <div className="pr-2.5">
-            <SlugStatusIcon state={slugState === "taken" && shareSlug === originalSlug ? "available" : slugState} />
-          </div>
-        </div>
-        {msg && <p className={`text-xs ${msg.color}`}>{msg.text}</p>}
-      </div>
-      <div className="flex items-center justify-between rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) px-4 py-3">
-        <div>
-          <p className="text-sm font-medium text-(--color-text)">Нийтэд нээлттэй</p>
-          <p className="mt-0.5 text-xs text-(--color-text-muted)">
-            {isPublic ? "Холбоос мэдэх хэн ч харж болно" : "Зөвхөн та болон танд холбоос илгээсэн хүмүүс харна"}
-          </p>
-        </div>
-        <Toggle checked={isPublic} onChange={onPublicChange} />
       </div>
     </div>
   );
