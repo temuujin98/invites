@@ -64,16 +64,21 @@ function reducer(state: EditorState, action: Action): EditorState {
         isDirty: true,
       };
 
-    case "ADD_SECTION":
+    case "ADD_SECTION": {
+      // Assign order atomically from the authoritative state so two rapid adds
+      // can't collide on the same order value (H3).
+      const maxOrder = Math.max(0, ...state.template.sections.map((s) => s.order));
+      const section = { ...action.section, order: maxOrder + 1 };
       return {
         ...state,
         template: {
           ...state.template,
-          sections: [...state.template.sections, action.section],
+          sections: [...state.template.sections, section],
         },
-        selectedSectionId: action.section.id,
+        selectedSectionId: section.id,
         isDirty: true,
       };
+    }
 
     case "REMOVE_SECTION": {
       const next = reindex(state.template.sections.filter((s) => s.id !== action.id));
@@ -86,18 +91,23 @@ function reducer(state: EditorState, action: Action): EditorState {
       };
     }
 
-    case "UPDATE_SECTION_CONFIG":
+    case "UPDATE_SECTION_CONFIG": {
+      // Guard the discriminant + identity: a panel patch may only change
+      // type-specific config, never id/type/order (Q1 defensive guard).
+      const { id: _id, type: _type, order: _order, ...safePatch } =
+        action.patch as Record<string, unknown>;
+      void _id; void _type; void _order;
       return {
         ...state,
         template: {
           ...state.template,
           sections: state.template.sections.map((s) =>
-            // patch shares the same discriminant type, so the merge stays valid
-            s.id === action.id ? ({ ...s, ...action.patch } as SectionConfig) : s,
+            s.id === action.id ? ({ ...s, ...safePatch } as SectionConfig) : s,
           ),
         },
         isDirty: true,
       };
+    }
 
     case "TOGGLE_ENABLED":
       return {
@@ -127,7 +137,13 @@ function reducer(state: EditorState, action: Action): EditorState {
       return { ...state, showThemePanel: action.open, selectedSectionId: action.open ? null : state.selectedSectionId };
 
     case "MARK_SAVED":
-      return { ...state, isDirty: false };
+      // Clear the pending thumbnail id so subsequent saves don't re-write (or
+      // null out) thumb_asset_id (H2).
+      return {
+        ...state,
+        template: { ...state.template, pendingThumbAssetId: undefined },
+        isDirty: false,
+      };
 
     case "SET_STATUS":
       return {
@@ -168,11 +184,9 @@ export function useSectionEditorState(initialTemplate: SectionTemplate) {
   );
 
   const addSection = useCallback(
-    (type: SectionType) => {
-      const maxOrder = Math.max(0, ...state.template.sections.map((s) => s.order));
-      dispatch({ type: "ADD_SECTION", section: buildSection(type, maxOrder) });
-    },
-    [state.template.sections],
+    // order is assigned atomically in the reducer; pass 0 as a placeholder.
+    (type: SectionType) => dispatch({ type: "ADD_SECTION", section: buildSection(type, 0) }),
+    [],
   );
 
   const removeSection = useCallback(

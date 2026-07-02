@@ -91,7 +91,7 @@ function MiniToggle({
           width: 12,
           height: 12,
           borderRadius: "50%",
-          background: "#fff",
+          background: "var(--color-surface)",
           transition: "left 0.18s",
         }}
       />

@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { APP_URL } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
-import { InviteRenderer } from "@/components/invite/InviteRenderer";
-import { Drawer } from "@/components/ui/Drawer";
-import { Button } from "@/components/ui/Button";
-import type { InviteTemplate } from "@/types/template";
+import { SectionRenderer } from "@/components/invite/SectionRenderer";
+import { InvitationShell } from "@/components/invite/InvitationShell";
+import type { SectionTemplate, InviteSectionContent, SectionConfig, InviteTheme } from "@/types/section";
+import { DEFAULT_THEME } from "@/types/section";
+import { formatDate } from "@/lib/format";
 
 // ── Invalid / Archived states ─────────────────────────────────────────────
 
@@ -45,467 +44,111 @@ function InvalidLinkState({ archived }: { archived?: boolean }) {
   );
 }
 
-// ── RSVP Sheet ────────────────────────────────────────────────────────────
+// ── Legacy fallback — templates without sections yet ──────────────────────
 
-type RSVPChoice = "accepted" | "declined" | "maybe";
-
-const CHOICES: { value: RSVPChoice; label: string }[] = [
-  { value: "accepted", label: "Ирнэ" },
-  { value: "declined", label: "Ирэхгүй" },
-  { value: "maybe", label: "Магадгүй" },
-];
-
-function RSVPBottomSheet({
-  open,
-  onClose,
-  inviteId,
-  inviteTitle,
-}: {
-  open: boolean;
-  onClose: () => void;
-  inviteId: string;
-  inviteTitle?: string;
-}) {
-  const [name, setName] = useState("");
-  const [nameError, setNameError] = useState(false);
-  const [choice, setChoice] = useState<RSVPChoice>("accepted");
-  const [partySize, setPartySize] = useState(1);
-  const [note, setNote] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [apiError, setApiError] = useState<string | null>(null);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!name.trim()) { setNameError(true); return; }
-    setNameError(false);
-    setApiError(null);
-    setLoading(true);
-    try {
-      const res = await fetch("/api/rsvp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          inviteId,
-          name: name.trim(),
-          attending: choice,
-          guestCount: choice === "accepted" ? partySize : 1,
-          note: note.trim() || undefined,
-        }),
-      });
-      const json = await res.json() as { ok: boolean; code?: string; message?: string };
-      if (!json.ok) {
-        setApiError(json.message ?? "Алдаа гарлаа. Дахин оролдоно уу.");
-        setLoading(false);
-        return;
-      }
-      setSubmitted(true);
-    } catch {
-      setApiError("Сүлжээний алдаа гарлаа. Дахин оролдоно уу.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function handleClose() {
-    setSubmitted(false);
-    setName("");
-    setNameError(false);
-    setChoice("accepted");
-    setPartySize(1);
-    setNote("");
-    setApiError(null);
-    onClose();
-  }
-
-  return (
-    <Drawer open={open} onClose={handleClose} title="Ирэх эсэхээ мэдэгдэх">
-      {submitted ? (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.18 }}
-          className="flex flex-col items-center justify-center gap-4 py-8 text-center"
-        >
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-(--color-success-soft)">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M5 12l4.5 4.5L19 7" stroke="var(--color-success)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <div>
-            <p className="text-base font-semibold text-(--color-text)">
-              {choice === "accepted"
-                ? "Баярлалаа! Тантай уулзахыг тэсэн ядан хүлээнэ."
-                : choice === "maybe"
-                  ? "Ойлголоо. Цаг боломж гарвал тавтай морилно уу."
-                  : "Ойлголоо. Дараагийн удаа уулзана."}
-            </p>
-            {inviteTitle && (
-              <p className="mt-1 text-sm text-(--color-text-secondary)">{inviteTitle}</p>
-            )}
-          </div>
-          <Button variant="secondary" size="sm" onClick={handleClose}>Хаах</Button>
-        </motion.div>
-      ) : (
-        <form className="flex flex-col gap-5" onSubmit={handleSubmit} noValidate>
-          {/* Name */}
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-(--color-text)">
-              Таны нэр <span className="text-(--color-danger)">*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="Нэрээ оруулна уу"
-              value={name}
-              onChange={(e) => { setName(e.target.value); if (nameError) setNameError(false); }}
-              autoComplete="name"
-              className={[
-                "h-10 w-full rounded-(--radius-ctrl) border bg-(--color-surface) px-3 text-[15px] text-(--color-text) placeholder:text-(--color-text-muted) focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] transition-colors",
-                nameError ? "border-(--color-danger)" : "border-(--color-border) focus:border-(--color-accent)",
-              ].join(" ")}
-            />
-            {nameError && (
-              <p className="text-xs text-(--color-danger)">Нэрээ оруулна уу</p>
-            )}
-          </div>
-
-          {/* RSVP choice */}
-          <fieldset className="flex flex-col gap-1.5">
-            <legend className="text-sm font-medium text-(--color-text) mb-1.5">Ирэх эсэх</legend>
-            <div className="flex gap-2">
-              {CHOICES.map((c) => (
-                <button
-                  key={c.value}
-                  type="button"
-                  aria-pressed={choice === c.value}
-                  onClick={() => setChoice(c.value)}
-                  className={[
-                    "flex-1 rounded-(--radius-ctrl) border py-2.5 text-[15px] font-medium transition-colors duration-150 cursor-pointer",
-                    choice === c.value
-                      ? "bg-(--color-accent) text-white border-(--color-accent)"
-                      : "bg-(--color-surface) text-(--color-text) border-(--color-border) hover:bg-(--color-surface-soft)",
-                  ].join(" ")}
-                >
-                  {c.label}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-
-          {/* Party size — only when attending */}
-          <AnimatePresence>
-            {choice === "accepted" && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.15 }}
-                className="overflow-hidden"
-              >
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium text-(--color-text)">Хэдэн хүн ирэх?</label>
-                  <div className="flex items-center gap-4">
-                    <button
-                      type="button"
-                      aria-label="Хасах"
-                      onClick={() => setPartySize((p) => Math.max(1, p - 1))}
-                      className="h-10 w-10 rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) text-(--color-text) flex items-center justify-center hover:bg-(--color-surface-soft) transition-colors cursor-pointer"
-                    >
-                      <svg width="14" height="2" viewBox="0 0 14 2" fill="none" aria-hidden="true">
-                        <path d="M1 1h12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                      </svg>
-                    </button>
-                    <span className="w-8 text-center text-[17px] font-semibold text-(--color-text)">{partySize}</span>
-                    <button
-                      type="button"
-                      aria-label="Нэмэх"
-                      onClick={() => setPartySize((p) => p + 1)}
-                      className="h-10 w-10 rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) text-(--color-text) flex items-center justify-center hover:bg-(--color-surface-soft) transition-colors cursor-pointer"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                        <path d="M7 1v12M1 7h12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Note */}
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-(--color-text-secondary)">
-              Тайлбар <span className="text-(--color-text-muted) font-normal">(заавал биш)</span>
-            </label>
-            <textarea
-              placeholder="Нэмэлт тайлбар..."
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              rows={3}
-              className="w-full rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-3 py-2 text-[15px] text-(--color-text) placeholder:text-(--color-text-muted) focus:outline-none focus:border-(--color-accent) focus:ring-2 focus:ring-[var(--focus-ring)] resize-none transition-colors"
-            />
-          </div>
-
-          {apiError && (
-            <p className="text-sm text-(--color-danger)">{apiError}</p>
-          )}
-
-          <Button
-            type="submit"
-            variant="accent"
-            size="lg"
-            className="w-full text-[15px]"
-            disabled={loading}
-          >
-            {loading ? "Илгээж байна…" : "RSVP илгээх"}
-          </Button>
-        </form>
-      )}
-    </Drawer>
-  );
+interface LegacyFallbackProps {
+  title: string;
+  eventDate?: string | null;
+  eventTime?: string | null;
+  eventLocation?: string | null;
 }
 
-// ── Share Sheet ────────────────────────────────────────────────────────────
-
-function ShareSheet({ open, onClose, url, title }: { open: boolean; onClose: () => void; url: string; title: string }) {
-  const [copied, setCopied] = useState(false);
-
-  function handleCopy() {
-    navigator.clipboard.writeText(url).catch(() => undefined);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
-  const encodedUrl = encodeURIComponent(url);
-  const encodedTitle = encodeURIComponent(title);
-
-  const channels = [
-    {
-      label: "Facebook",
-      href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-        </svg>
-      ),
-    },
-    {
-      label: "Twitter / X",
-      href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M4 4l16 16M4 20L20 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
-        </svg>
-      ),
-    },
-    {
-      label: "WhatsApp",
-      href: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      ),
-    },
-  ];
+function LegacyFallback({ title, eventDate, eventTime, eventLocation }: LegacyFallbackProps) {
+  const dateFormatted = eventDate ? formatDate(eventDate) : null;
 
   return (
-    <Drawer open={open} onClose={onClose} title="Урилга хуваалцах">
-      <div className="flex flex-col gap-5">
-        {/* URL copy */}
-        <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium text-(--color-text)">Холбоос хуулах</p>
-          <div className="flex items-center gap-2 rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface-soft) px-3 py-2.5">
-            <span className="flex-1 truncate text-sm text-(--color-text-secondary)">{url}</span>
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="shrink-0 rounded-(--radius-ctrl) bg-(--color-accent) px-3 py-1 text-[13px] font-medium text-white hover:bg-(--color-accent-hover) transition-colors"
-            >
-              {copied ? "Хуулагдлаа ✓" : "Хуулах"}
-            </button>
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 py-12" style={{ backgroundColor: DEFAULT_THEME.palette.bg }}>
+      <div className="w-full max-w-sm rounded-2xl border border-(--color-border) bg-white p-8 text-center shadow-sm">
+        <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.32em] text-(--color-accent)">
+          ТАНЫГ УРЬЖ БАЙНА
+        </p>
+        <h1 className="mb-6 text-[24px] font-bold leading-tight tracking-tight text-(--color-text)" style={{ wordBreak: "keep-all" }}>
+          {title}
+        </h1>
+        {(dateFormatted || eventTime || eventLocation) && (
+          <div className="mb-6 flex flex-col gap-3 rounded-xl border border-(--color-border) bg-(--color-surface) p-4 text-left text-[14px]">
+            {dateFormatted && (
+              <p className="text-(--color-text)">
+                <span className="text-(--color-text-muted)">Огноо: </span>{dateFormatted}
+              </p>
+            )}
+            {eventTime && (
+              <p className="text-(--color-text)">
+                <span className="text-(--color-text-muted)">Цаг: </span>{eventTime}
+              </p>
+            )}
+            {eventLocation && (
+              <p className="text-(--color-text)">
+                <span className="text-(--color-text-muted)">Байршил: </span>{eventLocation}
+              </p>
+            )}
           </div>
-        </div>
-
-        {/* Channels */}
-        <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium text-(--color-text)">Хуваалцах</p>
-          <div className="flex gap-3">
-            {channels.map((ch) => (
-              <a
-                key={ch.label}
-                href={ch.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={ch.label}
-                className="flex h-11 w-11 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) text-(--color-text-secondary) hover:bg-(--color-surface-soft) transition-colors"
-              >
-                {ch.icon}
-              </a>
-            ))}
-          </div>
-        </div>
+        )}
+        <p className="text-[13px] text-(--color-text-muted) leading-relaxed">
+          Энэ урилга шинэчлэгдэж байна
+        </p>
       </div>
-    </Drawer>
+    </div>
   );
 }
 
-// ── Calendar button (inline, used inside card) ─────────────────────────────
+// ── Invite row shape from the new query ───────────────────────────────────
 
-// Calendar download link — hits the server ICS route
-function CalendarLink({ shareSlug, className }: { shareSlug: string; className: string }) {
-  return (
-    <a
-      href={`/api/ics/${shareSlug}`}
-      download
-      className={className}
-    >
-      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-        <rect x="2" y="3" width="12" height="11" rx="2"/><line x1="2" y1="6.5" x2="14" y2="6.5"/><line x1="5.5" y1="1.5" x2="5.5" y2="4.5"/><line x1="10.5" y1="1.5" x2="10.5" y2="4.5"/>
-      </svg>
-      Календарт нэмэх
-    </a>
-  );
-}
-
-// ── Public Invite Page ─────────────────────────────────────────────────────
-
-import type { InviteValues } from "@/types/template";
-
-interface InviteData {
+interface InviteRow {
   id: string;
   title: string;
-  shareSlug: string;
+  share_slug: string;
   status: string;
-  isPublic: boolean;
-  eventDate?: string;
-  eventTime?: string;
-  eventLocation?: string;
-  values: InviteValues;
+  is_public: boolean;
+  content: Record<string, unknown> | null;
+  event_date: string | null;
+  event_time: string | null;
+  event_location: string | null;
+  templates: {
+    id: string;
+    slug: string;
+    name: string;
+    category_id: string;
+    status: string;
+    sections: unknown;
+    theme: unknown;
+  } | null;
 }
 
-export function PublicInviteClient({ shareSlug }: { shareSlug: string }) {
-  const [invite, setInvite] = useState<InviteData | null | "loading">("loading");
-  const [template, setTemplate] = useState<InviteTemplate | null>(null);
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+// ── PublicInviteClient ────────────────────────────────────────────────────
 
-  const [rsvpOpen, setRsvpOpen] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
+export function PublicInviteClient({ shareSlug }: { shareSlug: string }) {
+  const [invite, setInvite] = useState<InviteRow | null | "loading">("loading");
 
   useEffect(() => {
     const supabase = createClient();
     (async () => {
-      // Fetch invite + template metadata (real columns only per docs/05)
-      const { data: inv } = await supabase
+      const { data } = await supabase
         .from("invites")
         .select(`
-          id, title, share_slug, status, is_public, event_date,
-          templates ( id, slug, name, type, status, category_id, canvas_width, canvas_height, bg_asset:assets!bg_asset_id ( id, bucket, path ) )
+          id, title, share_slug, status, is_public, content,
+          event_date, event_time, event_location,
+          templates ( id, slug, name, category_id, status, sections, theme )
         `)
         .eq("share_slug", shareSlug)
         .single();
 
-      if (!inv) { setInvite(null); return; }
+      if (!data) {
+        setInvite(null);
+        return;
+      }
 
-      const tplRaw = inv.templates;
+      // Normalise the templates join (Supabase may return array or object)
+      const tplRaw = data.templates;
       const tpl = Array.isArray(tplRaw)
-        ? (tplRaw[0] as Record<string, unknown> | undefined) ?? null
-        : (tplRaw as Record<string, unknown> | null);
+        ? (tplRaw[0] ?? null)
+        : (tplRaw ?? null);
 
-      // Parallel: field values + template fields
-      const [{ data: fieldValues }, { data: tplFields }] = await Promise.all([
-        supabase
-          .from("invite_values")
-          .select("field_key, value_text, value_asset_url")
-          .eq("invite_id", inv.id),
-        tpl
-          ? supabase
-              .from("template_fields")
-              .select("id, key, label, placeholder, type, required, x, y, width, height, font_family, font_size, font_weight, line_height, max_chars, color, align, border_radius, object_fit, visible, locked, layer_order")
-              .eq("template_id", tpl.id as string)
-              .order("layer_order", { ascending: true })
-          : Promise.resolve({ data: [] }),
-      ]);
-
-      const valMap: InviteValues = {};
-      for (const v of fieldValues ?? []) {
-        valMap[v.field_key] = {
-          text: v.value_text ?? undefined,
-          assetUrl: v.value_asset_url ?? undefined,
-        };
-      }
-
-      const invData: InviteData = {
-        id: inv.id,
-        title: inv.title,
-        shareSlug: inv.share_slug,
-        status: inv.status,
-        isPublic: inv.is_public,
-        eventDate: inv.event_date ?? undefined,
-        eventTime: valMap["event_time"]?.text ?? undefined,
-        eventLocation: valMap["location"]?.text ?? undefined,
-        values: valMap,
-      };
-      setInvite(invData);
-
-      if (tpl) {
-        const fields: InviteTemplate["fields"] = (tplFields ?? []).map((f) => ({
-          id: f.id,
-          key: f.key,
-          label: f.label,
-          placeholder: f.placeholder ?? undefined,
-          type: f.type as InviteTemplate["fields"][number]["type"],
-          required: f.required,
-          x: f.x, y: f.y, width: f.width, height: f.height,
-          fontFamily: f.font_family ?? undefined,
-          fontSize: f.font_size ?? undefined,
-          fontWeight: f.font_weight ?? undefined,
-          lineHeight: f.line_height ?? undefined,
-          maxChars: f.max_chars ?? undefined,
-          color: f.color ?? undefined,
-          align: f.align as InviteTemplate["fields"][number]["align"],
-          borderRadius: f.border_radius ?? undefined,
-          objectFit: f.object_fit as InviteTemplate["fields"][number]["objectFit"],
-          visible: f.visible,
-          locked: f.locked,
-          layerOrder: f.layer_order,
-        }));
-
-        const tplSlug = tpl.slug as string;
-        const bgAssetRaw = tpl.bg_asset as { bucket: string; path: string } | { bucket: string; path: string }[] | null | undefined;
-        const bgAsset = Array.isArray(bgAssetRaw) ? (bgAssetRaw[0] ?? null) : (bgAssetRaw ?? null);
-        const bgUrl = bgAsset
-          ? supabase.storage.from(bgAsset.bucket).getPublicUrl(bgAsset.path).data.publicUrl
-          : `/mock-templates/${tplSlug}.svg`;
-        setTemplate({
-          id: tpl.id as string,
-          slug: tplSlug,
-          name: tpl.name as string,
-          categoryId: (tpl.category_id as string) ?? "",
-          type: (tpl.type as "image" | "video") ?? "image",
-          status: (tpl.status as "draft" | "published") ?? "published",
-          canvasWidth: (tpl.canvas_width as number) ?? 1080,
-          canvasHeight: (tpl.canvas_height as number) ?? 1920,
-          thumbnailUrl: `/mock-templates/${tplSlug}.svg`,
-          backgroundUrl: bgUrl,
-          fields,
-        });
-      }
+      setInvite({ ...data, templates: tpl } as InviteRow);
     })();
   }, [shareSlug]);
 
-  // Generate QR for the share URL once the invite slug is known
-  useEffect(() => {
-    if (!invite || invite === "loading") return;
-    const url = `${APP_URL}/i/${invite.shareSlug}`;
-    import("qrcode").then((QRCode) => {
-      QRCode.toDataURL(url, { width: 160, margin: 1, color: { dark: "#1a1a2e", light: "#ffffff" } })
-        .then(setQrDataUrl)
-        .catch(() => undefined);
-    });
-  }, [invite]);
-
-  // Loading
+  // ── Loading ──────────────────────────────────────────────────────────────
   if (invite === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-(--color-bg)">
@@ -514,212 +157,74 @@ export function PublicInviteClient({ shareSlug }: { shareSlug: string }) {
     );
   }
 
-  // Not found
-  if (!invite || !template) {
+  // ── Not found ────────────────────────────────────────────────────────────
+  if (!invite) {
     return <InvalidLinkState />;
   }
 
-  // Archived
+  // ── Archived ─────────────────────────────────────────────────────────────
   if (invite.status === "archived") {
     return <InvalidLinkState archived />;
   }
 
-  // Not public
-  if (!invite.isPublic) {
+  // ── Not public ───────────────────────────────────────────────────────────
+  if (!invite.is_public) {
     return <InvalidLinkState />;
   }
 
-  const shareUrl = `${APP_URL}/i/${invite.shareSlug}`;
+  const tpl = invite.templates;
 
-  const eventDateFormatted = invite.eventDate
-    ? (() => {
-        const d = new Date(invite.eventDate);
-        return `${d.getFullYear()} оны ${d.getMonth() + 1}-р сарын ${d.getDate()}`;
-      })()
-    : null;
-
-  const detailRows: { icon: React.ReactNode; label: string; value: string; sub?: string }[] = [];
-  if (eventDateFormatted) {
-    detailRows.push({
-      label: "Огноо",
-      value: eventDateFormatted,
-      icon: (
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-          <rect x="2" y="3" width="12" height="11" rx="2"/><line x1="2" y1="6.5" x2="14" y2="6.5"/><line x1="5.5" y1="1.5" x2="5.5" y2="4.5"/><line x1="10.5" y1="1.5" x2="10.5" y2="4.5"/>
-        </svg>
-      ),
-    });
-  }
-  if (invite.eventTime) {
-    detailRows.push({
-      label: "Цаг",
-      value: invite.eventTime,
-      icon: (
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-          <circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2 1.5"/>
-        </svg>
-      ),
-    });
-  }
-  if (invite.eventLocation) {
-    detailRows.push({
-      label: "Байршил",
-      value: invite.eventLocation,
-      sub: undefined,
-      icon: (
-        <svg width="13" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-          <path d="M8 14.5s5-4.2 5-7.8A5 5 0 003 6.7c0 3.6 5 7.8 5 7.8z"/><circle cx="8" cy="6.8" r="1.8"/>
-        </svg>
-      ),
-    });
+  // ── Legacy fallback — template missing or has no sections ────────────────
+  const rawSections = tpl?.sections;
+  const sectionsArray = Array.isArray(rawSections) ? rawSections : [];
+  if (!tpl || sectionsArray.length === 0) {
+    return (
+      <LegacyFallback
+        title={invite.title}
+        eventDate={invite.event_date}
+        eventTime={invite.event_time}
+        eventLocation={invite.event_location}
+      />
+    );
   }
 
+  // ── Build SectionTemplate ─────────────────────────────────────────────────
+  const theme: InviteTheme =
+    tpl.theme && typeof tpl.theme === "object" && !Array.isArray(tpl.theme)
+      ? (tpl.theme as InviteTheme)
+      : DEFAULT_THEME;
+
+  const sections = (sectionsArray as SectionConfig[]).slice().sort((a, b) => a.order - b.order);
+
+  const sectionTemplate: SectionTemplate = {
+    id: tpl.id,
+    name: tpl.name,
+    slug: tpl.slug,
+    categoryId: tpl.category_id,
+    status: tpl.status as "draft" | "published",
+    theme,
+    sections,
+    thumbnailUrl: "",
+  };
+
+  const content = (invite.content ?? {}) as InviteSectionContent;
+
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#F1EEE9", fontFamily: "var(--font-family)" }}>
-      <div className="flex min-h-screen flex-col items-center justify-start px-3.5 py-5 md:justify-center md:py-12 md:px-0">
-        {/* ── Invite card ── */}
-        <div className="w-full max-w-md overflow-hidden rounded-(--radius-card-lg) border border-(--color-border) bg-white shadow-lg">
-
-          {/* ── Template artwork via InviteRenderer (D2: must use actual template) ── */}
-          <InviteRenderer
-            template={template}
-            values={invite.values}
-            mode="public"
-          />
-
-          {/* Card body — detail rows + actions below the rendered invite */}
-          <div className="px-6 pb-6 pt-5 text-center">
-            {/* Eyebrow */}
-            <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.32em] text-(--color-accent)">
-              ТАНЫГ УРЬЖ БАЙНА
-            </p>
-
-            {/* Title */}
-            <h1 className="mb-1.5 text-[26px] font-bold leading-[1.2] tracking-tight text-(--color-text)">
-              {invite.title}
-            </h1>
-
-            {/* Host */}
-            <p className="mb-6 text-[14px] text-(--color-text-secondary)">
-              {(invite.values.host_name?.text) ?? ""}
-            </p>
-
-            {/* Detail rows */}
-            {detailRows.length > 0 && (
-              <div className="mb-4 flex flex-col gap-3.5 rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) p-4 text-left">
-                {detailRows.map((row, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-(--color-accent-soft) text-(--color-accent)">
-                      {row.icon}
-                    </div>
-                    <div>
-                      <p className="mb-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-(--color-text-muted)">
-                        {row.label}
-                      </p>
-                      <p className="text-[14px] font-medium text-(--color-text)">{row.value}</p>
-                      {row.sub && <p className="mt-0.5 text-[12px] text-(--color-text-muted)">{row.sub}</p>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Message */}
-            <p className="mb-5 px-2 text-[14px] leading-relaxed text-(--color-text-secondary)">
-              Та бүхнийг хүндэт зочноор урьж байна. Хүрэлцэн ирж, баярын баяр хөөрийг бидэнтэй хуваалцана уу.
-            </p>
-
-            {/* QR code — links to this invite page */}
-            {qrDataUrl && (
-              <div className="mb-5 flex flex-col items-center gap-2">
-                <div className="rounded-xl border border-(--color-border) bg-white p-3 shadow-sm">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={qrDataUrl} alt="QR код" width={120} height={120} />
-                </div>
-                <p className="text-[11px] text-(--color-text-muted)">
-                  Урилгын QR код — скан хийж нээнэ үү
-                </p>
-              </div>
-            )}
-
-            {/* Action buttons */}
-            <div className="flex flex-col gap-2">
-              {/* RSVP — primary (bg-primary dark) */}
-              <button
-                type="button"
-                onClick={() => setRsvpOpen(true)}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border-0 py-3 text-[14px] font-medium text-white transition-colors"
-                style={{ backgroundColor: "var(--color-primary)" }}
-              >
-                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M2 4.5h12v8H2z"/><path d="M2 5l6 4 6-4"/>
-                </svg>
-                Ирэхээ мэдэгдэх
-              </button>
-
-              {/* Map + Calendar */}
-              <div className="grid grid-cols-2 gap-2">
-                {invite.eventLocation && (
-                  <a
-                    href={`https://maps.google.com/?q=${encodeURIComponent(invite.eventLocation)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 rounded-xl border border-(--color-border) bg-(--color-surface) py-3 text-[14px] font-medium text-(--color-text) transition-colors hover:bg-(--color-surface-soft)"
-                  >
-                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M8 14.5s5-4.2 5-7.8A5 5 0 003 6.7c0 3.6 5 7.8 5 7.8z"/><circle cx="8" cy="6.8" r="1.8"/>
-                    </svg>
-                    Газрын зураг
-                  </a>
-                )}
-                {eventDateFormatted && (
-                  <CalendarLink
-                    shareSlug={invite.shareSlug}
-                    className="flex items-center justify-center gap-2 rounded-xl border border-(--color-border) bg-(--color-surface) py-3 text-[14px] font-medium text-(--color-text) transition-colors hover:bg-(--color-surface-soft)"
-                  />
-                )}
-              </div>
-
-              {/* Share */}
-              <button
-                type="button"
-                onClick={() => setShareOpen(true)}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-(--color-border) bg-(--color-surface) py-3 text-[14px] font-medium text-(--color-text) transition-colors hover:bg-(--color-surface-soft)"
-              >
-                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <circle cx="12" cy="3.5" r="1.8"/><circle cx="4" cy="8" r="1.8"/><circle cx="12" cy="12.5" r="1.8"/>
-                  <line x1="5.6" y1="7.1" x2="10.4" y2="4.4"/><line x1="5.6" y1="8.9" x2="10.4" y2="11.6"/>
-                </svg>
-                Хуваалцах
-              </button>
-            </div>
-
-            {/* invites.mn branding */}
-            <div className="mt-3 flex items-center justify-center gap-1.5 pt-2 text-[10px] text-(--color-text-muted)">
-              <div className="flex h-3 w-3 items-center justify-center rounded-[3px] bg-(--color-accent)">
-                <span className="text-[7px] font-bold text-white">i</span>
-              </div>
-              invites.mn дээр үүсгэв
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── RSVP sheet ── */}
-      <RSVPBottomSheet
-        open={rsvpOpen}
-        onClose={() => setRsvpOpen(false)}
+    <InvitationShell
+      template={sectionTemplate}
+      content={content}
+      showOpening
+      openingTitle={invite.title}
+    >
+      <SectionRenderer
+        template={sectionTemplate}
+        content={content}
+        mode="public"
         inviteId={invite.id}
+        shareSlug={invite.share_slug}
         inviteTitle={invite.title}
       />
-
-      {/* ── Share sheet ── */}
-      <ShareSheet
-        open={shareOpen}
-        onClose={() => setShareOpen(false)}
-        url={shareUrl}
-        title={invite.title}
-      />
-    </div>
+    </InvitationShell>
   );
 }

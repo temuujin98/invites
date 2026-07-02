@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { setTemplateStatus } from "@/app/admin/templates/actions";
@@ -57,6 +57,10 @@ function EditorShellInner({
   const [saving, setSaving] = useState(false);
   const [togglingStatus, setTogglingStatus] = useState(false);
 
+  // Tracks the last-committed slug so the uniqueness check stays correct across
+  // multiple saves in one session, even before router.replace re-mounts (H1).
+  const committedSlugRef = useRef(initialTemplate.slug);
+
   const selectedSection = template.sections.find((s) => s.id === selectedSectionId) ?? null;
 
   // Switch right tab to section settings when a section is selected.
@@ -109,7 +113,7 @@ function EditorShellInner({
           toast.show(`Slug "${slug}" аль хэдийн ашиглагдаж байна`, "error");
           return false;
         }
-      } else if (slug !== initialTemplate.slug) {
+      } else if (slug !== committedSlugRef.current) {
         const { data: existing } = await supabase
           .from("templates")
           .select("id")
@@ -153,6 +157,7 @@ function EditorShellInner({
         if (tplErr) throw tplErr;
       }
 
+      committedSlugRef.current = slug;
       markSaved();
       if (isNew) router.replace(`/admin/templates/${savedId}/edit`);
       return true;
@@ -205,8 +210,12 @@ function EditorShellInner({
   }, [isDirty, router]);
 
   function handleUnsavedConfirm() {
-    markSaved();
-    if (pendingNavHref) router.push(pendingNavHref);
+    // Only discard + navigate when there's a real destination — avoids clearing
+    // dirty state without navigating on a dialog race (H4).
+    if (pendingNavHref) {
+      markSaved();
+      router.push(pendingNavHref);
+    }
   }
 
   // Sample content so the preview isn't empty (uses section registry placeholders).

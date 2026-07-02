@@ -119,13 +119,10 @@ export function ThemePanel({ theme, onChange }: Props) {
   return (
     <div
       style={{
-        width: 240,
-        flexShrink: 0,
+        width: "100%",
         background: "var(--color-surface)",
-        borderRight: "1px solid var(--color-border)",
         display: "flex",
         flexDirection: "column",
-        overflowY: "auto",
         fontSize: 12,
       }}
     >
