@@ -134,12 +134,6 @@ export default async function TemplateDetailPage({ params }: Props) {
             >
               Энэ загвараар урилга үүсгэх
             </Link>
-            <Link
-              href={`/templates/${template.slug}/preview`}
-              className="inline-flex h-11 items-center justify-center rounded-(--radius-ctrl) border border-(--color-border) bg-(--color-surface) px-5 text-[14px] font-medium text-(--color-text-secondary) transition-colors hover:bg-(--color-surface-soft)"
-            >
-              Урьдчилан үзэх
-            </Link>
           </div>
           <Link
             href="/templates"
