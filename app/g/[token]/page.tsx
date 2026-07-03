@@ -63,7 +63,15 @@ export default async function GuestInvitePage({ params }: Props) {
   const resolved = await resolve(token);
 
   // Re-implement the public gates that RLS would enforce for the anon path.
-  if (!resolved || !resolved.invite.is_public || resolved.invite.status !== "published") {
+  // Archived invites get the dedicated "archived" copy; draft/private/not-found
+  // fall through to the generic invalid state.
+  if (!resolved || !resolved.invite.is_public) {
+    return <GuestInviteClient invite={null} />;
+  }
+  if (resolved.invite.status === "archived") {
+    return <GuestInviteClient invite={null} archived />;
+  }
+  if (resolved.invite.status !== "published") {
     return <GuestInviteClient invite={null} />;
   }
 

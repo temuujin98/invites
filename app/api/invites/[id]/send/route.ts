@@ -10,6 +10,18 @@ import { formatDate } from "@/lib/format";
 const BATCH_CAP = 100;
 const SEND_DELAY_MS = 200;
 
+// Per-(user, invite) cooldown so an owner can't spam sends / run up Resend cost.
+const COOLDOWN_MS = 30 * 1000;
+const lastSend = new Map<string, number>();
+
+function onCooldown(key: string): boolean {
+  const now = Date.now();
+  const last = lastSend.get(key);
+  if (last && now - last < COOLDOWN_MS) return true;
+  lastSend.set(key, now);
+  return false;
+}
+
 function json(body: Record<string, unknown>, status: number) {
   return NextResponse.json(body, { status });
 }
@@ -32,6 +44,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return json({ ok: false, code: "UNAUTHORIZED", message: "Нэвтрэх шаардлагатай" }, 401);
+
+  // Rate limit: one send batch per (user, invite) per cooldown window.
+  if (onCooldown(`${user.id}:${inviteId}`)) {
+    return json(
+      { ok: false, code: "RATE_LIMITED", message: "Түр хүлээгээд дахин илгээнэ үү." },
+      429,
+    );
+  }
 
   // 2. Owner + published (owner RLS via session client)
   const { data: invite } = await supabase

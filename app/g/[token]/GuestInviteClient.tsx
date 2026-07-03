@@ -8,9 +8,11 @@ import { PublicInviteView, type PublicInviteRow, type GuestContext } from "@/com
 export function GuestInviteClient({
   invite,
   guest,
+  archived,
 }: {
   invite: PublicInviteRow | null;
   guest?: GuestContext;
+  archived?: boolean;
 }) {
-  return <PublicInviteView invite={invite} guest={guest} />;
+  return <PublicInviteView invite={invite} guest={guest} archived={archived} />;
 }

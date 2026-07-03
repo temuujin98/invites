@@ -1,3 +1,4 @@
+import "server-only";
 import { createClient } from "@supabase/supabase-js";
 
 // Lazy factory — evaluated at call time (inside the route handler), not at

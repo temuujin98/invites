@@ -42,6 +42,9 @@ export interface GuestContext {
 interface PublicInviteViewProps {
   invite: PublicInviteRow | null | "loading";
   guest?: GuestContext;
+  // When the server already determined the invite is archived but passes null
+  // (e.g. /g/[token] safe projection), show the archived copy.
+  archived?: boolean;
 }
 
 // ── Invalid / Archived states ─────────────────────────────────────────────
@@ -124,7 +127,7 @@ function LegacyFallback({
 }
 
 // ── The shared render tree (data-agnostic) ─────────────────────────────────
-export function PublicInviteView({ invite, guest }: PublicInviteViewProps) {
+export function PublicInviteView({ invite, guest, archived }: PublicInviteViewProps) {
   if (invite === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-(--color-bg)">
@@ -133,7 +136,7 @@ export function PublicInviteView({ invite, guest }: PublicInviteViewProps) {
     );
   }
 
-  if (!invite) return <InvalidLinkState />;
+  if (!invite) return <InvalidLinkState archived={archived} />;
   if (invite.status === "archived") return <InvalidLinkState archived />;
   if (!invite.is_public) return <InvalidLinkState />;
 

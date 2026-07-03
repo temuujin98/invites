@@ -145,18 +145,26 @@ export async function importGuests(
     if (!parsed.success) throw new Error("INVALID");
 
     const db = getAdminClient();
-    const insertRows = parsed.data.rows.map((r) => ({
-      invite_id: inviteId,
-      name: r.name,
-      email: r.email ?? null,
-      phone: r.phone ?? null,
-      notes: r.notes ?? null,
-      token: generateGuestToken(),
-    }));
-    const { data, error } = await db.from("guests").insert(insertRows).select("id");
-    if (error) throw error;
-    revalidatePath(`/invites/${inviteId}/guests`);
-    return { ok: true, data: { inserted: data?.length ?? 0 } };
+    const buildRows = () =>
+      parsed.data.rows.map((r) => ({
+        invite_id: inviteId,
+        name: r.name,
+        email: r.email ?? null,
+        phone: r.phone ?? null,
+        notes: r.notes ?? null,
+        token: generateGuestToken(),
+      }));
+
+    // Retry the whole batch once with fresh tokens on a unique collision (23505).
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const { data, error } = await db.from("guests").insert(buildRows()).select("id");
+      if (!error) {
+        revalidatePath(`/invites/${inviteId}/guests`);
+        return { ok: true, data: { inserted: data?.length ?? 0 } };
+      }
+      if (error.code !== "23505") throw error;
+    }
+    throw new Error("SERVER_ERROR");
   } catch (err) {
     return errResult(err);
   }
