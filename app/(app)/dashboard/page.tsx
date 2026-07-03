@@ -138,7 +138,6 @@ function rowToInvite(row: InviteRow): Invite {
     shareSlug: row.share_slug ?? "",
     status: row.status,
     isPublic: row.is_public,
-    values: {},
     eventDate: row.event_date ?? undefined,
     rsvpCount: row.rsvps?.[0]?.count ?? 0,
     viewCount: 0,

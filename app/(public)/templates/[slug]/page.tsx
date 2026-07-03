@@ -1,30 +1,23 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { TemplateCard } from "@/components/invite/TemplateCard";
-import { TemplateDetailPreview } from "@/components/public/TemplateDetailPreview";
-import { fetchPublishedTemplateBySlug, fetchPublishedTemplates, fetchCategories } from "@/lib/db/templates";
+import { TemplateSectionPreview } from "@/components/public/TemplateSectionPreview";
+import {
+  fetchPublishedSectionTemplateBySlug,
+  fetchTemplateSummaries,
+  fetchCategories,
+} from "@/lib/db/templates";
+import { SECTION_REGISTRY } from "@/lib/sections/registry";
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
-// Field type labels in Mongolian
-const FIELD_TYPE_LABELS: Record<string, string> = {
-  text: "Текст",
-  date: "Огноо",
-  time: "Цаг",
-  location: "Байршил",
-  image: "Зураг",
-  qr: "QR код",
-  rsvp: "RSVP товч",
-  custom: "Тусгай",
-};
-
 export default async function TemplateDetailPage({ params }: Props) {
   const { slug } = await params;
 
   const [template, categories] = await Promise.all([
-    fetchPublishedTemplateBySlug(slug),
+    fetchPublishedSectionTemplateBySlug(slug),
     fetchCategories(),
   ]);
 
@@ -35,18 +28,15 @@ export default async function TemplateDetailPage({ params }: Props) {
   const category = categories.find((c) => c.id === template.categoryId);
 
   // Similar templates: same category, excluding current, up to 3
-  const allTemplates = await fetchPublishedTemplates();
+  const allTemplates = await fetchTemplateSummaries();
   const similar = allTemplates
     .filter((t) => t.id !== template.id && t.categoryId === template.categoryId)
     .slice(0, 3);
 
-  // Unique field types in this template (skip qr, rsvp for the chips — show useful input fields)
-  const inputFieldTypes = [
-    ...new Set(
-      template.fields
-        .filter((f) => f.type !== "qr" && f.type !== "rsvp" && f.visible)
-        .map((f) => f.type)
-    ),
+  // Enabled sections in this template → Mongolian labels from the registry.
+  const enabledSections = template.sections.filter((s) => s.enabled);
+  const sectionLabels = [
+    ...new Set(enabledSections.map((s) => SECTION_REGISTRY[s.type].label)),
   ];
 
   return (
@@ -76,7 +66,7 @@ export default async function TemplateDetailPage({ params }: Props) {
 
         {/* ── Left: preview ─────────────────────────────── */}
         <div>
-          <TemplateDetailPreview template={template} />
+          <TemplateSectionPreview template={template} />
         </div>
 
         {/* ── Right: info + CTA ──────────────────────────── */}
@@ -90,7 +80,7 @@ export default async function TemplateDetailPage({ params }: Props) {
               </span>
             )}
             <span className="inline-flex items-center rounded-md bg-(--color-surface-soft) border border-(--color-border) px-2.5 py-1 text-xs text-(--color-text-secondary)">
-              {template.type === "image" ? "Зургийн урилга" : "Видео урилга"}
+              Гүйлгэдэг урилга
             </span>
           </div>
 
@@ -99,31 +89,29 @@ export default async function TemplateDetailPage({ params }: Props) {
             {template.name}
           </h1>
 
-          {/* Supported fields */}
+          {/* Included sections */}
           <div>
             <p className="mb-3 text-xs font-medium text-(--color-text-secondary)">
-              Орлуулах боломжтой талбарууд
+              Багтсан хэсгүүд
             </p>
             <div className="flex flex-wrap gap-2">
-              {inputFieldTypes.map((type) => (
+              {sectionLabels.map((label) => (
                 <span
-                  key={type}
+                  key={label}
                   className="inline-flex items-center gap-1.5 rounded-full border border-(--color-border) bg-(--color-surface-soft) px-2.5 py-1 text-[11px] text-(--color-text-secondary)"
                 >
                   <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--color-success)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <polyline points="2,5 4.5,7.5 8,3"/>
                   </svg>
-                  {FIELD_TYPE_LABELS[type] ?? type}
+                  {label}
                 </span>
               ))}
             </div>
           </div>
 
-          {/* Canvas info */}
+          {/* Section count */}
           <p className="text-xs text-(--color-text-muted)">
-            Хэмжээ: {template.canvasWidth} × {template.canvasHeight}px
-            {" · "}
-            {template.fields.filter((f) => f.visible).length} талбар
+            {enabledSections.length} хэсэгтэй гүйлгэдэг урилга
           </p>
 
           {/* CTAs */}

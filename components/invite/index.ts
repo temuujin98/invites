@@ -1,5 +1,3 @@
-export { InviteRenderer } from "./InviteRenderer";
-export { GeneratedInviteForm } from "./GeneratedInviteForm";
 export { TemplateCard } from "./TemplateCard";
 export { EventTypeCard } from "./EventTypeCard";
 export { PhonePreviewFrame } from "./PhonePreviewFrame";

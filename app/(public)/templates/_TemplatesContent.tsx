@@ -11,7 +11,8 @@ import { FilterSelect } from "@/components/ui/FilterSelect";
 import { MultiSelect } from "@/components/ui/MultiSelect";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Pagination } from "@/components/ui/Pagination";
-import type { InviteTemplate, TemplateCategory } from "@/types/template";
+import type { TemplateSummary } from "@/types/section";
+import type { TemplateCategory } from "@/types/template";
 
 const SORT_OPTIONS = [
   { value: "default", label: "Шинэ эхэндээ" },
@@ -22,7 +23,7 @@ const SORT_OPTIONS = [
 const PAGE_SIZE = 8;
 
 interface Props {
-  templates: InviteTemplate[];
+  templates: TemplateSummary[];
   categories: TemplateCategory[];
 }
 

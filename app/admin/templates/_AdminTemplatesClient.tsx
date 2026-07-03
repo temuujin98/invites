@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import type { InviteTemplate, TemplateCategory } from "@/types/template";
+import type { TemplateSummary } from "@/types/section";
+import type { TemplateCategory } from "@/types/template";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { FilterTabs } from "@/components/shared/FilterTabs";
@@ -77,11 +78,11 @@ function TypeBadge({ type }: { type: "image" | "video" }) {
 // ── Grid card ──────────────────────────────────────────────────────────────
 
 interface TemplateCardActionsProps {
-  template: InviteTemplate;
+  template: TemplateSummary;
   categories: TemplateCategory[];
-  onDuplicate: (t: InviteTemplate) => void;
-  onTogglePublish: (t: InviteTemplate) => void;
-  onDelete: (t: InviteTemplate) => void;
+  onDuplicate: (t: TemplateSummary) => void;
+  onTogglePublish: (t: TemplateSummary) => void;
+  onDelete: (t: TemplateSummary) => void;
 }
 
 function TemplateGridCard({ template, categories, onDuplicate, onTogglePublish, onDelete }: TemplateCardActionsProps) {
@@ -244,7 +245,7 @@ function GridSkeleton() {
 type FilterStatus = "all" | "published" | "draft";
 type FilterType = "all" | "image" | "video";
 
-export function AdminTemplatesClient({ initialTemplates, categories }: { initialTemplates: InviteTemplate[]; categories: TemplateCategory[] }) {
+export function AdminTemplatesClient({ initialTemplates, categories }: { initialTemplates: TemplateSummary[]; categories: TemplateCategory[] }) {
   const [templates, setTemplates] = useState(initialTemplates);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
@@ -252,7 +253,7 @@ export function AdminTemplatesClient({ initialTemplates, categories }: { initial
   const [filterCategory, setFilterCategory] = useState("all");
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
   const [loading] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<InviteTemplate | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<TemplateSummary | null>(null);
 
   const filtered = useMemo(() => {
     return templates.filter((t) => {
@@ -264,8 +265,8 @@ export function AdminTemplatesClient({ initialTemplates, categories }: { initial
     });
   }, [templates, search, filterStatus, filterType, filterCategory]);
 
-  function handleDuplicate(t: InviteTemplate) {
-    const copy: InviteTemplate = {
+  function handleDuplicate(t: TemplateSummary) {
+    const copy: TemplateSummary = {
       ...t,
       id: `${t.id}-copy-${Date.now()}`,
       name: `${t.name} (хуулбар)`,
@@ -275,7 +276,7 @@ export function AdminTemplatesClient({ initialTemplates, categories }: { initial
     setTemplates((prev) => [copy, ...prev]);
   }
 
-  async function handleTogglePublish(t: InviteTemplate) {
+  async function handleTogglePublish(t: TemplateSummary) {
     const newStatus = t.status === "published" ? "draft" : "published";
     // Optimistic update
     setTemplates((prev) =>
@@ -291,7 +292,7 @@ export function AdminTemplatesClient({ initialTemplates, categories }: { initial
     }
   }
 
-  async function handleDelete(t: InviteTemplate) {
+  async function handleDelete(t: TemplateSummary) {
     // Optimistic update
     setTemplates((prev) => prev.filter((x) => x.id !== t.id));
     const result = await deleteTemplate(t.id);

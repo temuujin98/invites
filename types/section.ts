@@ -194,3 +194,14 @@ export interface SectionTemplate {
   // Editor-only: set after a thumbnail upload so save can link the asset row.
   pendingThumbAssetId?: string | null;
 }
+
+// Lightweight template shape for cards / listings — no sections/theme/canvas.
+export interface TemplateSummary {
+  id: string;
+  name: string;
+  slug: string;
+  categoryId: string;
+  type: "image" | "video";
+  status: "draft" | "published";
+  thumbnailUrl: string;
+}

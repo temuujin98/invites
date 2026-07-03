@@ -1,11 +1,10 @@
 import { Suspense } from "react";
-import { fetchPublishedTemplates, fetchCategories } from "@/lib/db/templates";
+import { fetchTemplateSummaries, fetchCategories } from "@/lib/db/templates";
 import { TemplatesContent } from "./_TemplatesContent";
-import type { InviteTemplate, TemplateCategory } from "@/types/template";
 
 async function TemplatesLoader() {
   const [templates, categories] = await Promise.all([
-    fetchPublishedTemplates(),
+    fetchTemplateSummaries(),
     fetchCategories(),
   ]);
   return <TemplatesContent templates={templates} categories={categories} />;

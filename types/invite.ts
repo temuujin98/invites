@@ -11,7 +11,6 @@ export interface Invite {
   shareSlug: string;
   status: InviteStatus;
   isPublic: boolean;
-  values: import("@/types/template").InviteValues;
   eventDate?: string;         // ISO string
   eventTime?: string;         // "HH:MM"
   eventLocation?: string;

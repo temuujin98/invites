@@ -3,7 +3,7 @@ import { TemplateCard } from "@/components/invite/TemplateCard";
 import { LandingHero } from "@/components/public/LandingHero";
 import { ShareQrVisual } from "@/components/public/ShareQrVisual";
 import { createClient } from "@/lib/supabase/server";
-import { fetchPublishedTemplates, fetchCategories } from "@/lib/db/templates";
+import { fetchTemplateSummaries, fetchCategories } from "@/lib/db/templates";
 
 /* ── How-it-works ───────────────────────────────────────────────────────── */
 const HOW_IT_WORKS = [
@@ -142,7 +142,7 @@ export default async function LandingPage() {
   const supabase = await createClient();
   const [{ data: { user } }, publishedTemplates, categories] = await Promise.all([
     supabase.auth.getUser(),
-    fetchPublishedTemplates(),
+    fetchTemplateSummaries(),
     fetchCategories(),
   ]);
   const featuredTemplates = publishedTemplates.slice(0, 6);

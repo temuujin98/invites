@@ -9,10 +9,11 @@ export async function GET(
   const { slug } = await params;
   const supabase = await createClient();
 
-  // Fetch invite — public RLS allows published + archived + is_public
+  // Fetch invite — public RLS allows published + archived + is_public.
+  // event_time / event_location are denormalized columns (section model).
   const { data: invite, error } = await supabase
     .from("invites")
-    .select("id, title, status, event_date, share_slug, is_public")
+    .select("id, title, status, event_date, event_time, event_location, share_slug, is_public")
     .eq("share_slug", slug)
     .single();
 
@@ -26,19 +27,8 @@ export async function GET(
     return new NextResponse("Урилга олдсонгүй", { status: 404 });
   }
 
-  // Fetch event_time and location from invite_values
-  const { data: values } = await supabase
-    .from("invite_values")
-    .select("field_key, value_text")
-    .eq("invite_id", invite.id)
-    .in("field_key", ["event_time", "location"]);
-
-  const valMap = Object.fromEntries(
-    (values ?? []).map((v: { field_key: string; value_text: string | null }) => [v.field_key, v.value_text ?? ""]),
-  );
-
-  const eventTime: string = valMap["event_time"] ?? "00:00";
-  const location: string = valMap["location"] ?? "";
+  const eventTime: string = invite.event_time ?? "00:00";
+  const location: string = invite.event_location ?? "";
 
   // Build DTSTART / DTEND
   let dtStart = "DTSTART;VALUE=DATE:" + formatICSDate(invite.event_date);

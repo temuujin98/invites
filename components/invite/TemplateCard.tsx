@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import type { InviteTemplate, TemplateCategory } from "@/types/template";
+import type { TemplateSummary } from "@/types/section";
+import type { TemplateCategory } from "@/types/template";
 
 interface TemplateCardProps {
-  template: InviteTemplate;
+  template: TemplateSummary;
   category?: TemplateCategory;
   href?: string;
 }

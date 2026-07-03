@@ -1,10 +1,4 @@
-export type {
-  FieldType,
-  TemplateFieldConfig,
-  InviteTemplate,
-  InviteValues,
-  TemplateCategory,
-} from "@/types/template";
+export type { TemplateCategory } from "@/types/template";
 
 export type {
   InviteStatus,
