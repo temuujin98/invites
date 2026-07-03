@@ -69,6 +69,38 @@ Public slug routing real, QR generation, .ics route, OG metadata, copy-link UX, 
 
 Video background support (poster, autoplay muted), rendered image/video export pipeline шийдэл (satori vs server canvas — энэ phase дээр судалж шийднэ).
 
+### Шийдвэр (2026.07.03) — export pipeline
+
+Section-pivot-ийн дараа урилга нь нэг poster биш, олон section-тэй гүйдэг site
+болсон. Тиймээс export = live site-ийн pixel-faithful screenshot биш,
+**хуваалцахад зориулсан summary card** (Facebook/Messenger/Instagram story-д
+линк unfurl хийхэд гарах зураг).
+
+**Сонгосон: satori (`next/og` / `ImageResponse`)** — server canvas БИШ,
+headless browser БИШ. Учир нь:
+- Deliverable нь зорилготой summary card тул satori-гийн flexbox-only хязгаар
+  асуудалгүй (одоогийн Tailwind section-уудыг дахин ашиглахгүй — тусдаа
+  export template бичсэн).
+- Vercel serverless-ийн bundle/timeout хязгаарт infra нэмэлтгүй багтдаг цорын
+  ганц сонголт. `@napi-rs/canvas` native binary асуудалтай, Chromium ~50MB
+  limit-ийг дүүргэдэг.
+- Cyrillic Roboto-г Google Fonts CSS API-аас legacy UA-аар TTF болгож ачаална
+  (satori woff2 уншдаггүй).
+
+**Хэрэгжсэн:** `lib/og/*` (fonts, InviteOgCard, meta), `app/api/og/[shareSlug]`
+render route (rendered-invites bucket-д service-role upload + `rendered_image_url`
+cache), `/i` `/g` dynamic OG meta, public "Зураг татах" товч. Одоо байгаа
+`invites.rendered_image_url` багана + `rendered-invites` bucket ашигласан —
+шинэ migration хэрэггүй.
+
+**Хойшлуулсан (тусдаа фаз — тус бүр өөр infra шаардана):**
+- Бүтэн page long screenshot — headless Chromium, үнэ цэнэ бага.
+- Animated video export (share clip) — Vercel serverless дээр боломжгүй
+  (Remotion doc баталсан). Remotion Lambda эсвэл Vercel Sandbox дээр.
+- Video *background* (cover section-д autoplay muted video) — front-end
+  feature, export-тэй холбоогүй; хийхэд `user-uploads` bucket-д mp4 нэмэх
+  migration шаардана.
+
 ---
 
 ### Phase хоорондын дүрэм
