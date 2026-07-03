@@ -21,6 +21,8 @@ export interface SectionComponentProps {
   inviteId?: string;
   shareSlug?: string;
   inviteTitle?: string;
+  guestToken?: string;
+  guestName?: string;
 }
 
 // Section type → component. Each component narrows its own config via SectionProps<T>,

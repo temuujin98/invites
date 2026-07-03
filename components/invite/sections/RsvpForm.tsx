@@ -16,13 +16,15 @@ const CHOICES: { value: RSVPChoice; label: string }[] = [
 
 interface RsvpFormProps {
   inviteId?: string;          // present only in public mode
+  guestToken?: string;        // present only on /g/[token]
+  guestName?: string;         // prefill from the guest record
   allowGuestCount: boolean;
   allowNote: boolean;
   disabled?: boolean;         // editor/create preview → inert
 }
 
-export function RsvpForm({ inviteId, allowGuestCount, allowNote, disabled }: RsvpFormProps) {
-  const [name, setName] = useState("");
+export function RsvpForm({ inviteId, guestToken, guestName, allowGuestCount, allowNote, disabled }: RsvpFormProps) {
+  const [name, setName] = useState(guestName ?? "");
   const [nameError, setNameError] = useState(false);
   const [choice, setChoice] = useState<RSVPChoice>("accepted");
   const [partySize, setPartySize] = useState(1);
@@ -31,7 +33,8 @@ export function RsvpForm({ inviteId, allowGuestCount, allowNote, disabled }: Rsv
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  const inert = disabled || !inviteId;
+  // A tokened guest link can submit even without inviteId (API resolves it).
+  const inert = disabled || (!inviteId && !guestToken);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,6 +52,7 @@ export function RsvpForm({ inviteId, allowGuestCount, allowNote, disabled }: Rsv
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           inviteId,
+          guestToken,
           name: name.trim(),
           attending: choice,
           guestCount: choice === "accepted" && allowGuestCount ? partySize : 1,

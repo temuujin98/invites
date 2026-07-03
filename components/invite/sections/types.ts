@@ -21,4 +21,7 @@ export interface SectionProps<T extends SectionType> {
   inviteId?: string;
   shareSlug?: string;
   inviteTitle?: string;
+  // Per-guest context (from /g/[token]).
+  guestToken?: string;
+  guestName?: string;
 }

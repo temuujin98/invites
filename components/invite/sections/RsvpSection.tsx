@@ -5,7 +5,7 @@ import { SectionWrap, SectionHeading, resolveText } from "./shared";
 import { RsvpForm } from "./RsvpForm";
 
 // RSVP — a dedicated in-page section (replaces the old canvas RSVP button).
-export function RsvpSection({ config, content, theme, mode, inviteId }: SectionProps<"rsvp">) {
+export function RsvpSection({ config, content, theme, mode, inviteId, guestToken, guestName }: SectionProps<"rsvp">) {
   const heading = resolveText(content, "heading", "Ирэхээ мэдэгдэнэ үү", mode);
   const message = resolveText(content, "message", "", mode);
 
@@ -26,6 +26,8 @@ export function RsvpSection({ config, content, theme, mode, inviteId }: SectionP
       >
         <RsvpForm
           inviteId={inviteId}
+          guestToken={guestToken}
+          guestName={guestName}
           allowGuestCount={config.allowGuestCount}
           allowNote={config.allowNote}
           disabled={mode !== "public"}

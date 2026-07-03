@@ -19,13 +19,18 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
-const RsvpSchema = z.object({
-  inviteId: z.string().uuid(),
-  name: z.string().min(1).max(100).trim(),
-  attending: z.enum(["accepted", "declined", "maybe"]),
-  guestCount: z.number().int().min(1).max(20).optional().default(1),
-  note: z.string().max(500).optional(),
-});
+const RsvpSchema = z
+  .object({
+    inviteId: z.string().uuid().optional(),
+    guestToken: z.string().min(24).max(64).optional(),
+    name: z.string().min(1).max(100).trim(),
+    attending: z.enum(["accepted", "declined", "maybe"]),
+    guestCount: z.number().int().min(1).max(20).optional().default(1),
+    note: z.string().max(500).optional(),
+  })
+  .refine((d) => d.inviteId || d.guestToken, {
+    message: "inviteId эсвэл guestToken шаардлагатай",
+  });
 
 function ip(req: NextRequest): string {
   return (
@@ -64,7 +69,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { inviteId, name, attending, guestCount, note } = parsed.data;
+  const { inviteId: clientInviteId, guestToken, name, attending, guestCount, note } = parsed.data;
 
   // Instantiate admin client — throws if env vars are missing or not a real JWT
   let admin: ReturnType<typeof getAdminClient>;
@@ -75,6 +80,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { ok: false, code: "SERVER_CONFIG_ERROR", message: "Серверийн тохиргооны алдаа." },
       { status: 500 },
+    );
+  }
+
+  // When a guest token is present, derive the invite from the token — never
+  // trust the client-supplied inviteId to pair with a guest.
+  let guestId: string | null = null;
+  let inviteId = clientInviteId;
+  if (guestToken) {
+    const { data: guest } = await admin
+      .from("guests")
+      .select("id, invite_id")
+      .eq("token", guestToken)
+      .maybeSingle();
+    if (!guest) {
+      return NextResponse.json(
+        { ok: false, code: "NOT_FOUND", message: "Зочны холбоос буруу байна." },
+        { status: 404 },
+      );
+    }
+    guestId = guest.id as string;
+    inviteId = guest.invite_id as string;
+  }
+
+  if (!inviteId) {
+    return NextResponse.json(
+      { ok: false, code: "INVALID_PAYLOAD", message: "Урилга тодорхойгүй." },
+      { status: 400 },
     );
   }
 
@@ -122,6 +154,7 @@ export async function POST(req: NextRequest) {
     .from("rsvps")
     .insert({
       invite_id: inviteId,
+      guest_id: guestId,
       name,
       attending,
       guest_count: attending === "accepted" ? guestCount : 1,
@@ -136,6 +169,11 @@ export async function POST(req: NextRequest) {
       { ok: false, code: "INSERT_FAILED", message: "RSVP хадгалахад алдаа гарлаа." },
       { status: 500 },
     );
+  }
+
+  // Reflect the response on the guest record (best-effort).
+  if (guestId) {
+    await admin.from("guests").update({ rsvp_status: attending }).eq("id", guestId);
   }
 
   return NextResponse.json({ ok: true, data: { id: rsvp.id } }, { status: 201 });

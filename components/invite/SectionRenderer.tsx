@@ -21,6 +21,9 @@ interface SectionRendererProps {
   inviteId?: string;
   shareSlug?: string;
   inviteTitle?: string;
+  // Per-guest context (from /g/[token]) — prefills + links the RSVP to a guest.
+  guestToken?: string;
+  guestName?: string;
 }
 
 // Map a theme font-family name to its loaded next/font CSS variable (falls back
@@ -75,6 +78,8 @@ export function SectionRenderer({
   inviteId,
   shareSlug,
   inviteTitle,
+  guestToken,
+  guestName,
 }: SectionRendererProps) {
   const sorted = [...template.sections].sort((a, b) => a.order - b.order);
 
@@ -95,6 +100,8 @@ export function SectionRenderer({
           inviteId={inviteId}
           shareSlug={shareSlug}
           inviteTitle={inviteTitle}
+          guestToken={guestToken}
+          guestName={guestName}
         />
       ))}
     </div>
@@ -111,6 +118,8 @@ interface SectionSlotProps {
   inviteId?: string;
   shareSlug?: string;
   inviteTitle?: string;
+  guestToken?: string;
+  guestName?: string;
 }
 
 function SectionSlot({
@@ -123,6 +132,8 @@ function SectionSlot({
   inviteId,
   shareSlug,
   inviteTitle,
+  guestToken,
+  guestName,
 }: SectionSlotProps) {
   // Component chosen by discriminated type. Each component narrows its own config
   // internally via SectionProps<T>; here we type the shared runtime prop shape.
@@ -139,6 +150,8 @@ function SectionSlot({
       inviteId={inviteId}
       shareSlug={shareSlug}
       inviteTitle={inviteTitle}
+      guestToken={guestToken}
+      guestName={guestName}
     />
   );
 
