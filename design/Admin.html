@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>invites — Admin</title>
+<link rel="stylesheet" href="tokens.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  @keyframes dsLoadPulse {
+    0%, 100% { opacity: 0.25; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1); }
+  }
+  body { margin: 0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="ds-controls.jsx"></script>
+<script type="text/babel" src="ds-patterns.jsx"></script>
+<script type="text/babel" src="ds-cards-states.jsx"></script>
+<script type="text/babel" src="ds-compositions.jsx"></script>
+<script type="text/babel" src="pages-shared.jsx"></script>
+<script type="text/babel" src="admin-shared.jsx"></script>
+<script type="text/babel" src="admin-dashboard.jsx"></script>
+<script type="text/babel" src="admin-templates.jsx"></script>
+<script type="text/babel" src="admin-editor.jsx"></script>
+<script type="text/babel" src="proto-shared.jsx"></script>
+<script type="text/babel" src="admin-delivery.jsx"></script>
+<script type="text/babel" src="admin-states.jsx"></script>
+
+<script type="text/babel">
+const AUTO = { height: 'auto' };
+
+function AdminBoard() {
+  return (
+    <DesignCanvas>
+      <DCSection id="adm-dash" title="01 · Admin dashboard" subtitle="/admin — stats, quick actions, recent">
+        <DCArtboard id="ad-dash" label="Dashboard" width={1280} style={AUTO}>
+          <AdminDashboard />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="adm-templates" title="02 · Template management" subtitle="/admin/templates — table/grid, шүүлт, states">
+        <DCArtboard id="ad-tpl-table" label="Table view" width={1280} style={AUTO}>
+          <AdminTemplates />
+        </DCArtboard>
+        <DCArtboard id="ad-tpl-grid" label="Grid view + states" width={1280} style={AUTO}>
+          <AdminTemplatesGrid />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="adm-editor" title="03 · Template editor" subtitle="/admin/templates/[id]/edit — тохиргоо · canvas · талбар/давхарга">
+        <DCArtboard id="ad-editor" label="Editor · Desktop" width={1440} style={AUTO}>
+          <AdminEditor />
+        </DCArtboard>
+        <DCArtboard id="ad-editor-m" label="Editor · Mobile (tabs)" width={390} style={AUTO}>
+          <AdminEditorMobile />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="adm-form" title="04 · Талбар → форм" subtitle="Админы талбараас хэрэглэгчийн форм автоматаар үүсэх зарчим">
+        <DCArtboard id="ad-form" label="Field → generated form" width={1180} style={AUTO}>
+          <FieldFormPreview />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="adm-cats" title="05 · Categories" subtitle="/admin/categories — жагсаалт + create/edit modal">
+        <DCArtboard id="ad-cats" label="Categories" width={1280} style={AUTO}>
+          <AdminCategories />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="adm-invites" title="06 · User invites" subtitle="/admin/invites — хэрэглэгчийн урилгууд">
+        <DCArtboard id="ad-invites" label="Invites management" width={1280} style={AUTO}>
+          <AdminInvites />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="adm-assets" title="07 · Asset library" subtitle="/admin/assets — фон файлууд, устгах хамгаалалт">
+        <DCArtboard id="ad-assets" label="Asset library" width={1280} style={AUTO}>
+          <AdminAssets />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="adm-delivery" title="08 · Илгээлтийн лог" subtitle="/admin/delivery-logs — provider, төлөв, алдааны дэлгэрэнгүй">
+        <DCArtboard id="ad-delivery" label="Delivery logs" width={1280} style={AUTO}>
+          <AdminDeliveryLogs />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="adm-states" title="09 · UX states" subtitle="Toast, confirmation, warning, processing — бүх admin хуудсанд">
+        <DCArtboard id="ad-states" label="States sheet" width={1180} style={AUTO}>
+          <AdminStates />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="adm-map" title="10 · Component map" subtitle="Handoff — хуудас бүрийн компонентууд">
+        <DCArtboard id="ad-map" label="Component map" width={1080} style={AUTO}>
+          <ComponentMap />
+        </DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<AdminBoard />);
+</script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>invites — Pages</title>
+<link rel="stylesheet" href="tokens.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  @keyframes dsLoadPulse {
+    0%, 100% { opacity: 0.25; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1); }
+  }
+  body { margin: 0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="ds-controls.jsx"></script>
+<script type="text/babel" src="ds-patterns.jsx"></script>
+<script type="text/babel" src="ds-cards-states.jsx"></script>
+<script type="text/babel" src="ds-compositions.jsx"></script>
+<script type="text/babel" src="pages-shared.jsx"></script>
+<script type="text/babel" src="pages-landing.jsx"></script>
+<script type="text/babel" src="pages-templates.jsx"></script>
+<script type="text/babel" src="pages-create.jsx"></script>
+<script type="text/babel" src="pages-dashboard.jsx"></script>
+<script type="text/babel" src="pages-public-auth.jsx"></script>
+<script type="text/babel" src="proto-shared.jsx"></script>
+<script type="text/babel" src="pages-guests.jsx"></script>
+
+<script type="text/babel">
+const AUTO = { height: 'auto' };
+
+function PagesBoard() {
+  return (
+    <DesignCanvas>
+      <DCSection id="landing" title="01 · Landing" subtitle="Нүүр хуудас — desktop + mobile">
+        <DCArtboard id="landing-d" label="Landing · Desktop 1280" width={1280} style={AUTO}>
+          <LandingDesktop />
+        </DCArtboard>
+        <DCArtboard id="landing-m" label="Landing · Mobile 390" width={390} style={AUTO}>
+          <LandingMobile />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="templates" title="02 · Templates" subtitle="/templates — listing, states, mobile filter drawer">
+        <DCArtboard id="tpl-d" label="Listing · Desktop" width={1280} style={AUTO}>
+          <TemplatesDesktop />
+        </DCArtboard>
+        <DCArtboard id="tpl-states" label="Loading + Empty states" width={900} style={AUTO}>
+          <TemplatesStates />
+        </DCArtboard>
+        <DCArtboard id="tpl-m" label="Listing · Mobile" width={390} style={AUTO}>
+          <TemplatesMobile />
+        </DCArtboard>
+        <DCArtboard id="tpl-m-drawer" label="Mobile · Filter drawer" width={390} height={760}>
+          <TemplatesMobile drawer />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="detail" title="03 · Template detail" subtitle="/templates/[slug]">
+        <DCArtboard id="det-d" label="Detail · Desktop" width={1280} style={AUTO}>
+          <TemplateDetailDesktop />
+        </DCArtboard>
+        <DCArtboard id="det-m" label="Detail · Mobile" width={390} style={AUTO}>
+          <TemplateDetailMobile />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="create" title="04 · Create flow" subtitle="/create/[templateSlug] — алхамчилсан урсгал, баруун талд шууд preview">
+        <DCArtboard id="cr-1" label="Step 1 · Үндсэн мэдээлэл" width={1100} style={AUTO}>
+          <CreateStep1 />
+        </DCArtboard>
+        <DCArtboard id="cr-2" label="Step 2 · Байршил" width={1100} style={AUTO}>
+          <CreateStep2 />
+        </DCArtboard>
+        <DCArtboard id="cr-3" label="Step 3 · Зураг ба медиа" width={1100} style={AUTO}>
+          <CreateStep3 />
+        </DCArtboard>
+        <DCArtboard id="cr-4" label="Step 4 · Нийтлэх" width={1100} style={AUTO}>
+          <CreateStep4 />
+        </DCArtboard>
+        <DCArtboard id="cr-m" label="Mobile · Step 2" width={390} style={AUTO}>
+          <CreateMobile />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="dashboard" title="05 · My Invites" subtitle="/dashboard — жагсаалт, stats, empty state">
+        <DCArtboard id="db-d" label="Dashboard · Desktop" width={1280} style={AUTO}>
+          <DashboardDesktop />
+        </DCArtboard>
+        <DCArtboard id="db-empty" label="Empty state" width={760} style={AUTO}>
+          <DashboardEmpty />
+        </DCArtboard>
+        <DCArtboard id="db-m" label="Dashboard · Mobile" width={390} style={AUTO}>
+          <DashboardMobile />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="invite" title="06 · Public invite" subtitle="/i/[shareSlug] — зочдод харагдах хуудас">
+        <DCArtboard id="pi-m" label="Guest view · Mobile" width={390} style={AUTO}>
+          <PublicInviteMobile />
+        </DCArtboard>
+        <DCArtboard id="pi-d" label="Guest view · Desktop" width={1100} style={AUTO}>
+          <PublicInviteDesktop />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="auth" title="07 · Auth" subtitle="/login · /register · /forgot-password">
+        <DCArtboard id="au-login" label="Login" width={520} style={AUTO}>
+          <AuthLogin />
+        </DCArtboard>
+        <DCArtboard id="au-reg" label="Register · validation" width={520} style={AUTO}>
+          <AuthRegister />
+        </DCArtboard>
+        <DCArtboard id="au-forgot" label="Forgot password · success" width={520} style={AUTO}>
+          <AuthForgot />
+        </DCArtboard>
+      </DCSection>
+      <DCSection id="guests" title="08 · Зочид & илгээлт" subtitle="/invites/[id]/edit → Зочид — удирдлага, RSVP, илгээлт">
+        <DCArtboard id="gm-d" label="Guest management · Desktop" width={1100} style={AUTO}>
+          <GuestManagementDesktop />
+        </DCArtboard>
+        <DCArtboard id="gm-states" label="Empty + GuestFormModal" width={900} style={AUTO}>
+          <GuestManagementStates />
+        </DCArtboard>
+        <DCArtboard id="gm-m" label="Guest list · Mobile" width={390} style={AUTO}>
+          <GuestManagementMobile />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="rsvp" title="09 · RSVP sheet" subtitle="Зочны хариу форм — form / validation / success">
+        <DCArtboard id="rsvp-states" label="RSVP — 3 төлөв" width={1240} style={AUTO}>
+          <RSVPSheetStates />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="special" title="10 · Тусгай төлөвүүд" subtitle="Хүчингүй линк · хувийн урилга · email">
+        <DCArtboard id="inv-link" label="Урилга олдсонгүй" width={520} style={AUTO}>
+          <InvalidLinkState />
+        </DCArtboard>
+        <DCArtboard id="inv-arch" label="Архивлагдсан урилга" width={520} style={AUTO}>
+          <InvalidLinkState variant="archived" />
+        </DCArtboard>
+        <DCArtboard id="pers-guest" label="Хувийн урилга /g/[token]" width={430} style={AUTO}>
+          <PersonalizedGuestView />
+        </DCArtboard>
+        <DCArtboard id="email-tpl" label="Email урилга" width={440} style={AUTO}>
+          <EmailInviteTemplate />
+        </DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<PagesBoard />);
+</script>
+</body>
+</html>

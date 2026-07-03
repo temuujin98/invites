@@ -1,75 +1,83 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { setTemplateStatus } from "@/app/admin/templates/actions";
-import type { InviteTemplate, TemplateCategory } from "@/types/template";
+import type { SectionTemplate } from "@/types/section";
+import type { TemplateCategory } from "@/types/template";
 import { RESERVED_SLUGS } from "@/lib/constants";
-import { useEditorState } from "./useEditorState";
-import { TemplateSettingsPanel } from "./TemplateSettingsPanel";
-import { TemplateCanvas } from "./TemplateCanvas";
-import { FieldsPanel } from "./FieldsPanel";
+import { useSectionEditorState } from "./useSectionEditorState";
+import { SectionListPanel } from "./SectionListPanel";
+import { SectionSettingsPanel } from "./SectionSettingsPanel";
+import { ThemePanel } from "./ThemePanel";
+import { TemplateBasicsPanel } from "./TemplateBasicsPanel";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Modal } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ToastProvider, useToast } from "@/components/ui/Toast";
-import { InviteRenderer } from "@/components/invite/InviteRenderer";
+import { SectionRenderer } from "@/components/invite/SectionRenderer";
 import { PhonePreviewFrame } from "@/components/invite/PhonePreviewFrame";
 
-// ── Shared label helper (DB values unchanged, only display differs) ──────────
 function tplStatusLabel(status: "draft" | "published") {
   return status === "published" ? "Идэвхтэй" : "Идэвхгүй";
 }
 
-// ── Inner shell (needs toast context) ────────────────────────────────────────
+type RightTab = "section" | "theme";
 
-function EditorShellInner({ initialTemplate, categories }: { initialTemplate: InviteTemplate; categories: TemplateCategory[] }) {
+function EditorShellInner({
+  initialTemplate,
+  categories,
+}: {
+  initialTemplate: SectionTemplate;
+  categories: TemplateCategory[];
+}) {
   const router = useRouter();
   const toast = useToast();
 
   const {
     template,
-    selectedFieldId,
-    setSelectedFieldId,
-    updateTemplateMeta,
-    updateField,
-    addField,
-    removeField,
-    duplicateField,
-    reorderFields,
-    toggleLock,
-    toggleVisible,
-    zoom,
-    setZoom,
-    zoomIn,
-    zoomOut,
-    showSafeArea,
-    toggleSafeArea,
-    showSampleData,
-    toggleSampleData,
+    selectedSectionId,
     isDirty,
+    setSelectedSectionId,
+    updateTemplateMeta,
+    updateTheme,
+    addSection,
+    removeSection,
+    updateSectionConfig,
+    toggleEnabled,
+    reorderSections,
     markSaved,
     setStatus,
-  } = useEditorState(initialTemplate);
+  } = useSectionEditorState(initialTemplate);
 
-  const [showPreview, setShowPreview] = useState(false);
+  const [rightTab, setRightTab] = useState<RightTab>("section");
   const [showUnsavedConfirm, setShowUnsavedConfirm] = useState(false);
   const [pendingNavHref, setPendingNavHref] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [togglingStatus, setTogglingStatus] = useState(false);
 
+  // Tracks the last-committed slug so the uniqueness check stays correct across
+  // multiple saves in one session, even before router.replace re-mounts (H1).
+  const committedSlugRef = useRef(initialTemplate.slug);
+
+  const selectedSection = template.sections.find((s) => s.id === selectedSectionId) ?? null;
+
+  // Switch right tab to section settings when a section is selected.
+  useEffect(() => {
+    if (selectedSectionId) setRightTab("section");
+  }, [selectedSectionId]);
+
   // beforeunload guard
   useEffect(() => {
-    function handleBeforeUnload(e: BeforeUnloadEvent) {
+    function handler(e: BeforeUnloadEvent) {
       if (isDirty) {
         e.preventDefault();
         e.returnValue = "";
       }
     }
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
   }, [isDirty]);
 
   async function doSave(): Promise<boolean> {
@@ -77,11 +85,15 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
 
     const slug = template.slug.trim();
     if (!slug || !/^[a-z0-9-]+$/.test(slug) || slug.length < 3 || slug.length > 60) {
-      toast.show("Slug нь 3–60 тэмдэгт, зөвхөн a-z, 0-9, - тэмдэгт агуулна", "error");
+      toast.show("Slug нь 3–60 тэмдэгт, зөвхөн a-z, 0-9, - агуулна", "error");
       return false;
     }
     if ((RESERVED_SLUGS as readonly string[]).includes(slug)) {
       toast.show(`"${slug}" нь хориглогдсон slug`, "error");
+      return false;
+    }
+    if (!template.categoryId) {
+      toast.show("Ангилал сонгоно уу", "error");
       return false;
     }
 
@@ -90,12 +102,7 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
       const supabase = createClient();
       const isNew = template.id.startsWith("new-");
 
-      if (!template.categoryId) {
-        toast.show("Ангилал сонгоно уу", "error");
-        return false;
-      }
-
-      // Slug uniqueness: new → check all rows; existing → exclude self
+      // Slug uniqueness
       if (isNew) {
         const { data: existing } = await supabase
           .from("templates")
@@ -106,7 +113,7 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
           toast.show(`Slug "${slug}" аль хэдийн ашиглагдаж байна`, "error");
           return false;
         }
-      } else if (slug !== initialTemplate.slug) {
+      } else if (slug !== committedSlugRef.current) {
         const { data: existing } = await supabase
           .from("templates")
           .select("id")
@@ -119,20 +126,14 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
         }
       }
 
-      // Save persists content/meta only — never touches status column.
-      // Status is changed exclusively via handleStatusToggle below.
       const tplPatch: Record<string, unknown> = {
         name: template.name,
         slug,
         category_id: template.categoryId,
-        type: template.type,
-        canvas_width: template.canvasWidth,
-        canvas_height: template.canvasHeight,
+        sections: template.sections,
+        theme: template.theme,
         updated_at: new Date().toISOString(),
       };
-      if (template.pendingBgAssetId !== undefined) {
-        tplPatch.bg_asset_id = template.pendingBgAssetId;
-      }
       if (template.pendingThumbAssetId !== undefined) {
         tplPatch.thumb_asset_id = template.pendingThumbAssetId;
       }
@@ -142,7 +143,8 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
       if (isNew) {
         const { data: created, error: insErr } = await supabase
           .from("templates")
-          .insert({ ...tplPatch, status: "draft" })
+          // section templates are image-type shells; keep type for schema compat
+          .insert({ ...tplPatch, type: "image", status: "draft" })
           .select("id")
           .single();
         if (insErr) throw insErr;
@@ -155,42 +157,9 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
         if (tplErr) throw tplErr;
       }
 
-      if (template.fields.length > 0) {
-        const fieldRows = template.fields.map((f) => ({
-          id: f.id,
-          template_id: savedId,
-          key: f.key,
-          label: f.label,
-          placeholder: f.placeholder ?? null,
-          type: f.type,
-          required: f.required,
-          x: f.x,
-          y: f.y,
-          width: f.width,
-          height: f.height,
-          font_family: f.fontFamily ?? null,
-          font_size: f.fontSize ?? null,
-          font_weight: f.fontWeight ?? null,
-          line_height: f.lineHeight ?? null,
-          max_chars: f.maxChars ?? null,
-          color: f.color ?? null,
-          align: f.align ?? null,
-          border_radius: f.borderRadius ?? null,
-          object_fit: f.objectFit ?? null,
-          visible: f.visible,
-          locked: f.locked,
-          layer_order: f.layerOrder,
-        }));
-        const { error: fieldsErr } = await supabase
-          .from("template_fields")
-          .upsert(fieldRows, { onConflict: "id" });
-        if (fieldsErr) throw fieldsErr;
-      }
-
+      committedSlugRef.current = slug;
       markSaved();
-      if (isNew) {
-        router.replace(`/admin/templates/${savedId}/edit`);
-      }
+      if (isNew) router.replace(`/admin/templates/${savedId}/edit`);
       return true;
     } catch (err) {
       const msg = (err as { message?: string } | null)?.message ?? "Хадгалахад алдаа гарлаа";
@@ -206,10 +175,13 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
     if (ok) toast.show("Хадгалагдлаа", "success");
   }
 
-  // Status toggle: auto-saves pending edits first so no content is lost,
-  // then flips status via server action (service-role, bypasses RLS reliably).
   async function handleStatusToggle() {
     if (togglingStatus) return;
+    // Publish validation: at least one enabled section.
+    if (template.status !== "published" && !template.sections.some((s) => s.enabled)) {
+      toast.show("Дор хаяж нэг идэвхтэй хэсэг шаардлагатай", "error");
+      return;
+    }
     setTogglingStatus(true);
     try {
       if (isDirty) {
@@ -220,10 +192,7 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
       const result = await setTemplateStatus(template.id, newStatus);
       if (!result.ok) throw new Error(result.message);
       setStatus(newStatus);
-      toast.show(
-        newStatus === "published" ? "Идэвхтэй болгосон" : "Идэвхгүй болгосон",
-        "success",
-      );
+      toast.show(newStatus === "published" ? "Идэвхтэй болгосон" : "Идэвхгүй болгосон", "success");
     } catch (err) {
       toast.show(err instanceof Error ? err.message : "Алдаа гарлаа", "error");
     } finally {
@@ -241,14 +210,16 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
   }, [isDirty, router]);
 
   function handleUnsavedConfirm() {
-    markSaved(); // discard
-    if (pendingNavHref) router.push(pendingNavHref);
+    // Only discard + navigate when there's a real destination — avoids clearing
+    // dirty state without navigating on a dialog race (H4).
+    if (pendingNavHref) {
+      markSaved();
+      router.push(pendingNavHref);
+    }
   }
 
-  // Sample values for preview
-  const previewValues = Object.fromEntries(
-    template.fields.map((f) => [f.key, { text: f.placeholder ?? f.label }]),
-  );
+  // Sample content so the preview isn't empty (uses section registry placeholders).
+  const previewContent = {};
 
   return (
     <div
@@ -264,7 +235,7 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
         overflow: "hidden",
       }}
     >
-      {/* ── Topbar ── */}
+      {/* Topbar */}
       <div
         style={{
           height: 52,
@@ -277,7 +248,6 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
           paddingInline: 16,
         }}
       >
-        {/* Back button */}
         <button
           type="button"
           onClick={handleBackClick}
@@ -293,13 +263,6 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
             padding: "4px 6px",
             borderRadius: "var(--radius-ctrl)",
           }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background =
-              "var(--color-surface-soft)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = "none";
-          }}
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
             <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -307,10 +270,8 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
           Загварууд
         </button>
 
-        {/* Divider */}
         <span style={{ width: 1, height: 20, background: "var(--color-border)", flexShrink: 0 }} />
 
-        {/* Template name + status badge */}
         <span
           style={{
             fontSize: 13,
@@ -327,9 +288,7 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
           {tplStatusLabel(template.status)}
         </Badge>
 
-        {/* Right side */}
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10 }}>
-          {/* Хадгалах — content/meta only, never changes status */}
           {isDirty || saving ? (
             <button
               type="button"
@@ -350,86 +309,125 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
               {saving ? "Хадгалж байна..." : "Хадгалах"}
             </button>
           ) : (
-            <span style={{ fontSize: 11, color: "var(--color-text-muted)" }}>
-              Хадгалагдсан
-            </span>
+            <span style={{ fontSize: 11, color: "var(--color-text-muted)" }}>Хадгалагдсан</span>
           )}
 
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setShowPreview(true)}
-          >
-            Урьдчилан үзэх
+          <Button variant="secondary" size="sm" onClick={handleStatusToggle} loading={togglingStatus}>
+            {template.status === "published" ? "Идэвхгүй болгох" : "Идэвхжүүлэх"}
           </Button>
         </div>
       </div>
 
-      {/* ── 3-panel body ── */}
+      {/* 3-panel body */}
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
-        <TemplateSettingsPanel
-          template={template}
-          categories={categories}
-          onChange={updateTemplateMeta}
-          onStatusToggle={handleStatusToggle}
-          togglingStatus={togglingStatus}
-        />
+        {/* Left: template basics + section list */}
+        <div
+          style={{
+            width: 280,
+            flexShrink: 0,
+            borderRight: "1px solid var(--color-border)",
+            background: "var(--color-surface)",
+            overflowY: "auto",
+          }}
+        >
+          <TemplateBasicsPanel template={template} categories={categories} onChange={updateTemplateMeta} />
+          <SectionListPanel
+            sections={template.sections}
+            selectedSectionId={selectedSectionId}
+            onSelect={setSelectedSectionId}
+            onToggleEnabled={toggleEnabled}
+            onRemove={removeSection}
+            onAdd={addSection}
+            onReorder={reorderSections}
+          />
+        </div>
 
-        <TemplateCanvas
-          template={template}
-          selectedFieldId={selectedFieldId}
-          setSelectedFieldId={setSelectedFieldId}
-          zoom={zoom}
-          setZoom={setZoom}
-          zoomIn={zoomIn}
-          zoomOut={zoomOut}
-          showSafeArea={showSafeArea}
-          toggleSafeArea={toggleSafeArea}
-          showSampleData={showSampleData}
-          toggleSampleData={toggleSampleData}
-          updateField={updateField}
-          addField={addField}
-        />
+        {/* Center: live scrolling preview */}
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "flex-start",
+            padding: "24px 16px",
+            overflowY: "auto",
+            background: "var(--color-bg)",
+          }}
+        >
+          <div style={{ width: 390, flexShrink: 0 }}>
+            <PhonePreviewFrame canvasWidth={390} canvasHeight={844}>
+              <div style={{ height: "100%", overflowY: "auto" }}>
+                <SectionRenderer
+                  template={template}
+                  content={previewContent}
+                  mode="editor"
+                  selectedSectionId={selectedSectionId ?? undefined}
+                  onSectionSelect={setSelectedSectionId}
+                />
+              </div>
+            </PhonePreviewFrame>
+          </div>
+        </div>
 
-        <FieldsPanel
-          fields={template.fields}
-          selectedFieldId={selectedFieldId}
-          onSelect={setSelectedFieldId}
-          onToggleLock={toggleLock}
-          onToggleVisible={toggleVisible}
-          onDuplicate={duplicateField}
-          onDelete={removeField}
-          onAdd={addField}
-          onReorder={reorderFields}
-          onUpdateField={updateField}
-        />
+        {/* Right: section settings / theme (tabbed) */}
+        <div
+          style={{
+            width: 300,
+            flexShrink: 0,
+            borderLeft: "1px solid var(--color-border)",
+            background: "var(--color-surface)",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+          }}
+        >
+          <div style={{ display: "flex", borderBottom: "1px solid var(--color-border)" }}>
+            {(["section", "theme"] as RightTab[]).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setRightTab(tab)}
+                style={{
+                  flex: 1,
+                  padding: "10px 8px",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  background: "none",
+                  border: "none",
+                  borderBottom: rightTab === tab ? "2px solid var(--color-accent)" : "2px solid transparent",
+                  color: rightTab === tab ? "var(--color-accent)" : "var(--color-text-secondary)",
+                  cursor: "pointer",
+                }}
+              >
+                {tab === "section" ? "Хэсэг" : "Загвар"}
+              </button>
+            ))}
+          </div>
+          <div style={{ flex: 1, overflowY: "auto" }}>
+            {rightTab === "section" ? (
+              selectedSection ? (
+                <SectionSettingsPanel
+                  section={selectedSection}
+                  onChange={(patch) => updateSectionConfig(selectedSection.id, patch)}
+                />
+              ) : (
+                <p style={{ padding: 16, fontSize: 11, color: "var(--color-text-muted)", textAlign: "center" }}>
+                  Хэсэг сонгоно уу
+                </p>
+              )
+            ) : (
+              <ThemePanel theme={template.theme} onChange={updateTheme} />
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* ── Mobile Preview Modal ── */}
-      <Modal
-        open={showPreview}
-        onClose={() => setShowPreview(false)}
-        title="Урьдчилан үзэх"
-        size="sm"
-      >
-        <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
-          <PhonePreviewFrame
-            canvasWidth={template.canvasWidth}
-            canvasHeight={template.canvasHeight}
-          >
-            <InviteRenderer
-              template={template}
-              values={previewValues}
-              mode="preview"
-            />
-          </PhonePreviewFrame>
-        </div>
-      </Modal>
-
-      {/* ── Unsaved changes confirm ── */}
       <ConfirmDialog
         open={showUnsavedConfirm}
-        onClose={() => { setShowUnsavedConfirm(false); setPendingNavHref(null); }}
+        onClose={() => {
+          setShowUnsavedConfirm(false);
+          setPendingNavHref(null);
+        }}
         onConfirm={handleUnsavedConfirm}
         title="Хадгалагдаагүй өөрчлөлт байна"
         message="Өөрчлөлтүүд хадгалагдаагүй байна. Гарах уу?"
@@ -440,9 +438,13 @@ function EditorShellInner({ initialTemplate, categories }: { initialTemplate: In
   );
 }
 
-// ── Public export (wraps with ToastProvider) ──────────────────────────────
-
-export function TemplateEditorShell({ initialTemplate, categories }: { initialTemplate: InviteTemplate; categories: TemplateCategory[] }) {
+export function TemplateSectionEditorShell({
+  initialTemplate,
+  categories,
+}: {
+  initialTemplate: SectionTemplate;
+  categories: TemplateCategory[];
+}) {
   return (
     <ToastProvider>
       <EditorShellInner initialTemplate={initialTemplate} categories={categories} />

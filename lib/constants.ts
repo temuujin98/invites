@@ -9,6 +9,11 @@ export const RESERVED_SLUGS = [
   "i",
   "g",
   "dev",
+  "auth",
+  "forgot-password",
+  "update-password",
+  "terms",
+  "privacy",
 ] as const;
 
 export const CANVAS_DEFAULT_W = 1080;

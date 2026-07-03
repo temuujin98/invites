@@ -5,6 +5,8 @@ import Link from "next/link";
 import { AuthLayout } from "@/components/shared/AuthLayout";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { createClient } from "@/lib/supabase/client";
+import { APP_URL } from "@/lib/constants";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -12,6 +14,7 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [touched, setTouched] = useState(false);
+  const [apiError, setApiError] = useState<string | undefined>();
 
   function validateEmail(v: string): string | undefined {
     if (!v) return "И-мэйл хаяг оруулна уу";
@@ -32,14 +35,28 @@ export default function ForgotPasswordPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setTouched(true);
+    setApiError(undefined);
     const err = validateEmail(email);
     setEmailError(err);
     if (err) return;
 
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setLoading(false);
-    setSent(true);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${APP_URL}/auth/callback?next=/update-password`,
+      });
+      if (error) {
+        setApiError("Холбоос илгээхэд алдаа гарлаа. Дахин оролдоно уу.");
+        return;
+      }
+      // Always show success (do not reveal whether the email is registered).
+      setSent(true);
+    } catch {
+      setApiError("Сүлжээний алдаа гарлаа. Дахин оролдоно уу.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (sent) {
@@ -91,6 +108,9 @@ export default function ForgotPasswordPage() {
             onBlur={handleBlur}
             error={touched ? emailError : undefined}
           />
+          {apiError && (
+            <p className="text-xs text-(--color-danger)">{apiError}</p>
+          )}
           <Button
             type="submit"
             variant="primary"
