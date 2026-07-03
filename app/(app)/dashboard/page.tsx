@@ -328,6 +328,7 @@ export default function DashboardPage() {
                   onPreview={() => window.open(`/i/${invite.shareSlug}`, "_blank")}
                   onCopy={() => handleCopyLink(invite)}
                   onGuests={() => router.push(`/invites/${invite.id}/guests`)}
+                  onRsvps={() => router.push(`/invites/${invite.id}/rsvps`)}
                   onArchive={() => setArchiveTarget(invite)}
                   onDelete={() => setDeleteTarget(invite)}
                 />
@@ -373,6 +374,7 @@ interface InviteRowProps {
   onPreview: () => void;
   onCopy: () => void;
   onGuests: () => void;
+  onRsvps: () => void;
   onArchive: () => void;
   onDelete: () => void;
 }
@@ -388,7 +390,7 @@ function IconGuests() {
   );
 }
 
-function InviteRow({ invite, onEdit, onPreview, onCopy, onGuests, onArchive, onDelete }: InviteRowProps) {
+function InviteRow({ invite, onEdit, onPreview, onCopy, onGuests, onRsvps, onArchive, onDelete }: InviteRowProps) {
   return (
     <article className="flex items-center gap-3 rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) p-3 shadow-sm transition-shadow hover:shadow-md">
       {/* Thumbnail */}
@@ -423,10 +425,6 @@ function InviteRow({ invite, onEdit, onPreview, onCopy, onGuests, onArchive, onD
             <IconGuests />
             {invite.guestCount} зочин
           </span>
-          <span className="flex items-center gap-1 text-[11px] text-(--color-text-muted)">
-            <IconEye />
-            {invite.viewCount}
-          </span>
         </div>
       </div>
 
@@ -437,6 +435,7 @@ function InviteRow({ invite, onEdit, onPreview, onCopy, onGuests, onArchive, onD
             { label: "Засах", icon: <IconEdit />, onClick: onEdit },
             { label: "Харах", icon: <IconEye />, onClick: onPreview },
             { label: "Зочид", icon: <IconGuests />, onClick: onGuests },
+            { label: "RSVP хариулт", icon: <IconRSVP />, onClick: onRsvps },
             { label: "Линк хуулах", icon: <IconCopy />, onClick: onCopy },
             { label: "Архивлах", icon: <IconArchive />, onClick: onArchive },
             { label: "Устгах", icon: <IconTrash />, onClick: onDelete, danger: true },

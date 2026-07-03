@@ -38,6 +38,26 @@ function IconInvites() {
     </svg>
   );
 }
+function IconUsers() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <circle cx="5" cy="4.5" r="2.5" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M1 12c0-2.21 1.79-4 4-4s4 1.79 4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      <path d="M10 6.5c1.1 0 2 .9 2 2v3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      <circle cx="10" cy="4" r="1.5" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+}
+function IconCategories() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" />
+      <rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" />
+      <rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" />
+      <rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+}
 
 // ── Quick action card ──────────────────────────────────────────────────────
 
@@ -73,6 +93,8 @@ export default async function AdminDashboardPage() {
     { count: publishedCount },
     { count: draftCount },
     { count: totalInvites },
+    { count: totalUsers },
+    { count: totalCategories },
     { data: recentTemplateRows },
     { data: recentInviteRows },
   ] = await Promise.all([
@@ -80,6 +102,8 @@ export default async function AdminDashboardPage() {
     supabase.from("templates").select("*", { count: "exact", head: true }).eq("status", "published"),
     supabase.from("templates").select("*", { count: "exact", head: true }).eq("status", "draft"),
     supabase.from("invites").select("*", { count: "exact", head: true }),
+    supabase.from("profiles").select("*", { count: "exact", head: true }),
+    supabase.from("categories").select("*", { count: "exact", head: true }),
     supabase
       .from("templates")
       .select(`id, name, slug, status,
@@ -125,11 +149,20 @@ export default async function AdminDashboardPage() {
         />
 
         {/* ── Stats ── */}
-        <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
           <StatsCard label="Нийт загвар" value={totalTemplates ?? 0} icon={<IconTemplate />} />
           <StatsCard label="Идэвхтэй" value={publishedCount ?? 0} icon={<IconPublished />} />
           <StatsCard label="Идэвхгүй" value={draftCount ?? 0} icon={<IconDraft />} />
           <StatsCard label="Хэрэглэгчийн урилга" value={totalInvites ?? 0} icon={<IconInvites />} />
+          <Link href="/admin/users" className="block">
+            <StatsCard
+              label="Хэрэглэгчид"
+              value={totalUsers ?? 0}
+              icon={<IconUsers />}
+              delta="Бүгдийг харах →"
+            />
+          </Link>
+          <StatsCard label="Ангилал" value={totalCategories ?? 0} icon={<IconCategories />} />
         </div>
 
         {/* ── Quick actions ── */}

@@ -23,6 +23,10 @@ interface AdminInvite {
   templateSlug: string;
   eventDate: string | null;
   status: InviteStatus;
+  userId: string;
+  ownerName: string;
+  rsvpCount: number;
+  guestCount: number;
 }
 
 type FilterStatus = "all" | InviteStatus;
@@ -46,13 +50,33 @@ export default function AdminInvitesPage() {
     setLoading(true);
     const { data } = await supabase
       .from("invites")
-      .select(`id, title, share_slug, event_date, status,
-        template:templates!template_id ( name, slug )`)
+      .select(`id, title, share_slug, event_date, status, user_id,
+        template:templates!template_id ( name, slug ),
+        rsvps ( count ),
+        guests ( count )`)
       .order("updated_at", { ascending: false });
 
+    const rows = data ?? [];
+
+    // Collect unique user_ids then fetch display_names in one query
+    const userIds = [...new Set(rows.map((r: Record<string, unknown>) => r.user_id as string).filter(Boolean))];
+    const profileMap = new Map<string, string>();
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, display_name")
+        .in("id", userIds);
+      for (const p of profiles ?? []) {
+        profileMap.set(p.id as string, (p.display_name as string | null) ?? "—");
+      }
+    }
+
     setInvites(
-      (data ?? []).map((row: Record<string, unknown>) => {
+      rows.map((row: Record<string, unknown>) => {
         const tpl = Array.isArray(row.template) ? ((row.template as unknown[])[0] ?? null) : row.template;
+        const rsvpArr = row.rsvps as Array<{ count: number }> | null;
+        const guestArr = row.guests as Array<{ count: number }> | null;
+        const userId = row.user_id as string;
         return {
           id: row.id as string,
           title: row.title as string,
@@ -61,6 +85,10 @@ export default function AdminInvitesPage() {
           templateSlug: (tpl as { slug: string } | null)?.slug ?? "",
           eventDate: (row.event_date as string | null) ?? null,
           status: row.status as InviteStatus,
+          userId,
+          ownerName: profileMap.get(userId) ?? "—",
+          rsvpCount: rsvpArr?.[0]?.count ?? 0,
+          guestCount: guestArr?.[0]?.count ?? 0,
         };
       }),
     );
@@ -122,8 +150,11 @@ export default function AdminInvitesPage() {
               <thead>
                 <tr className="border-b border-(--color-border) bg-(--color-surface-soft)">
                   <th className="px-3 py-2.5 text-left font-medium text-(--color-text-secondary)">Урилга</th>
+                  <th className="px-3 py-2.5 text-left font-medium text-(--color-text-secondary)">Эзэн</th>
                   <th className="px-3 py-2.5 text-left font-medium text-(--color-text-secondary)">Загвар</th>
                   <th className="px-3 py-2.5 text-left font-medium text-(--color-text-secondary)">Огноо</th>
+                  <th className="px-3 py-2.5 text-right font-medium text-(--color-text-secondary)">RSVP</th>
+                  <th className="px-3 py-2.5 text-right font-medium text-(--color-text-secondary)">Зочид</th>
                   <th className="px-3 py-2.5 text-left font-medium text-(--color-text-secondary)">Төлөв</th>
                   <th className="px-3 py-2.5 text-left font-medium text-(--color-text-secondary)">Үйлдэл</th>
                 </tr>
@@ -131,7 +162,7 @@ export default function AdminInvitesPage() {
               <tbody>
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={5}>
+                    <td colSpan={8}>
                       <EmptyState title="Урилга олдсонгүй" description="Хайлт эсвэл шүүлтүүрийг өөрчилнө үү" />
                     </td>
                   </tr>
@@ -154,10 +185,13 @@ export default function AdminInvitesPage() {
                         </div>
                       </div>
                     </td>
+                    <td className="px-3 py-2.5 text-(--color-text-secondary) whitespace-nowrap">{inv.ownerName}</td>
                     <td className="px-3 py-2.5 text-(--color-text-secondary)">{inv.templateName}</td>
                     <td className="px-3 py-2.5 text-(--color-text-muted)">
                       {inv.eventDate ? formatDate(inv.eventDate) : "—"}
                     </td>
+                    <td className="px-3 py-2.5 text-right tabular-nums text-(--color-text-secondary)">{inv.rsvpCount}</td>
+                    <td className="px-3 py-2.5 text-right tabular-nums text-(--color-text-secondary)">{inv.guestCount}</td>
                     <td className="px-3 py-2.5"><StatusBadge status={inv.status} /></td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-1">
