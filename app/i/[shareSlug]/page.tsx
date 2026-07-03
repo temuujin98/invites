@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { APP_URL } from "@/lib/constants";
+import { resolveOgImage } from "@/lib/og/meta";
 import { PublicInviteClient } from "./PublicInviteClient";
 
 interface Props {
@@ -11,10 +12,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { shareSlug } = await params;
   const supabase = await createClient();
 
-  // Only real columns from invites table (docs/05); thumbnail resolved via assets in Phase 9
   const { data: invite } = await supabase
     .from("invites")
-    .select("id, title, status, is_public, event_date")
+    .select("id, title, status, is_public, event_date, rendered_image_url, updated_at")
     .eq("share_slug", shareSlug)
     .single();
 
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? `${(invite.event_date as string).replace(/-/g, ".")} · invites.mn дээр үүсгэсэн урилга`
     : "invites.mn дээр үүсгэсэн урилга";
 
-  const ogImage = `${APP_URL}/og-default.png`;
+  const ogImage = resolveOgImage(shareSlug, invite);
 
   return {
     title,
@@ -37,14 +37,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url: `${APP_URL}/i/${shareSlug}`,
       siteName: "invites.mn",
-      images: [{ url: ogImage, width: 1080, height: 1920, alt: invite.title }],
+      images: [{ url: ogImage.url, width: ogImage.width, height: ogImage.height, alt: invite.title }],
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [ogImage],
+      images: [ogImage.url],
     },
   };
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getAdminClient } from "@/lib/supabase/admin";
 import type { PublicInviteRow, GuestContext } from "@/components/invite/PublicInviteView";
+import { resolveOgImage } from "@/lib/og/meta";
 import { GuestInviteClient } from "./GuestInviteClient";
 
 interface Props {
@@ -29,7 +30,7 @@ async function resolve(token: string): Promise<{ invite: PublicInviteRow; guest:
     .from("invites")
     .select(`
       id, title, share_slug, status, is_public, content,
-      event_date, event_time, event_location,
+      event_date, event_time, event_location, rendered_image_url, updated_at,
       templates ( id, slug, name, category_id, status, sections, theme )
     `)
     .eq("id", guest.invite_id as string)
@@ -51,10 +52,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!resolved || !resolved.invite.is_public || resolved.invite.status !== "published") {
     return { title: "Урилга олдсонгүй — invites.mn", robots: { index: false } };
   }
+  // Per-guest links are personalized — never index them, but still give
+  // messaging apps (Messenger/Viber) a rich preview when the link is shared.
+  const invite = resolved.invite as unknown as {
+    share_slug: string;
+    rendered_image_url?: string | null;
+    updated_at?: string | null;
+  };
+  const ogImage = resolveOgImage(invite.share_slug, invite);
   return {
     title: `${resolved.invite.title} — invites.mn`,
-    // Per-guest links are personalized — never index them.
     robots: { index: false, follow: false },
+    openGraph: {
+      title: `${resolved.invite.title} — invites.mn`,
+      siteName: "invites.mn",
+      images: [{ url: ogImage.url, width: ogImage.width, height: ogImage.height }],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: [ogImage.url],
+    },
   };
 }
 

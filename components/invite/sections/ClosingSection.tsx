@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import type { SectionProps } from "./types";
 import { resolveText, SectionWrap } from "./shared";
+import { ShareImageButton } from "@/components/invite/ShareImageButton";
 
 export function ClosingSection({
   config,
@@ -116,6 +117,11 @@ export function ClosingSection({
               </svg>
               {copied ? "Хуулагдлаа" : "Холбоос хуулах"}
             </button>
+
+            {/* Download rendered share image — public render route only */}
+            {mode === "public" && shareSlug && (
+              <ShareImageButton shareSlug={shareSlug} />
+            )}
 
             {/* Social icon buttons */}
             <div className="flex gap-3">
