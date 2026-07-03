@@ -25,11 +25,20 @@ export async function setUserRole(
 ): Promise<{ ok: true } | { ok: false; message: string }> {
   try {
     const adminId = await assertAdmin();
-    // Don't let an admin demote themselves (avoid locking out the last admin).
     if (userId === adminId && role !== "admin") {
       return { ok: false, message: "Өөрийн эрхийг бууруулах боломжгүй" };
     }
     const db = getAdminClient();
+    // Never demote the last remaining admin.
+    if (role !== "admin") {
+      const { count } = await db
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("role", "admin");
+      if ((count ?? 0) <= 1) {
+        return { ok: false, message: "Хамгийн сүүлийн админыг бууруулах боломжгүй" };
+      }
+    }
     const { error } = await db.from("profiles").update({ role }).eq("id", userId);
     if (error) throw error;
     revalidatePath("/admin/users");

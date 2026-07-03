@@ -1,32 +1,52 @@
 import { getAdminClient } from "@/lib/supabase/admin";
 import { UsersClient, type AdminUser } from "./_UsersClient";
+import { ErrorState } from "@/components/shared/ErrorState";
+
+const PAGE = 1000;
 
 export default async function AdminUsersPage() {
-  const db = getAdminClient();
+  let db: ReturnType<typeof getAdminClient>;
+  try {
+    db = getAdminClient();
+  } catch {
+    return <ErrorState message="Серверийн тохиргооны алдаа." />;
+  }
 
-  // Profiles (all — admin RLS allows it, but service-role is simplest for the joins).
-  const { data: profiles } = await db
+  const { data: profiles, error: profilesErr } = await db
     .from("profiles")
     .select("id, display_name, role, created_at")
     .order("created_at", { ascending: false });
 
-  // Invite counts per user.
-  const { data: inviteRows } = await db.from("invites").select("user_id");
-  const inviteCounts = new Map<string, number>();
-  for (const r of inviteRows ?? []) {
-    const uid = r.user_id as string;
-    inviteCounts.set(uid, (inviteCounts.get(uid) ?? 0) + 1);
+  if (profilesErr) {
+    return <ErrorState message="Хэрэглэгчдийг уншихад алдаа гарлаа." />;
   }
 
-  // Emails live in auth.users — resolve via the admin auth API.
+  // Invite counts per user — paginate through the whole table so counts stay
+  // correct past the 1000-row PostgREST default.
+  const inviteCounts = new Map<string, number>();
+  for (let from = 0; ; from += PAGE) {
+    const { data: rows } = await db
+      .from("invites")
+      .select("user_id")
+      .range(from, from + PAGE - 1);
+    for (const r of rows ?? []) {
+      const uid = r.user_id as string;
+      inviteCounts.set(uid, (inviteCounts.get(uid) ?? 0) + 1);
+    }
+    if (!rows || rows.length < PAGE) break;
+  }
+
+  // Emails live in auth.users — page through the admin auth API.
   const emailById = new Map<string, string>();
   try {
-    const { data: authList } = await db.auth.admin.listUsers({ perPage: 1000 });
-    for (const u of authList?.users ?? []) {
-      if (u.email) emailById.set(u.id, u.email);
+    for (let page = 1; ; page++) {
+      const { data: authList } = await db.auth.admin.listUsers({ page, perPage: PAGE });
+      const list = authList?.users ?? [];
+      for (const u of list) if (u.email) emailById.set(u.id, u.email);
+      if (list.length < PAGE) break;
     }
   } catch {
-    // If the auth admin call fails, emails just stay blank.
+    // Emails just stay blank if the auth admin call fails.
   }
 
   const users: AdminUser[] = (profiles ?? []).map((p) => ({
