@@ -46,7 +46,12 @@ function StatCell({ value, label }: StatCellProps) {
   return (
     <div
       className="flex flex-1 flex-col items-center gap-1 rounded-xl px-2 py-4"
-      style={{ backgroundColor: "var(--inv-surface)" }}
+      style={{
+        backgroundColor: "var(--inv-surface)",
+        minWidth: "3.5rem",
+        border: "1px solid color-mix(in srgb, var(--inv-muted) 20%, transparent)",
+        boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
+      }}
     >
       <span
         className="text-[32px] font-bold leading-none tabular-nums"
@@ -54,7 +59,10 @@ function StatCell({ value, label }: StatCellProps) {
       >
         {value}
       </span>
-      <span className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "var(--inv-muted)" }}>
+      <span
+        className="text-[10px] font-medium uppercase leading-tight tracking-normal"
+        style={{ color: "var(--inv-muted)" }}
+      >
         {label}
       </span>
     </div>

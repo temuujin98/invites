@@ -23,6 +23,31 @@ interface SectionRendererProps {
   inviteTitle?: string;
 }
 
+// Map a theme font-family name to its loaded next/font CSS variable (falls back
+// to the literal family name + generic keyword when it's not one we preload).
+export function fontStack(family: string, generic: "serif" | "sans-serif"): string {
+  const loaded: Record<string, string> = {
+    "Playfair Display": "var(--font-playfair)",
+    "Cormorant Garamond": "var(--font-cormorant)",
+    "Montserrat": "var(--font-montserrat)",
+    "Roboto": "var(--font-roboto)",
+  };
+  const v = loaded[family];
+  return v
+    ? `${v}, ${generic}`
+    : `'${family}', ${generic}`;
+}
+
+// Relative luminance → pick a readable on-accent text color (white vs near-black).
+function onColor(hex: string): string {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return "#ffffff";
+  const n = parseInt(m[1], 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return lum > 0.6 ? "#1F1D1A" : "#ffffff";
+}
+
 // Map theme → CSS custom properties consumed by every section (via var(--inv-*)).
 function themeVars(theme: InviteTheme): CSSProperties {
   return {
@@ -31,11 +56,13 @@ function themeVars(theme: InviteTheme): CSSProperties {
     "--inv-text": theme.palette.text,
     "--inv-accent": theme.palette.accent,
     "--inv-muted": theme.palette.muted,
-    "--inv-font-heading": `'${theme.fonts.heading}', serif`,
-    "--inv-font-body": `'${theme.fonts.body}', sans-serif`,
+    "--inv-on-accent": onColor(theme.palette.accent),
+    "--inv-danger": "#C4443A",
+    "--inv-font-heading": fontStack(theme.fonts.heading, "serif"),
+    "--inv-font-body": fontStack(theme.fonts.body, "sans-serif"),
     backgroundColor: theme.palette.bg,
     color: theme.palette.text,
-    fontFamily: `'${theme.fonts.body}', sans-serif`,
+    fontFamily: fontStack(theme.fonts.body, "sans-serif"),
   } as CSSProperties;
 }
 

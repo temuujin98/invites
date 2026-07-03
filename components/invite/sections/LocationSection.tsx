@@ -8,11 +8,21 @@ export function LocationSection({ config, content, theme, mode }: SectionProps<"
   const address = resolveText(content, "address", "Улаанбаатар, Сүхбаатар дүүрэг", mode);
   const mapUrl = readText(content, "mapUrl");
 
-  const mapsLink =
+  // Directions link — prefer explicit mapUrl, fall back to address query
+  const directionsLink =
     mapUrl ||
     (address
       ? `https://maps.google.com/?q=${encodeURIComponent(address)}`
       : "https://maps.google.com/");
+
+  // Embed iframe src — use address or venueName as the map query
+  const embedQuery = address || venueName;
+  const embedSrc = embedQuery
+    ? `https://maps.google.com/maps?q=${encodeURIComponent(embedQuery)}&output=embed`
+    : null;
+
+  // Only show the live iframe when we have a real query to avoid a broken blank map
+  const showEmbed = config.showEmbed && embedSrc !== null;
 
   if (mode === "public" && !venueName && !address) return null;
 
@@ -28,23 +38,37 @@ export function LocationSection({ config, content, theme, mode }: SectionProps<"
           </p>
         )}
         {address && (
-          <p className="mt-1 text-[13px]" style={{ color: "var(--inv-muted)" }}>
+          <p className="mt-1 text-[14px] leading-relaxed" style={{ color: "var(--inv-muted)" }}>
             {address}
           </p>
         )}
       </div>
 
-      {/* Map placeholder card — links to Google Maps */}
-      {(config.showEmbed || config.showDirections) && (
-        <a
-          href={mapsLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mb-4 flex flex-col items-center justify-center gap-2 rounded-xl px-4 py-8 transition-opacity hover:opacity-80"
-          style={{ backgroundColor: "var(--inv-surface)" }}
-          aria-label="Google Maps дээр харах"
+      {/* Embedded Google Maps iframe */}
+      {showEmbed && (
+        <div
+          className="mb-4 overflow-hidden rounded-xl"
+          style={{ border: "1px solid color-mix(in srgb, var(--inv-muted) 18%, transparent)" }}
         >
-          {/* Map pin icon */}
+          <iframe
+            src={embedSrc!}
+            title="Газрын зураг"
+            loading="lazy"
+            className="h-48 w-full"
+            style={{ display: "block", border: 0 }}
+            referrerPolicy="no-referrer-when-downgrade"
+            allowFullScreen
+          />
+        </div>
+      )}
+
+      {/* Fallback placeholder when embed is off but showDirections is on */}
+      {!showEmbed && config.showDirections && (
+        <div
+          className="mb-4 flex flex-col items-center justify-center gap-2 rounded-xl px-4 py-8"
+          style={{ backgroundColor: "var(--inv-surface)" }}
+          aria-hidden="true"
+        >
           <svg
             width="32"
             height="32"
@@ -64,17 +88,17 @@ export function LocationSection({ config, content, theme, mode }: SectionProps<"
           <span className="text-[13px] font-medium" style={{ color: "var(--inv-muted)" }}>
             Газрын зураг харах
           </span>
-        </a>
+        </div>
       )}
 
       {/* Directions button */}
       {config.showDirections && (
         <a
-          href={mapsLink}
+          href={directionsLink}
           target="_blank"
           rel="noopener noreferrer"
           className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-[14px] font-semibold transition-opacity hover:opacity-85"
-          style={{ backgroundColor: "var(--inv-accent)", color: "#fff" }}
+          style={{ backgroundColor: "var(--inv-accent)", color: "var(--inv-on-accent)" }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path

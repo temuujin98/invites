@@ -100,7 +100,7 @@ export function RsvpForm({ inviteId, allowGuestCount, allowNote, disabled }: Rsv
       {/* Name */}
       <div className="flex flex-col gap-1">
         <label className="text-[13px] font-medium" style={{ color: "var(--inv-text)" }}>
-          Таны нэр <span style={{ color: "#C4443A" }}>*</span>
+          Таны нэр <span style={{ color: "var(--inv-danger)" }}>*</span>
         </label>
         <input
           type="text"
@@ -115,10 +115,10 @@ export function RsvpForm({ inviteId, allowGuestCount, allowNote, disabled }: Rsv
           style={{
             backgroundColor: "var(--inv-surface)",
             color: "var(--inv-text)",
-            borderColor: nameError ? "#C4443A" : "color-mix(in srgb, var(--inv-muted) 40%, transparent)",
+            borderColor: nameError ? "var(--inv-danger)" : "color-mix(in srgb, var(--inv-muted) 45%, transparent)",
           }}
         />
-        {nameError && <p className="text-xs" style={{ color: "#C4443A" }}>Нэрээ оруулна уу</p>}
+        {nameError && <p className="text-xs" style={{ color: "var(--inv-danger)" }}>Нэрээ оруулна уу</p>}
       </div>
 
       {/* Choice */}
@@ -138,8 +138,8 @@ export function RsvpForm({ inviteId, allowGuestCount, allowNote, disabled }: Rsv
                 className="flex-1 rounded-[10px] border py-2.5 text-[14px] font-medium transition-colors"
                 style={{
                   backgroundColor: active ? "var(--inv-accent)" : "var(--inv-surface)",
-                  color: active ? "#fff" : "var(--inv-text)",
-                  borderColor: active ? "var(--inv-accent)" : "color-mix(in srgb, var(--inv-muted) 40%, transparent)",
+                  color: active ? "var(--inv-on-accent)" : "var(--inv-text)",
+                  borderColor: active ? "var(--inv-accent)" : "color-mix(in srgb, var(--inv-muted) 45%, transparent)",
                 }}
               >
                 {c.label}
@@ -170,7 +170,7 @@ export function RsvpForm({ inviteId, allowGuestCount, allowNote, disabled }: Rsv
                     aria-label="Хасах"
                     onClick={() => setPartySize((p) => Math.max(1, p - 1))}
                     className="flex h-10 w-10 items-center justify-center rounded-[10px] border"
-                    style={{ backgroundColor: "var(--inv-surface)", color: "var(--inv-text)", borderColor: "color-mix(in srgb, var(--inv-muted) 40%, transparent)" }}
+                    style={{ backgroundColor: "var(--inv-surface)", color: "var(--inv-text)", borderColor: "color-mix(in srgb, var(--inv-muted) 45%, transparent)" }}
                   >
                     –
                   </button>
@@ -182,7 +182,7 @@ export function RsvpForm({ inviteId, allowGuestCount, allowNote, disabled }: Rsv
                     aria-label="Нэмэх"
                     onClick={() => setPartySize((p) => p + 1)}
                     className="flex h-10 w-10 items-center justify-center rounded-[10px] border"
-                    style={{ backgroundColor: "var(--inv-surface)", color: "var(--inv-text)", borderColor: "color-mix(in srgb, var(--inv-muted) 40%, transparent)" }}
+                    style={{ backgroundColor: "var(--inv-surface)", color: "var(--inv-text)", borderColor: "color-mix(in srgb, var(--inv-muted) 45%, transparent)" }}
                   >
                     +
                   </button>
@@ -205,18 +205,18 @@ export function RsvpForm({ inviteId, allowGuestCount, allowNote, disabled }: Rsv
             onChange={(e) => setNote(e.target.value)}
             rows={2}
             className="w-full resize-none rounded-[10px] border px-3 py-2 text-[15px] focus:outline-none focus:ring-2"
-            style={{ backgroundColor: "var(--inv-surface)", color: "var(--inv-text)", borderColor: "color-mix(in srgb, var(--inv-muted) 40%, transparent)" }}
+            style={{ backgroundColor: "var(--inv-surface)", color: "var(--inv-text)", borderColor: "color-mix(in srgb, var(--inv-muted) 45%, transparent)" }}
           />
         </div>
       )}
 
-      {apiError && <p className="text-[13px]" style={{ color: "#C4443A" }}>{apiError}</p>}
+      {apiError && <p className="text-[13px]" style={{ color: "var(--inv-danger)" }}>{apiError}</p>}
 
       <button
         type="submit"
         disabled={loading || inert}
-        className="mt-1 w-full rounded-[10px] py-3 text-[15px] font-medium text-white transition-opacity disabled:opacity-60"
-        style={{ backgroundColor: "var(--inv-accent)" }}
+        className="mt-1 w-full rounded-[10px] py-3 text-[15px] font-medium transition-opacity disabled:opacity-60"
+        style={{ backgroundColor: "var(--inv-accent)", color: "var(--inv-on-accent)" }}
       >
         {loading ? "Илгээж байна…" : "RSVP илгээх"}
       </button>

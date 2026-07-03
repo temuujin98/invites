@@ -25,8 +25,18 @@ export function CoverSection({ config, content, theme, mode }: SectionProps<"cov
           {subtitle}
         </p>
       )}
+      {/* Elegant hairline divider between subtitle and title */}
+      <div
+        aria-hidden
+        style={{
+          width: 40,
+          height: 1,
+          backgroundColor: fullbleed ? "rgba(255,255,255,0.55)" : "var(--inv-accent)",
+          borderRadius: 1,
+        }}
+      />
       <h1
-        className="text-[34px] font-bold leading-[1.15] tracking-tight"
+        className="text-[34px] font-bold leading-[1.15]"
         style={{
           fontFamily: "var(--inv-font-heading)",
           color: fullbleed ? "#ffffff" : "var(--inv-text)",
@@ -44,13 +54,24 @@ export function CoverSection({ config, content, theme, mode }: SectionProps<"cov
     >
       {/* Background image (fullbleed) or framed image (centered/split) */}
       {image && fullbleed && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={image}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover opacity-70"
-        />
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={image}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full object-cover opacity-70"
+          />
+          {/* Gradient scrim — keeps white titles readable on light photos */}
+          <div
+            className="absolute inset-0"
+            aria-hidden
+            style={{
+              background:
+                "linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0.15) 45%, rgba(0,0,0,0.25))",
+            }}
+          />
+        </>
       )}
 
       {animate ? (

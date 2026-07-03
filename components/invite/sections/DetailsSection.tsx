@@ -53,7 +53,7 @@ function DetailRow({ icon, text, cards }: DetailRowProps) {
         style={{ backgroundColor: "var(--inv-surface)", color: "var(--inv-text)" }}
       >
         <span style={{ color: "var(--inv-accent)" }}>{icon}</span>
-        <span className="text-[14px] leading-snug" style={{ wordBreak: "keep-all" }}>
+        <span className="min-w-0 wrap-break-word text-[14px] leading-relaxed" style={{ wordBreak: "keep-all" }}>
           {text}
         </span>
       </div>
@@ -62,7 +62,7 @@ function DetailRow({ icon, text, cards }: DetailRowProps) {
   return (
     <div className="flex items-center gap-3 py-2" style={{ color: "var(--inv-text)" }}>
       <span style={{ color: "var(--inv-accent)" }}>{icon}</span>
-      <span className="text-[14px] leading-snug" style={{ wordBreak: "keep-all" }}>
+      <span className="min-w-0 wrap-break-word text-[14px] leading-relaxed" style={{ wordBreak: "keep-all" }}>
         {text}
       </span>
     </div>
@@ -110,7 +110,7 @@ export function DetailsSection({ config, content, theme, mode }: SectionProps<"d
               className="rounded-full px-6 py-2.5 text-[14px] font-medium transition-opacity hover:opacity-80"
               style={{
                 backgroundColor: "var(--inv-accent)",
-                color: "#fff",
+                color: "var(--inv-on-accent)",
               }}
               onClick={() => {
                 /* calendar action handled by public shell */

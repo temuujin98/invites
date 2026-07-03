@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { SectionTemplate, InviteSectionContent } from "@/types/section";
+import { fontStack } from "./SectionRenderer";
 
 interface InvitationShellProps {
   template: SectionTemplate;
@@ -139,7 +140,7 @@ export function InvitationShell({
               {openingTitle && (
                 <p
                   className="text-[24px] font-bold leading-tight"
-                  style={{ fontFamily: `'${template.theme.fonts.heading}', serif`, color: template.theme.palette.text }}
+                  style={{ fontFamily: fontStack(template.theme.fonts.heading, "serif"), color: template.theme.palette.text }}
                 >
                   {openingTitle}
                 </p>

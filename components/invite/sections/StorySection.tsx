@@ -29,7 +29,7 @@ function TimelineItem({ entry, last }: TimelineItemProps) {
         {!last && (
           <div
             className="mt-1 w-px flex-1"
-            style={{ backgroundColor: "var(--inv-surface)", minHeight: "24px" }}
+            style={{ backgroundColor: "color-mix(in srgb, var(--inv-accent) 35%, transparent)", minHeight: "24px" }}
             aria-hidden="true"
           />
         )}
@@ -37,7 +37,7 @@ function TimelineItem({ entry, last }: TimelineItemProps) {
       {/* Right: content */}
       <div className="pb-6">
         <p
-          className="text-[13px] font-bold leading-snug"
+          className="text-[13px] font-bold leading-relaxed"
           style={{ color: "var(--inv-accent)" }}
         >
           {entry.key}
@@ -84,7 +84,7 @@ function AlternatingItem({ entry, index }: AlternatingItemProps) {
         style={{ backgroundColor: "var(--inv-surface)" }}
       >
         <p
-          className="text-[13px] font-bold leading-snug"
+          className="text-[13px] font-bold leading-relaxed"
           style={{ color: "var(--inv-accent)" }}
         >
           {entry.key}
@@ -130,7 +130,7 @@ export function StorySection({ config, content, theme, mode }: SectionProps<"sto
             {/* Center vertical line (desktop only) */}
             <div
               className="absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 sm:block"
-              style={{ backgroundColor: "var(--inv-surface)" }}
+              style={{ backgroundColor: "color-mix(in srgb, var(--inv-accent) 35%, transparent)" }}
               aria-hidden="true"
             />
             {items.map((item, i) => (

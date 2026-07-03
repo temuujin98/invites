@@ -28,10 +28,12 @@ function CopyButton({ value }: { value: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="ml-2 shrink-0 rounded-md px-2 py-0.5 text-[11px] font-medium transition-colors"
+      className="ml-2 inline-flex shrink-0 items-center justify-center rounded-md border px-3 text-[12px] font-medium transition-colors"
       style={{
-        backgroundColor: copied ? "var(--inv-accent)" : "var(--inv-bg)",
-        color: copied ? "#fff" : "var(--inv-muted)",
+        minHeight: "32px",
+        backgroundColor: copied ? "var(--inv-accent)" : "transparent",
+        color: copied ? "var(--inv-on-accent)" : "var(--inv-accent)",
+        borderColor: copied ? "var(--inv-accent)" : "var(--inv-accent)",
       }}
       aria-label={`${value} хуулах`}
     >
@@ -74,7 +76,7 @@ export function GiftSection({ config, content, theme, mode }: SectionProps<"gift
               className="flex items-center justify-between px-4 py-3"
               style={{
                 borderBottom:
-                  i < bankRows.length - 1 ? "1px solid var(--inv-bg)" : undefined,
+                  i < bankRows.length - 1 ? "1px solid color-mix(in srgb, var(--inv-muted) 20%, transparent)" : undefined,
               }}
             >
               <div className="flex flex-col gap-0.5">
