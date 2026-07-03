@@ -126,19 +126,31 @@ function CsvImportDrawer({ open, onClose, onImport, importing }: CsvImportDrawer
   );
 }
 
+// ── Icons ─────────────────────────────────────────────────────────────────────
+
+function IconSendAll() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <path d="M12 2L2 6.5l4 1.5 1.5 4L12 2z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 // ── Inner component (uses useToast) ──────────────────────────────────────────
 
 interface GuestsInnerProps {
   inviteId: string;
   inviteTitle: string;
+  invitePublished: boolean;
   initialGuests: Guest[];
 }
 
-function GuestsInner({ inviteId, inviteTitle, initialGuests }: GuestsInnerProps) {
+function GuestsInner({ inviteId, inviteTitle, invitePublished, initialGuests }: GuestsInnerProps) {
   const { show } = useToast();
 
   const [guests, setGuests] = useState<Guest[]>(initialGuests);
   const [search, setSearch] = useState("");
+  const [sendingAll, setSendingAll] = useState(false);
 
   // Form drawer state
   const [formOpen, setFormOpen] = useState(false);
@@ -246,9 +258,76 @@ function GuestsInner({ inviteId, inviteTitle, initialGuests }: GuestsInnerProps)
     }
   }
 
-  function handleSend(g: Guest) {
-    void g;
-    show("Имэйл илгээх удахгүй нэмэгдэнэ", "info");
+  async function handleSend(g: Guest) {
+    if (!g.email) return;
+    try {
+      const res = await fetch(`/api/invites/${inviteId}/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ guestId: g.id }),
+      });
+      const json = await res.json() as
+        | { ok: true; data: { sent: number; failed: number; hasMore: boolean; results: { guestId: string; status: "sent" | "failed" }[] } }
+        | { ok: false; code: string; message: string };
+      if (!json.ok) {
+        show(json.message, "error");
+        return;
+      }
+      const result = json.data.results.find((r) => r.guestId === g.id);
+      const newStatus = result?.status ?? "sent";
+      setGuests((prev) =>
+        prev.map((guest) =>
+          guest.id === g.id ? { ...guest, deliveryStatus: newStatus } : guest
+        )
+      );
+      if (newStatus === "sent") {
+        show("Илгээлээ", "success");
+      } else {
+        show("Илгээхэд алдаа гарлаа", "error");
+      }
+    } catch {
+      show("Сүлжээний алдаа гарлаа", "error");
+    }
+  }
+
+  async function handleSendAll() {
+    if (!invitePublished) {
+      show("Эхлээд урилгаа нийтэлнэ үү", "error");
+      return;
+    }
+    setSendingAll(true);
+    try {
+      const res = await fetch(`/api/invites/${inviteId}/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const json = await res.json() as
+        | { ok: true; data: { sent: number; failed: number; hasMore: boolean; results: { guestId: string; status: "sent" | "failed" }[] } }
+        | { ok: false; code: string; message: string };
+      if (!json.ok) {
+        show(json.message, "error");
+        return;
+      }
+      const { sent, failed, results } = json.data;
+      // Optimistically update statuses from results
+      if (results.length > 0) {
+        setGuests((prev) =>
+          prev.map((guest) => {
+            const r = results.find((x) => x.guestId === guest.id);
+            return r ? { ...guest, deliveryStatus: r.status } : guest;
+          })
+        );
+      }
+      const msg = failed > 0
+        ? `${sent} зочинд илгээлээ · ${failed} амжилтгүй`
+        : `${sent} зочинд илгээлээ`;
+      show(msg, failed > 0 ? "error" : "success");
+    } catch {
+      show("Сүлжээний алдаа гарлаа", "error");
+    } finally {
+      setSendingAll(false);
+    }
   }
 
   async function handleImport(rows: GuestCreateInput[]) {
@@ -298,6 +377,17 @@ function GuestsInner({ inviteId, inviteTitle, initialGuests }: GuestsInnerProps)
               >
                 <IconUpload />
                 <span className="hidden sm:inline">CSV импорт</span>
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleSendAll}
+                loading={sendingAll}
+                disabled={sendingAll}
+                className="gap-1.5"
+              >
+                <IconSendAll />
+                <span className="hidden sm:inline">Бүгдэд илгээх</span>
               </Button>
               <Button variant="primary" size="sm" onClick={openAdd}>
                 + Зочин нэмэх
@@ -414,10 +504,10 @@ interface GuestsClientProps {
   initialGuests: Guest[];
 }
 
-export function GuestsClient({ inviteId, inviteTitle, initialGuests }: GuestsClientProps) {
+export function GuestsClient({ inviteId, inviteTitle, invitePublished, initialGuests }: GuestsClientProps) {
   return (
     <ToastProvider>
-      <GuestsInner inviteId={inviteId} inviteTitle={inviteTitle} initialGuests={initialGuests} />
+      <GuestsInner inviteId={inviteId} inviteTitle={inviteTitle} invitePublished={invitePublished} initialGuests={initialGuests} />
     </ToastProvider>
   );
 }

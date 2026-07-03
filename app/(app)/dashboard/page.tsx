@@ -126,9 +126,10 @@ interface InviteRow {
   updated_at: string;
   templates: { slug: string } | null;
   rsvps: { count: number }[];
+  guests: { count: number }[];
 }
 
-function rowToInvite(row: InviteRow): Invite {
+function rowToInvite(row: InviteRow): Invite & { guestCount: number } {
   return {
     id: row.id,
     templateId: row.template_id,
@@ -140,6 +141,7 @@ function rowToInvite(row: InviteRow): Invite {
     isPublic: row.is_public,
     eventDate: row.event_date ?? undefined,
     rsvpCount: row.rsvps?.[0]?.count ?? 0,
+    guestCount: row.guests?.[0]?.count ?? 0,
     viewCount: 0,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -148,7 +150,7 @@ function rowToInvite(row: InviteRow): Invite {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [invites, setInvites] = useState<Invite[]>([]);
+  const [invites, setInvites] = useState<(Invite & { guestCount: number })[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterId>("all");
@@ -167,7 +169,7 @@ export default function DashboardPage() {
       );
       const { data, error: err } = await supabase
         .from("invites")
-        .select("id, template_id, user_id, title, share_slug, status, is_public, event_date, created_at, updated_at, templates ( slug ), rsvps ( count )")
+        .select("id, template_id, user_id, title, share_slug, status, is_public, event_date, created_at, updated_at, templates ( slug ), rsvps ( count ), guests ( count )")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       if (err) { setError("Урилга уншихад алдаа гарлаа"); }
@@ -211,8 +213,8 @@ export default function DashboardPage() {
     if (!err) {
       setInvites((prev) =>
         prev.map((i) =>
-          i.id === invite.id ? { ...i, status: "archived" as InviteStatus } : i,
-        ),
+          i.id === invite.id ? { ...i, status: "archived" as InviteStatus } : i
+        )
       );
     }
   }
@@ -325,6 +327,7 @@ export default function DashboardPage() {
                   onEdit={() => router.push(`/invites/${invite.id}/edit`)}
                   onPreview={() => window.open(`/i/${invite.shareSlug}`, "_blank")}
                   onCopy={() => handleCopyLink(invite)}
+                  onGuests={() => router.push(`/invites/${invite.id}/guests`)}
                   onArchive={() => setArchiveTarget(invite)}
                   onDelete={() => setDeleteTarget(invite)}
                 />
@@ -365,15 +368,27 @@ export default function DashboardPage() {
 // ── InviteRow ──────────────────────────────────────────────────────────────
 
 interface InviteRowProps {
-  invite: Invite;
+  invite: Invite & { guestCount: number };
   onEdit: () => void;
   onPreview: () => void;
   onCopy: () => void;
+  onGuests: () => void;
   onArchive: () => void;
   onDelete: () => void;
 }
 
-function InviteRow({ invite, onEdit, onPreview, onCopy, onArchive, onDelete }: InviteRowProps) {
+function IconGuests() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <circle cx="4.5" cy="3.5" r="1.8" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M1 10a3.5 3.5 0 0 1 7 0" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      <path d="M8.5 6.5a2.5 2.5 0 0 1 2.5 2.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      <circle cx="9" cy="3.5" r="1.5" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+}
+
+function InviteRow({ invite, onEdit, onPreview, onCopy, onGuests, onArchive, onDelete }: InviteRowProps) {
   return (
     <article className="flex items-center gap-3 rounded-(--radius-card) border border-(--color-border) bg-(--color-surface) p-3 shadow-sm transition-shadow hover:shadow-md">
       {/* Thumbnail */}
@@ -404,6 +419,10 @@ function InviteRow({ invite, onEdit, onPreview, onCopy, onArchive, onDelete }: I
             <IconRSVP />
             {invite.rsvpCount} RSVP
           </span>
+          <span className="flex items-center gap-1 text-[11px] text-(--color-text-secondary)">
+            <IconGuests />
+            {invite.guestCount} зочин
+          </span>
           <span className="flex items-center gap-1 text-[11px] text-(--color-text-muted)">
             <IconEye />
             {invite.viewCount}
@@ -417,6 +436,7 @@ function InviteRow({ invite, onEdit, onPreview, onCopy, onArchive, onDelete }: I
           items={[
             { label: "Засах", icon: <IconEdit />, onClick: onEdit },
             { label: "Харах", icon: <IconEye />, onClick: onPreview },
+            { label: "Зочид", icon: <IconGuests />, onClick: onGuests },
             { label: "Линк хуулах", icon: <IconCopy />, onClick: onCopy },
             { label: "Архивлах", icon: <IconArchive />, onClick: onArchive },
             { label: "Устгах", icon: <IconTrash />, onClick: onDelete, danger: true },
