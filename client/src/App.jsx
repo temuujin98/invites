@@ -2,6 +2,8 @@ import { motion, useReducedMotion } from 'motion/react'
 import { ArrowUpRight, Play } from 'lucide-react'
 import PublicInvitation from './PublicInvitation'
 
+const studioUrl = import.meta.env.VITE_APP_URL || 'https://invites-mn-studio-20260716.temuujinotgonchimeg9.chatgpt.site'
+
 const cards = [
   { name: 'ТЭМҮҮЛЭН', date: '2026 09 18', tone: 'lavender', type: 'Хурим', angle: 0 },
   { name: 'LUNAR 27', date: 'SAT 21 00', tone: 'coral', type: 'Төрсөн өдөр', angle: 120 },
