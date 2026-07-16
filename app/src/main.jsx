@@ -13,7 +13,7 @@ function InvitationPreview({ invitation }) {
 }
 
 
-function TemplateGallery({ onClose }) {
+function TemplateGallery({ onClose, onStart }) {
   const [selected, setSelected] = useState('Luxe violet')
   const templates = [
     { name: 'Luxe violet', type: 'Хурим', style: 'lavender' },
@@ -21,18 +21,26 @@ function TemplateGallery({ onClose }) {
     { name: 'Green room', type: 'Ёслол', style: 'sage' },
     { name: 'Mono', type: 'Байгууллага', style: 'mono' },
   ]
-  return <section className="template-overlay"><div className="template-head"><div><p className="eyebrow">01 / ЗАГВАР СОНГОХ</p><h1>Таны мөчид<br />таарах өнгө аяс.</h1><p>Дараа нь бүх текст, зураг болон хэсгийг өөрийнхөөрөө засна.</p></div><button className="text-button" onClick={onClose}>Буцах <ArrowRight size={15} /></button></div><div className="template-grid">{templates.map((template) => <button key={template.name} className={selected === template.name ? 'template-card selected' : 'template-card'} onClick={() => setSelected(template.name)}><InvitationPreview invitation={{ title: template.name === 'Luxe violet' ? 'Тэмүүлэн × Номин' : template.name, type: template.type, date: 'ТАНЫ АРГА ХЭМЖЭЭ', color: template.style }} /><span>{template.type}</span><b>{template.name}</b></button>)}</div><div className="template-footer"><span>Сонгосон загвар: <b>{selected}</b></span><button className="create-button">Энэ загвараар эхлэх <ArrowRight size={17} /></button></div></section>
+  return <section className="template-overlay"><div className="template-head"><div><p className="eyebrow">01 / ЗАГВАР СОНГОХ</p><h1>Таны мөчид<br />таарах өнгө аяс.</h1><p>Дараа нь бүх текст, зураг болон хэсгийг өөрийнхөөрөө засна.</p></div><button className="text-button" onClick={onClose}>Буцах <ArrowRight size={15} /></button></div><div className="template-grid">{templates.map((template) => <button key={template.name} className={selected === template.name ? 'template-card selected' : 'template-card'} onClick={() => setSelected(template.name)}><InvitationPreview invitation={{ title: template.name === 'Luxe violet' ? 'Тэмүүлэн × Номин' : template.name, type: template.type, date: 'ТАНЫ АРГА ХЭМЖЭЭ', color: template.style }} /><span>{template.type}</span><b>{template.name}</b></button>)}</div><div className="template-footer"><span>Сонгосон загвар: <b>{selected}</b></span><button type="button" className="create-button" onClick={onStart}>Энэ загвараар эхлэх <ArrowRight size={17} /></button></div></section>
+}
+
+function InvitationEditor({ onClose }) {
+  const [title, setTitle] = useState('Тэмүүлэн × Номин')
+  const [date, setDate] = useState('2026.09.18')
+  const [place, setPlace] = useState('Улаанбаатар')
+  return <section className="editor-overlay"><div className="editor-top"><div><p className="eyebrow">02 / УРИЛГАА ЗАСАХ</p><h1>Таны түүх,<br />таны өнгө аяс.</h1></div><button className="text-button" onClick={onClose}>Загвар руу буцах <ArrowRight size={15} /></button></div><div className="editor-grid"><form className="editor-form"><label>Арга хэмжээний нэр<input value={title} onChange={(event) => setTitle(event.target.value)} /></label><label>Огноо<input value={date} onChange={(event) => setDate(event.target.value)} /></label><label>Байршил<input value={place} onChange={(event) => setPlace(event.target.value)} /></label><label>Урилгын мессеж<textarea defaultValue="Таныг бидний онцгой өдөрт урьж байна." /></label><button type="button" className="create-button">Хадгалах <ArrowRight size={17} /></button></form><div className="editor-preview"><p>LIVE PREVIEW</p><div className="editor-card"><span>ХУРИМ</span><div><strong>{title || 'Таны нэр'}</strong><small>{date} · {place}</small></div><i>i</i></div></div></div></section>
 }
 function App() {
   const [activeTab, setActiveTab] = useState('Миний урилга')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [editorOpen, setEditorOpen] = useState(false)
   return <div className="studio-shell">
     <aside className="sidebar">
       <a className="studio-brand" href="http://localhost:5173"><img src="http://localhost:5173/brand/invites.mn/Logo (3).png" alt="INVITES.MN" /></a><p className="studio-kicker">CREATOR STUDIO</p>
       <nav aria-label="Studio navigation">{[[Grid2X2, 'Миний урилга'], [LayoutTemplate, 'Загварууд'], [Users, 'Зочид']].map(([Icon, label]) => <button key={label} className={activeTab === label ? 'nav-item active' : 'nav-item'} onClick={() => setActiveTab(label)}><Icon size={18} />{label}</button>)}</nav>
       <div className="sidebar-bottom"><button className="nav-item" onClick={() => setMenuOpen(!menuOpen)}><Settings size={18} />Тохиргоо</button><a className="help-link" href="mailto:hello@invites.mn"><CircleHelp size={17} />Тусламж хэрэгтэй юу?</a><button className="profile" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen}><span className="avatar">A</span><span><b>Ариунболд</b><small>Free plan</small></span><ChevronDown size={16} /></button>{menuOpen && <div className="profile-menu"><button><LogOut size={15} />Гарах</button></div>}</div>
     </aside>
-    <main className="studio-main">{activeTab === 'Загварууд' && <TemplateGallery onClose={() => setActiveTab('Миний урилга')} />}
+    <main className="studio-main">{activeTab === 'Загварууд' && <TemplateGallery onClose={() => setActiveTab('Миний урилга')} onStart={() => setEditorOpen(true)} />}{editorOpen && <InvitationEditor onClose={() => setEditorOpen(false)} />}
       <header className="topbar"><div className="crumb"><Home size={15} /><span>/</span><b>{activeTab}</b></div><div className="top-actions"><button className="icon-button" aria-label="Мэдэгдэл"><Bell size={18} /></button><a className="view-site" href="http://localhost:5173">Сайт харах <ArrowRight size={16} /></a></div></header>
       <section className="dashboard-head"><div><p className="eyebrow">ТАНЫ ОРОН ЗАЙ</p><h1>Сайн байна уу, Ариунболд.</h1><p className="lead">Таны дараагийн дурсамжтай мөч эндээс эхэлнэ.</p></div><button className="create-button" onClick={() => setActiveTab('Загварууд')}><Plus size={18} />Шинэ урилга</button></section>
       <section className="metric-grid" aria-label="Урилгын тойм"><div className="metric"><span className="metric-icon purple"><LayoutTemplate size={18} /></span><p>Нийт урилга</p><b>2</b><small>Эхлүүлсэн бүтээлүүд</small></div><div className="metric"><span className="metric-icon orange"><CalendarDays size={18} /></span><p>Дараагийн арга хэмжээ</p><b>18</b><small>2026 оны 9 сар</small></div><div className="metric"><span className="metric-icon pink"><Heart size={18} /></span><p>Ирсэн RSVP</p><b>—</b><small>Урилга идэвхжсэний дараа</small></div></section>
