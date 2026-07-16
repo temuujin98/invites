@@ -1,0 +1,12 @@
+{
+  "name": "invites-mn",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": ["client", "app"],
+  "scripts": {
+    "dev:client": "npm run dev --workspace=client",
+    "dev:app": "npm run dev --workspace=app",
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces"
+  }
+}
