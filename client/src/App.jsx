@@ -26,7 +26,7 @@ export default function App() {
   const fadeUp = { initial: { opacity: 0, y: 22 }, animate: { opacity: 1, y: 0 } }
   return <main className="page-shell">
     <nav className="nav" aria-label="Үндсэн цэс">
-      <a className="brand" href="#top"><span>i</span> INVITES.MN</a>
+      <a className="brand" href="#top"><img src="/brand/invites.mn/Logo (3).png" alt="INVITES.MN" /></a>
       <div className="nav-links"><a href="#how">Хэрхэн ажиллах вэ</a><a href="#templates">Загварууд</a></div>
       <a className="button button-small" href="http://localhost:5174">Нэвтрэх <ArrowUpRight size={16} /></a>
     </nav>
@@ -56,6 +56,6 @@ export default function App() {
       <div className="feature violet"><p>QR</p><span>Нэг scan. Бүх мэдээлэл.</span></div>
     </section>
 
-    <footer><a className="brand" href="#top"><span>i</span> INVITES.MN</a><p>Дурсах мөч тань эндээс эхэлнэ.</p><a href="http://localhost:5174">Эхлэх <ArrowUpRight size={15}/></a></footer>
+    <footer><a className="brand" href="#top"><img src="/brand/invites.mn/Logo (3).png" alt="INVITES.MN" /></a><p>Дурсах мөч тань эндээс эхэлнэ.</p><a href="http://localhost:5174">Эхлэх <ArrowUpRight size={15}/></a></footer>
   </main>
 }
