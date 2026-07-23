@@ -48,7 +48,7 @@ export default function App() {
     <main className="kpage">
 
       <nav className="knav" aria-label="Үндсэн хэсэг">
-        <a className="knav-brand" href="#top">INVITES.MN</a>
+        <a className="knav-brand" href="#top"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a>
         <div className="knav-pill">
           <a href="#services">БОЛОМЖ</a>
           <a href="#cta">ЭХЛЭХ</a>
