@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { ArrowDown, ArrowUpRight } from 'lucide-react'
 import PublicInvitation from './PublicInvitation'
 import CreatorApp from '../../app/src/CreatorApp.jsx'
@@ -41,13 +42,34 @@ function MarqueeRow({ items, reverse, className }) {
   )
 }
 
-export default function App() {
-  if (window.location.pathname.startsWith('/studio')) return <CreatorApp />
-  if (window.location.pathname.startsWith('/i/')) return <PublicInvitation />
+/* Flip nav colors to white while it floats over the black sections */
+function useNavOnDark() {
+  const [onDark, setOnDark] = useState(false)
+  useEffect(() => {
+    const darkSections = () => document.querySelectorAll('.kskew, .kservices')
+    function check() {
+      const navLine = 46
+      let dark = false
+      darkSections().forEach((section) => {
+        const box = section.getBoundingClientRect()
+        if (box.top <= navLine && box.bottom >= navLine) dark = true
+      })
+      setOnDark(dark)
+    }
+    check()
+    window.addEventListener('scroll', check, { passive: true })
+    window.addEventListener('resize', check)
+    return () => { window.removeEventListener('scroll', check); window.removeEventListener('resize', check) }
+  }, [])
+  return onDark
+}
+
+function Landing() {
+  const navOnDark = useNavOnDark()
   return (
     <main className="kpage">
 
-      <nav className="knav" aria-label="Үндсэн хэсэг">
+      <nav className={`knav ${navOnDark ? 'on-dark' : ''}`} aria-label="Үндсэн хэсэг">
         <a className="knav-brand" href="#top"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a>
         <div className="knav-pill">
           <a href="#services">БОЛОМЖ</a>
@@ -108,4 +130,10 @@ export default function App() {
 
     </main>
   )
+}
+
+export default function App() {
+  if (window.location.pathname.startsWith('/studio')) return <CreatorApp />
+  if (window.location.pathname.startsWith('/i/')) return <PublicInvitation />
+  return <Landing />
 }
