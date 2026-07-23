@@ -1,36 +1,25 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from 'react'
-import { ArrowLeft, CalendarDays, MapPin, Users } from 'lucide-react'
+import { ArrowLeft, CalendarDays, MapPin, User, Users } from 'lucide-react'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
-
-const fallbackInvitation = {
-  id: null,
-  event_type: 'ХУРИМ',
-  title: 'Тэмүүжин × Номин',
-  message: 'Бидний дурсамжтай өдрийг хамтдаа тэмдэглэхийг урьж байна',
-  event_at: '2026-09-18T18:00:00+08:00',
-  venue: 'Улаанбаатар · Тансаг өргөө',
-}
-
-function formatEventDate(value) {
-  if (!value) return 'Огноо удахгүй зарлагдана'
-  return new Intl.DateTimeFormat('mn-MN', { dateStyle: 'long', timeStyle: 'short' }).format(new Date(value))
-}
+import { formatEventDate } from './templates'
 
 export default function PublicInvitation() {
   const [response, setResponse] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [guestName, setGuestName] = useState('')
   const [partySize, setPartySize] = useState(1)
-  const [invitation, setInvitation] = useState(fallbackInvitation)
-  const [loading, setLoading] = useState(isSupabaseConfigured)
+  const [invitation, setInvitation] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const slug = window.location.pathname.split('/').filter(Boolean).at(-1)
 
   useEffect(() => {
-    if (!supabase || !slug) return undefined
+    if (!supabase || !slug) { setLoading(false); return undefined }
     let alive = true
     supabase
       .from('invitations')
-      .select('id, event_type, title, message, event_at, venue')
+      .select('id, event_type, title, message, event_at, venue, theme')
       .eq('slug', slug)
       .eq('status', 'active')
       .maybeSingle()
@@ -45,13 +34,10 @@ export default function PublicInvitation() {
 
   async function submitRsvp() {
     if (!response) return
-    if (!supabase || !invitation.id) {
-      setError('RSVP илгээхийн тулд Supabase publishable key тохируулна уу')
-      return
-    }
     setError('')
     const { error: submitError } = await supabase.from('rsvps').insert({
       invitation_id: invitation.id,
+      guest_name: guestName.trim() || null,
       response: response === 'yes' ? 'attending' : 'declined',
       party_size: partySize,
     })
@@ -59,5 +45,63 @@ export default function PublicInvitation() {
     else setSubmitted(true)
   }
 
-  return <main className="public-invite"><a className="public-brand" href="/"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a><section className="public-card"><p className="public-type">{invitation.event_type}</p><h1>{invitation.title}</h1><p className="public-message">{invitation.message}</p><div className="event-facts"><p><CalendarDays size={18}/><span>{formatEventDate(invitation.event_at)}</span></p><p><MapPin size={18}/><span>{invitation.venue || 'Байршил удахгүй зарлагдана'}</span></p></div></section><section className="rsvp"><p className="public-type">RSVP</p><h2>Та ирэх үү</h2>{loading ? <p>Урилгыг ачаалж байна</p> : submitted ? <div className="thanks">Баярлалаа<br /><span>Таны хариуг хүлээн авлаа</span></div> : <><div className="response-buttons"><button className={response === 'yes' ? 'selected' : ''} onClick={() => setResponse('yes')}>Тийм</button><button className={response === 'no' ? 'selected' : ''} onClick={() => setResponse('no')}>Харамсалтай нь үгүй</button></div><label><Users size={17}/> Зочдын тоо<select value={partySize} onChange={(event) => setPartySize(Number(event.target.value))}><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label><button className="rsvp-submit" disabled={!response} onClick={submitRsvp}>Хариу илгээх</button>{error && <p role="alert">{error}</p>}</>}</section><a className="public-back" href="/"><ArrowLeft size={15}/> Invites.mn</a></main>
+  if (!isSupabaseConfigured) {
+    return <main className="public-invite"><p>Тохиргоо дутуу байна.</p></main>
+  }
+
+  if (loading) {
+    return <main className="public-invite"><a className="public-brand" href="/"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a><p style={{ marginTop: 60 }}>Урилгыг ачаалж байна…</p></main>
+  }
+
+  if (!invitation) {
+    return (
+      <main className="public-invite">
+        <a className="public-brand" href="/"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a>
+        <section className="public-card"><h1 style={{ fontSize: '2rem', letterSpacing: 0 }}>{error || 'Урилга олдсонгүй'}</h1></section>
+        <a className="public-back" href="/"><ArrowLeft size={15} /> Invites.mn</a>
+      </main>
+    )
+  }
+
+  return (
+    <main className="public-invite">
+      <a className="public-brand" href="/"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a>
+      <section className={`public-card ${invitation.theme || 'lavender'}`}>
+        <p className="public-type">{invitation.event_type}</p>
+        <h1>{invitation.title}</h1>
+        {invitation.message && <p className="public-message">{invitation.message}</p>}
+        <div className="event-facts">
+          <p><CalendarDays size={18} /><span>{formatEventDate(invitation.event_at)}</span></p>
+          <p><MapPin size={18} /><span>{invitation.venue || 'Байршил удахгүй зарлагдана'}</span></p>
+        </div>
+      </section>
+      <section className="rsvp">
+        <p className="public-type">RSVP</p>
+        <h2>Та ирэх үү</h2>
+        {submitted ? (
+          <div className="thanks">Баярлалаа<br /><span>Таны хариуг хүлээн авлаа</span></div>
+        ) : (
+          <>
+            <div className="response-buttons">
+              <button className={response === 'yes' ? 'selected' : ''} onClick={() => setResponse('yes')}>Тийм</button>
+              <button className={response === 'no' ? 'selected' : ''} onClick={() => setResponse('no')}>Харамсалтай нь үгүй</button>
+            </div>
+            <label><User size={17} /> Таны нэр
+              <input type="text" value={guestName} onChange={(event) => setGuestName(event.target.value)} placeholder="Нэрээ бичнэ үү" maxLength={80} />
+            </label>
+            {response === 'yes' && (
+              <label style={{ marginTop: 10 }}><Users size={17} /> Зочдын тоо
+                <select value={partySize} onChange={(event) => setPartySize(Number(event.target.value))}>
+                  {[1, 2, 3, 4, 5].map((size) => <option key={size} value={size}>{size}</option>)}
+                </select>
+              </label>
+            )}
+            <button className="rsvp-submit" disabled={!response} onClick={submitRsvp}>Хариу илгээх</button>
+            {error && <p role="alert">{error}</p>}
+          </>
+        )}
+      </section>
+      <a className="public-back" href="/"><ArrowLeft size={15} /> Invites.mn</a>
+    </main>
+  )
 }

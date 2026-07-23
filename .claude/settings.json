@@ -19,7 +19,24 @@
       "Bash(agent-browser click *)",
       "Bash(powershell -Command \"Get-Process agent-browser* -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep 2\")",
       "Bash(powershell -Command 'Get-Process | Where-Object {$_.Name -like '\\\\''*agent-browser*'\\\\''} | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Sleep 3')",
-      "Bash(echo \"exit=$?\")"
+      "Bash(echo \"exit=$?\")",
+      "Bash(curl -sL -o RussoOne-Regular.ttf \"https://github.com/google/fonts/raw/main/ofl/russoone/RussoOne-Regular.ttf\")",
+      "Bash(curl -sL -o JetBrainsMono.ttf \"https://github.com/google/fonts/raw/main/ofl/jetbrainsmono/JetBrainsMono%5Bwght%5D.ttf\")",
+      "Bash(curl -sL -o Inter.ttf \"https://github.com/google/fonts/raw/main/ofl/inter/Inter%5Bopsz%2Cwght%5D.ttf\")",
+      "Bash(awk '{print $5, $9}')",
+      "Bash(xxd)",
+      "WebFetch(domain:claudeskills.info)",
+      "Bash(node .agents/skills/impeccable/scripts/context.mjs --target app)",
+      "Bash(node \"C:\\\\Users\\\\ak-developer\\\\.claude\\\\skills\\\\impeccable\\\\scripts\\\\context.mjs\" --target \"c:\\\\Users\\\\ak-developer\\\\Documents\\\\invites\\\\app\")",
+      "Read(//c/Users/ak-developer/.claude/skills/impeccable/reference/**)",
+      "mcp__claude_ai_Supabase__apply_migration",
+      "Bash(node -e \"const s='Тэмүүлэн × Номин'; const latin=s.toLowerCase\\(\\).normalize\\('NFKD'\\).replace\\(/[\\\\u0300-\\\\u036f]/g,''\\); console.log\\(latin.replace\\(/[^a-z0-9]+/g,'-'\\).replace\\(/^-|-\\\\$/g,''\\)\\)\")",
+      "Bash(python -c ' *)",
+      "Bash(node -e ' *)",
+      "Bash(rm app/src/CreatorApp.jsx)",
+      "Bash(npx eslint *)",
+      "Bash(agent-browser fill *)",
+      "mcp__claude_ai_Supabase__execute_sql"
     ]
   }
 }

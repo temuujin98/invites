@@ -1,19 +1,11 @@
-import { useEffect, useState } from 'react'
-import { ArrowDown, ArrowUpRight } from 'lucide-react'
+import { ArrowDown } from 'lucide-react'
 import PublicInvitation from './PublicInvitation'
-import CreatorApp from '../../app/src/CreatorApp.jsx'
-
-const studioUrl = '/studio'
-
-const marqueeRow1 = ['ХУРИМ', 'ТӨРСӨН ӨДӨР', 'ЁСЛОЛ', 'ХҮЛЭЭН АВАЛТ', 'ТӨГСӨЛТ', 'ОЙН БАЯР']
-const marqueeRow2 = ['НЭГ ХОЛБООС', 'RSVP БОДИТ ЦАГТ', 'ГАР УТСАНД ТӨГС', 'ҮНЭГҮЙ ЭХЛЭХ']
-
-const services = [
-  { num: '01', title: 'УРИЛГА ҮҮСГЭХ', tags: ['20+ загвар', '3 минут', 'Кирилл типографи'] },
-  { num: '02', title: 'ХОЛБООС ХУВААЛЦАХ', tags: ['Мессенжер', 'Имэйл', 'QR код'] },
-  { num: '03', title: 'RSVP ХЯНАХ', tags: ['Бодит цагт', 'Зочдын тоо', 'Нэг самбар'] },
-  { num: '04', title: 'ШУУД ЗАСВАР', tags: ['Холбоос хэвээр', 'Авто шинэчлэл', 'Хязгааргүй'] },
-]
+import AdminApp from '../../app/src/AdminApp.jsx'
+import CreateGallery from './pages/CreateGallery'
+import CreateEditor from './pages/CreateEditor'
+import ConfirmPage from './pages/ConfirmPage'
+import PayPage from './pages/PayPage'
+import MyPage from './pages/MyPage'
 
 function ScrollIndicator() {
   return (
@@ -23,7 +15,7 @@ function ScrollIndicator() {
           <path id="spin-circle" d="M 72,72 m -52,0 a 52,52 0 1,1 104,0 a 52,52 0 1,1 -104,0" />
         </defs>
         <text>
-          <textPath href="#spin-circle">SCROLL DOWN • SCROLL DOWN • SCROLL DOWN • </textPath>
+          <textPath href="#spin-circle">УРИЛГА ҮҮСГЭ • УРИЛГА ҮҮСГЭ • УРИЛГА ҮҮСГЭ • </textPath>
         </text>
       </svg>
       <ArrowDown size={22} strokeWidth={2.5} />
@@ -31,109 +23,34 @@ function ScrollIndicator() {
   )
 }
 
-function MarqueeRow({ items, reverse, className }) {
-  const content = [...items, ...items, ...items]
-  return (
-    <div className={`kmarquee ${className || ''}`}>
-      <div className={`kmarquee-track ${reverse ? 'reverse' : ''}`}>
-        {content.map((item, index) => <span key={index}>{item}<em>✦</em></span>)}
-      </div>
-    </div>
-  )
-}
-
-/* Flip nav colors to white while it floats over the black sections */
-function useNavOnDark() {
-  const [onDark, setOnDark] = useState(false)
-  useEffect(() => {
-    const darkSections = () => document.querySelectorAll('.kskew, .kservices')
-    function check() {
-      const navLine = 46
-      let dark = false
-      darkSections().forEach((section) => {
-        const box = section.getBoundingClientRect()
-        if (box.top <= navLine && box.bottom >= navLine) dark = true
-      })
-      setOnDark(dark)
-    }
-    check()
-    window.addEventListener('scroll', check, { passive: true })
-    window.addEventListener('resize', check)
-    return () => { window.removeEventListener('scroll', check); window.removeEventListener('resize', check) }
-  }, [])
-  return onDark
-}
-
+/* Landing: header with one CTA + fullscreen typographic hero. Nothing else. */
 function Landing() {
-  const navOnDark = useNavOnDark()
   return (
     <main className="kpage">
-
-      <nav className={`knav ${navOnDark ? 'on-dark' : ''}`} aria-label="Үндсэн хэсэг">
-        <a className="knav-brand" href="#top"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a>
-        <div className="knav-pill">
-          <a href="#services">БОЛОМЖ</a>
-          <a href="#cta">ЭХЛЭХ</a>
-          <a href={studioUrl}>НЭВТРЭХ</a>
-        </div>
-        <div className="knav-social">
-          <a href="https://instagram.com" aria-label="Instagram">IG</a>
-          <a href="https://facebook.com" aria-label="Facebook">FB</a>
-          <a href="mailto:hello@invites.mn" aria-label="Имэйл">@</a>
-        </div>
+      <nav className="knav" aria-label="Үндсэн хэсэг">
+        <a className="knav-brand" href="/"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a>
+        <a className="kbutton kbutton-small" href="/create">Урилга үүсгэх</a>
       </nav>
-
-      <header id="top" className="khero">
+      <header className="khero">
         <h1>УРИЛГА</h1>
         <div className="khero-meta">
-          <p className="kmeta-left">УЛААНБААТАР,<br />МОНГОЛ УЛС</p>
-          <ScrollIndicator />
-          <p className="kmeta-right">DIGITAL УРИЛГЫН ПЛАТФОРМ<br />ЗАГВАР · ХОЛБООС · RSVP</p>
+          <p className="kmeta-left">DIGITAL УРИЛГЫН<br />ПЛАТФОРМ</p>
+          <a href="/create" aria-label="Урилга үүсгэх"><ScrollIndicator /></a>
+          <p className="kmeta-right">3 МИНУТАД БЭЛЭН<br />ЗАГВАР · ХОЛБООС · RSVP</p>
         </div>
       </header>
-
-      <section className="kskew" aria-hidden="true">
-        <MarqueeRow items={marqueeRow1} className="krow-1" />
-        <MarqueeRow items={marqueeRow2} reverse className="krow-2" />
-      </section>
-
-      <section id="services" className="kservices">
-        <p className="ksection-label">// БОЛОМЖУУД</p>
-        {services.map((service) => (
-          <a className="kservice" href={studioUrl} key={service.num}>
-            <span className="kservice-num">{service.num}</span>
-            <div className="kservice-body">
-              <h2>{service.title}</h2>
-              <div className="kservice-tags">
-                {service.tags.map((tag) => <span key={tag}>{tag}</span>)}
-              </div>
-            </div>
-            <ArrowUpRight className="kservice-arrow" size={54} strokeWidth={2.5} />
-          </a>
-        ))}
-      </section>
-
-      <section id="cta" className="kcta">
-        <h2>ОДОО<br />ЭХЭЛЦГЭЭЕ</h2>
-        <a className="kcta-button" href={studioUrl}>УРИЛГА ҮҮСГЭХ</a>
-        <p className="kcta-note">Бүртгэл үнэгүй · 3 минутад бэлэн</p>
-      </section>
-
-      <footer className="kfooter">
-        <p>© 2026 INVITES.MN — БҮХ ЭРХ ХУУЛИАР ХАМГААЛАГДСАН</p>
-        <div className="kfooter-links">
-          <a href="https://instagram.com">INSTAGRAM</a>
-          <a href="https://facebook.com">FACEBOOK</a>
-          <a href="mailto:hello@invites.mn">HELLO@INVITES.MN</a>
-        </div>
-      </footer>
-
     </main>
   )
 }
 
 export default function App() {
-  if (window.location.pathname.startsWith('/studio')) return <CreatorApp />
-  if (window.location.pathname.startsWith('/i/')) return <PublicInvitation />
+  const path = window.location.pathname
+  if (path.startsWith('/i/')) return <PublicInvitation />
+  if (path.startsWith('/admin')) return <AdminApp />
+  if (path.startsWith('/create/confirm')) return <ConfirmPage />
+  if (path.startsWith('/create/')) return <CreateEditor templateId={path.split('/')[2]} />
+  if (path === '/create') return <CreateGallery />
+  if (path.startsWith('/pay/')) return <PayPage invitationId={path.split('/')[2]} />
+  if (path.startsWith('/my')) return <MyPage />
   return <Landing />
 }

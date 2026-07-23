@@ -1,1 +1,15 @@
-{ "framework": "vite", "installCommand": "npm install", "buildCommand": "npm run build --workspace=client", "outputDirectory": "client/dist", "rewrites": [{ "source": "/i/:path*", "destination": "/index.html" }] }
+{
+  "framework": "vite",
+  "installCommand": "npm install",
+  "buildCommand": "npm run build --workspace=client",
+  "outputDirectory": "client/dist",
+  "rewrites": [
+    { "source": "/i/:path*", "destination": "/index.html" },
+    { "source": "/create", "destination": "/index.html" },
+    { "source": "/create/:path*", "destination": "/index.html" },
+    { "source": "/pay/:path*", "destination": "/index.html" },
+    { "source": "/my", "destination": "/index.html" },
+    { "source": "/admin", "destination": "/index.html" },
+    { "source": "/admin/:path*", "destination": "/index.html" }
+  ]
+}
