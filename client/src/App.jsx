@@ -134,10 +134,22 @@ function Hero({ reduceMotion }) {
       <div className="hero-sticky">
         <motion.div className="hero-scene" style={reduceMotion ? undefined : { scale: sceneScale, rotate: sceneRotate, opacity: sceneOpacity }} aria-hidden="true">
           <motion.div className="scene" variants={reduceMotion ? undefined : wallVariants} initial={reduceMotion ? false : 'hidden'} animate={reduceMotion ? false : 'show'}>
-            <motion.p className="wall ceiling" variants={reduceMotion ? undefined : wallItem}>МӨЧ БҮР<br />ТАНЫХ</motion.p>
-            <motion.p className="wall floor" variants={reduceMotion ? undefined : wallItem}>УРИЛГА<br />БОЛГО</motion.p>
-            <motion.p className="wall left" variants={reduceMotion ? undefined : wallItem}>ТАНЫ<br />МӨЧ</motion.p>
-            <motion.p className="wall right" variants={reduceMotion ? undefined : wallItem}>УРЬЖ<br />БАЙНА</motion.p>
+            <motion.div className="plane ceiling" variants={reduceMotion ? undefined : wallItem} aria-hidden="true">
+              <span className="w-a">МӨЧ</span>
+              <span className="w-b">БҮР-</span>
+            </motion.div>
+            <motion.div className="plane floor" variants={reduceMotion ? undefined : wallItem} aria-hidden="true">
+              <span className="w-a">УРИЛГА</span>
+              <span className="w-b">БОЛГО</span>
+            </motion.div>
+            <motion.div className="plane wall-l" variants={reduceMotion ? undefined : wallItem} aria-hidden="true">
+              <span className="w-a">ТАНЫ</span>
+              <span className="w-b">МӨЧ</span>
+            </motion.div>
+            <motion.div className="plane wall-r" variants={reduceMotion ? undefined : wallItem} aria-hidden="true">
+              <span className="w-a">УРЬЖ</span>
+              <span className="w-b">БАЙНА</span>
+            </motion.div>
           </motion.div>
           <div className="hero-veil" />
         </motion.div>
