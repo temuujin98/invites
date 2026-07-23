@@ -9,7 +9,17 @@
       "Skill(agent-browser:*)",
       "Bash(npx vite *)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5199/)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(agent-browser open *)",
+      "Bash(agent-browser set *)",
+      "Bash(agent-browser screenshot *)",
+      "Bash(agent-browser eval *)",
+      "Bash(agent-browser close *)",
+      "Bash(agent-browser snapshot *)",
+      "Bash(agent-browser click *)",
+      "Bash(powershell -Command \"Get-Process agent-browser* -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep 2\")",
+      "Bash(powershell -Command 'Get-Process | Where-Object {$_.Name -like '\\\\''*agent-browser*'\\\\''} | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Sleep 3')",
+      "Bash(echo \"exit=$?\")"
     ]
   }
 }

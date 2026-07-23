@@ -135,20 +135,16 @@ function Hero({ reduceMotion }) {
         <motion.div className="hero-scene" style={reduceMotion ? undefined : { scale: sceneScale, rotate: sceneRotate, opacity: sceneOpacity }} aria-hidden="true">
           <motion.div className="scene" variants={reduceMotion ? undefined : wallVariants} initial={reduceMotion ? false : 'hidden'} animate={reduceMotion ? false : 'show'}>
             <motion.div className="plane ceiling" variants={reduceMotion ? undefined : wallItem} aria-hidden="true">
-              <span className="w-a">МӨЧ</span>
-              <span className="w-b">БҮР-</span>
+              <p className="txt">-УРЬ</p>
             </motion.div>
             <motion.div className="plane floor" variants={reduceMotion ? undefined : wallItem} aria-hidden="true">
-              <span className="w-a">УРИЛГА</span>
-              <span className="w-b">БОЛГО</span>
+              <p className="txt">УРИЛГА<br />БОЛГО</p>
             </motion.div>
             <motion.div className="plane wall-l" variants={reduceMotion ? undefined : wallItem} aria-hidden="true">
-              <span className="w-a">ТАНЫ</span>
-              <span className="w-b">МӨЧ</span>
+              <p className="txt">ТАНЫ<br />МӨЧ</p>
             </motion.div>
             <motion.div className="plane wall-r" variants={reduceMotion ? undefined : wallItem} aria-hidden="true">
-              <span className="w-a">УРЬЖ</span>
-              <span className="w-b">БАЙНА</span>
+              <p className="txt">ОДОО<br />УРЬ</p>
             </motion.div>
           </motion.div>
           <div className="hero-veil" />

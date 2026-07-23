@@ -33,23 +33,24 @@ a { color: inherit; text-decoration: none; }
 .hero { position: relative; height: 180vh; background: #050308; }
 .hero-sticky { position: sticky; top: 0; height: 100vh; display: grid; place-items: center; isolation: isolate; overflow: hidden; }
 .hero-scene { position: absolute; inset: 0; z-index: 1; pointer-events: none; transform-origin: 50% 50%; will-change: transform, opacity; }
-.scene { position: absolute; inset: 0; perspective: 820px; perspective-origin: 50% 46%; overflow: hidden; }
-/* Each plane is a wall of the box: oversized cropped type, Leonardo wall.svg style */
-.plane { position: absolute; overflow: hidden; color: var(--brand); user-select: none; will-change: opacity, transform, filter; }
-.plane span { position: absolute; font-weight: 800; line-height: .74; letter-spacing: -.06em; white-space: nowrap; text-transform: uppercase; }
-.plane.ceiling { left: -22vw; right: -22vw; top: -6vh; height: 64vh; transform-origin: 50% 0; transform: rotateX(-62deg); }
-.plane.ceiling .w-a { font-size: 44vh; left: -6vw; top: -8vh; transform: rotate(-9deg); }
-.plane.ceiling .w-b { font-size: 52vh; right: -8vw; top: 6vh; transform: rotate(-14deg); }
-.plane.floor { left: -25vw; right: -25vw; bottom: -6vh; height: 72vh; transform-origin: 50% 100%; transform: rotateX(63deg); }
-.plane.floor .w-a { font-size: 46vh; left: 4vw; top: -4vh; transform: rotate(7deg); }
-.plane.floor .w-b { font-size: 58vh; left: 26vw; bottom: -14vh; transform: rotate(4deg); }
-.plane.wall-l { left: -2vw; top: -12vh; bottom: -12vh; width: 44vw; transform-origin: 0 50%; transform: rotateY(70deg); }
-.plane.wall-l .w-a { font-size: 24vw; left: -4vw; top: 2vh; transform: rotate(-90deg); transform-origin: left top; translate: 0 46vh; }
-.plane.wall-l .w-b { font-size: 30vw; left: 6vw; bottom: -6vh; }
-.plane.wall-r { right: -2vw; top: -12vh; bottom: -12vh; width: 44vw; transform-origin: 100% 50%; transform: rotateY(-70deg); }
-.plane.wall-r .w-a { font-size: 22vw; right: -2vw; top: -4vh; }
-.plane.wall-r .w-b { font-size: 26vw; right: -6vw; bottom: 4vh; transform: rotate(90deg); transform-origin: right bottom; translate: 0 -40vh; }
-.hero-veil { position: absolute; inset: 0; background: radial-gradient(ellipse 46% 34% at 50% 48%, #050308f7 0%, #050308ab 55%, transparent 100%), linear-gradient(#05030800 82%, #050308 100%); }
+.scene { position: absolute; inset: 0; overflow: hidden; --wallc: #8455ff; }
+/*
+ * Leonardo wall.svg geometry: the screen tessellates into four trapezoid
+ * planes that converge on a pure-black core rectangle (30%..76% x, 26%..66% y).
+ * Each plane clips its own perspective-transformed giant type, so the seams
+ * between planes stay razor sharp and the letters stay vivid to the edges.
+ */
+.plane { position: absolute; inset: 0; color: var(--wallc); user-select: none; will-change: opacity, transform, filter; }
+.plane .txt { position: absolute; margin: 0; font-weight: 800; line-height: .78; letter-spacing: -.05em; white-space: nowrap; text-transform: uppercase; }
+.plane.ceiling { clip-path: polygon(0 0, 100% 0, 76% 26%, 30% 26%); }
+.plane.ceiling .txt { left: 30vw; top: -4vh; font-size: 52vh; transform: perspective(750px) rotateX(-50deg) rotate(-7deg); transform-origin: 50% 0; }
+.plane.floor { clip-path: polygon(0 100%, 30% 66%, 76% 66%, 100% 100%); }
+.plane.floor .txt { left: 2vw; bottom: -4vh; font-size: 36vh; text-align: center; transform: perspective(750px) rotateX(50deg) rotate(2deg); transform-origin: 50% 100%; }
+.plane.wall-l { clip-path: polygon(0 0, 30% 26%, 30% 66%, 0 100%); }
+.plane.wall-l .txt { left: -6vw; top: -6vh; font-size: 42vh; transform: perspective(620px) rotateY(58deg); transform-origin: 0 50%; }
+.plane.wall-r { clip-path: polygon(100% 0, 76% 26%, 76% 66%, 100% 100%); }
+.plane.wall-r .txt { right: -8vw; top: -2vh; font-size: 40vh; text-align: right; transform: perspective(620px) rotateY(-58deg); transform-origin: 100% 50%; }
+.hero-veil { position: absolute; inset: 0; background: radial-gradient(ellipse 30% 24% at 52% 47%, #050308d9 0%, #05030866 55%, transparent 100%); }
 .hero-copy { position: relative; z-index: 2; text-align: center; padding: 90px 20px 0; max-width: 980px; will-change: transform, opacity; }
 .hero-badge { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 24px; padding: 8px 16px; border: 1px solid #8b5cf740; border-radius: 99px; background: #8b5cf714; backdrop-filter: blur(6px); color: #d8b9ff; font-size: 11px; letter-spacing: .16em; font-weight: 600; }
 .hero h1 { margin: 0 0 34px; font-size: clamp(2rem, 5.4vw, 4.3rem); font-weight: 800; letter-spacing: -.015em; line-height: 1.04; color: #fff; text-transform: uppercase; }
@@ -214,8 +215,8 @@ footer > a:hover { color: #fff; }
   .hero { height: 180vh; }
   .hero h1 { font-size: clamp(1.6rem, 7.4vw, 2.4rem); }
   .plane.wall-l, .plane.wall-r { display: none; }
-  .plane.ceiling { left: -40vw; right: -40vw; }
-  .plane.floor { left: -45vw; right: -45vw; }
+  .plane.ceiling { clip-path: polygon(0 0, 100% 0, 100% 26%, 0 26%); }
+  .plane.floor { clip-path: polygon(0 66%, 100% 66%, 100% 100%, 0 100%); }
   .stream-card { width: 200px; height: 280px; }
   .stream-card-big { height: 400px; }
   .visual-fan { width: 260px; height: 360px; }
