@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:leonardo.ai)",
+      "mcp__lazyweb__lazyweb_search",
+      "Bash(npm run *)",
+      "Bash(powershell -Command 'Get-NetTCPConnection -LocalPort 5199 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }')",
+      "Skill(agent-browser)",
+      "Skill(agent-browser:*)",
+      "Bash(npx vite *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5199/)",
+      "Bash(git add *)"
+    ]
+  }
+}

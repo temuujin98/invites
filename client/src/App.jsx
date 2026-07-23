@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react'
+import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'motion/react'
 import { ArrowUpRight, CalendarDays, MousePointerClick, Share2, Sparkles } from 'lucide-react'
 import PublicInvitation from './PublicInvitation'
 import CreatorApp from '../../app/src/CreatorApp.jsx'
@@ -24,6 +24,16 @@ const features = [
   { icon: MousePointerClick, title: 'Шууд засвар', copy: 'Огноо, байршил өөрчлөгдсөн ч холбоос хэвээрээ — зочдод үргэлж хамгийн сүүлийн мэдээлэл очно.' },
 ]
 
+const stats = [
+  { value: '3 мин', label: 'Урилга үүсгэх дундаж хугацаа' },
+  { value: '20+', label: 'Бэлэн загвар' },
+  { value: '100%', label: 'Гар утсанд тохирсон' },
+]
+
+const marqueeWords = ['ХУРИМ', 'ТӨРСӨН ӨДӨР', 'ЁСЛОЛ', 'ХҮЛЭЭН АВАЛТ', 'ТӨГСӨЛТ', 'ОЙН БАЯР', 'НЭЭЛТ', 'НЭРИЙН БАЯР']
+
+const ease = [0.22, 1, 0.36, 1]
+
 function StreamCard({ card }) {
   return (
     <article className={`stream-card ${card.tone}`}>
@@ -37,21 +47,106 @@ function StreamCard({ card }) {
   )
 }
 
-/* Leonardo-style 3D typography room: ceiling / floor / left / right walls */
-function HeroScene({ reduceMotion }) {
-  const { scrollY } = useScroll()
-  const y = useTransform(scrollY, [0, 700], [0, 150])
-  const opacity = useTransform(scrollY, [0, 650], [1, 0.15])
+/*
+ * Hero: Leonardo-style 3D typography room the camera flies INTO on scroll.
+ * The whole scene scales up + rotates while fading, so scrolling feels like
+ * pushing through the wall of letters. Copy fades and lifts out of the way.
+ */
+function Hero({ reduceMotion }) {
+  const ref = useRef(null)
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
+  const p = useSpring(scrollYProgress, { stiffness: 120, damping: 30, restDelta: 0.001 })
+
+  const sceneScale = useTransform(p, [0, 1], [1, 2.1])
+  const sceneRotate = useTransform(p, [0, 1], [0, -6])
+  const sceneOpacity = useTransform(p, [0, 0.7], [1, 0])
+  const copyY = useTransform(p, [0, 0.6], [0, -120])
+  const copyOpacity = useTransform(p, [0, 0.45], [1, 0])
+
+  const wallVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.12, delayChildren: 0.15 } },
+  }
+  const wallItem = {
+    hidden: { opacity: 0, scale: 1.4, filter: 'blur(8px)' },
+    show: { opacity: 1, scale: 1, filter: 'blur(0px)', transition: { duration: 1.1, ease } },
+  }
+
+  const copyContainer = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.09, delayChildren: 0.6 } },
+  }
+  const copyItem = {
+    hidden: { opacity: 0, y: 28 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.8, ease } },
+  }
+
   return (
-    <motion.div className="hero-scene" style={reduceMotion ? undefined : { y, opacity }} aria-hidden="true">
-      <div className="scene">
-        <p className="wall ceiling">МӨЧ БҮР<br />ТАНЫХ</p>
-        <p className="wall floor">УРИЛГА<br />БОЛГО</p>
-        <p className="wall left">ТАНЫ<br />МӨЧ</p>
-        <p className="wall right">УРЬЖ<br />БАЙНА</p>
+    <section id="top" ref={ref} className="hero">
+      <div className="hero-sticky">
+        <motion.div
+          className="hero-scene"
+          style={reduceMotion ? undefined : { scale: sceneScale, rotate: sceneRotate, opacity: sceneOpacity }}
+          aria-hidden="true"
+        >
+          <motion.div
+            className="scene"
+            variants={reduceMotion ? undefined : wallVariants}
+            initial={reduceMotion ? false : 'hidden'}
+            animate={reduceMotion ? false : 'show'}
+          >
+            <motion.p className="wall ceiling" variants={reduceMotion ? undefined : wallItem}>МӨЧ БҮР<br />ТАНЫХ</motion.p>
+            <motion.p className="wall floor" variants={reduceMotion ? undefined : wallItem}>УРИЛГА<br />БОЛГО</motion.p>
+            <motion.p className="wall left" variants={reduceMotion ? undefined : wallItem}>ТАНЫ<br />МӨЧ</motion.p>
+            <motion.p className="wall right" variants={reduceMotion ? undefined : wallItem}>УРЬЖ<br />БАЙНА</motion.p>
+          </motion.div>
+          <div className="hero-veil" />
+        </motion.div>
+
+        <motion.div
+          className="hero-copy"
+          style={reduceMotion ? undefined : { y: copyY, opacity: copyOpacity }}
+          variants={reduceMotion ? undefined : copyContainer}
+          initial={reduceMotion ? false : 'hidden'}
+          animate={reduceMotion ? false : 'show'}
+        >
+          <motion.p className="hero-badge" variants={reduceMotion ? undefined : copyItem}>
+            <Sparkles size={13} /> DIGITAL УРИЛГЫН ПЛАТФОРМ
+          </motion.p>
+          <motion.h1 variants={reduceMotion ? undefined : copyItem}>Мөч бүрийг урилга<br />болгодог платформ</motion.h1>
+          <motion.div className="hero-actions" variants={reduceMotion ? undefined : copyItem}>
+            <a className="button button-white" href={studioUrl}>Урилга үүсгэх</a>
+            <a className="button button-ghost" href="#showcase">Загварууд үзэх</a>
+          </motion.div>
+        </motion.div>
+
+        <motion.div
+          className="scroll-hint"
+          aria-hidden="true"
+          initial={reduceMotion ? false : { opacity: 0 }}
+          animate={reduceMotion ? false : { opacity: [0, 1, 1, 0.4], y: [0, 6, 0] }}
+          transition={reduceMotion ? undefined : { duration: 2.2, repeat: Infinity, delay: 1.4 }}
+        >
+          <span />
+        </motion.div>
       </div>
-      <div className="hero-veil" />
-    </motion.div>
+    </section>
+  )
+}
+
+/* Marquee band: continuous CSS scroll, plus a slight scroll-linked skew drift */
+function MarqueeBand({ reduceMotion }) {
+  const ref = useRef(null)
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
+  const x = useTransform(scrollYProgress, [0, 1], ['6%', '-6%'])
+  return (
+    <div className="marquee" ref={ref} aria-hidden="true">
+      <motion.div className="marquee-inner" style={reduceMotion ? undefined : { x }}>
+        <div className={`marquee-track ${reduceMotion ? 'static' : ''}`}>
+          {[...marqueeWords, ...marqueeWords].map((word, index) => <span key={index}>{word}<b>✦</b></span>)}
+        </div>
+      </motion.div>
+    </div>
   )
 }
 
@@ -59,7 +154,7 @@ function HeroScene({ reduceMotion }) {
 function ShowcaseStrip({ reduceMotion }) {
   const ref = useRef(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
-  const x = useTransform(scrollYProgress, [0, 1], ['4%', '-32%'])
+  const x = useTransform(scrollYProgress, [0, 1], ['2%', '-34%'])
   return (
     <section id="showcase" ref={ref} className="showcase">
       <motion.div
@@ -67,14 +162,45 @@ function ShowcaseStrip({ reduceMotion }) {
         initial={reduceMotion ? false : { opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-80px' }}
-        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.7, ease }}
       >
         <p className="eyebrow">ЗАГВАРУУД</p>
         <h2>Арга хэмжээ бүрд<br /><em>тохирсон загвар</em></h2>
       </motion.div>
       <motion.div className="showcase-track" style={reduceMotion ? undefined : { x }}>
-        {streamCards.map((card) => <StreamCard key={card.name} card={card} />)}
+        {streamCards.map((card, index) => (
+          <motion.div
+            key={card.name}
+            initial={reduceMotion ? false : { opacity: 0, y: 60, rotate: index % 2 ? 3 : -3 }}
+            whileInView={{ opacity: 1, y: 0, rotate: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.6, delay: index * 0.05, ease }}
+          >
+            <StreamCard card={card} />
+          </motion.div>
+        ))}
       </motion.div>
+    </section>
+  )
+}
+
+/* Stats row: numbers pop in with a spring, one after another */
+function StatsRow({ reduceMotion }) {
+  return (
+    <section className="stats">
+      {stats.map((stat, index) => (
+        <motion.div
+          key={stat.label}
+          className="stat"
+          initial={reduceMotion ? false : { opacity: 0, y: 30, scale: 0.9 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ type: 'spring', stiffness: 220, damping: 18, delay: index * 0.12 }}
+        >
+          <b>{stat.value}</b>
+          <small>{stat.label}</small>
+        </motion.div>
+      ))}
     </section>
   )
 }
@@ -85,32 +211,28 @@ export default function App() {
   if (window.location.pathname.startsWith('/i/')) return <PublicInvitation />
   return (
     <main className="page-shell">
-      <nav className="nav" aria-label="Үндсэн хэсэг">
+      <motion.nav
+        className="nav"
+        aria-label="Үндсэн хэсэг"
+        initial={reduceMotion ? false : { y: -80, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.7, ease }}
+      >
         <a className="brand" href="#top"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a>
         <div className="nav-links">
           <a href="#showcase">Загварууд</a>
           <a href="#features">Боломжууд</a>
         </div>
         <a className="button button-white button-small" href={studioUrl}>Нэвтрэх</a>
-      </nav>
+      </motion.nav>
 
-      <section id="top" className="hero">
-        <HeroScene reduceMotion={reduceMotion} />
-        <motion.div
-          className="hero-copy"
-          initial={reduceMotion ? false : { opacity: 0, y: 26 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <h1>Мөч бүрийг урилга<br />болгодог платформ</h1>
-          <div className="hero-actions">
-            <a className="button button-white" href={studioUrl}>Урилга үүсгэх</a>
-            <a className="button button-ghost" href="#showcase">Загварууд үзэх</a>
-          </div>
-        </motion.div>
-      </section>
+      <Hero reduceMotion={reduceMotion} />
+
+      <MarqueeBand reduceMotion={reduceMotion} />
 
       <ShowcaseStrip reduceMotion={reduceMotion} />
+
+      <StatsRow reduceMotion={reduceMotion} />
 
       <section id="features" className="features">
         <motion.div
@@ -118,7 +240,7 @@ export default function App() {
           initial={reduceMotion ? false : { opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.7, ease }}
         >
           <p className="eyebrow">ЯАГААД INVITES.MN ГЭЖ</p>
           <h2>Урилга илгээхийн<br /><em>шинэ стандарт</em></h2>
@@ -128,10 +250,11 @@ export default function App() {
             <motion.article
               key={feature.title}
               className="feature"
-              initial={reduceMotion ? false : { opacity: 0, x: index % 2 ? 48 : -48 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={reduceMotion ? false : { opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.65, delay: index * 0.09, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.65, delay: index * 0.1, ease }}
+              whileHover={reduceMotion ? undefined : { y: -6 }}
             >
               <span className="feature-icon"><feature.icon size={19} /></span>
               <p>{feature.title}</p>
@@ -147,18 +270,30 @@ export default function App() {
           initial={reduceMotion ? false : { opacity: 0, scale: 0.92 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, margin: '-90px' }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.8, ease }}
         >
-          <h2>Таны онцгой өдөр<br /><em>эндээс эхэлнэ</em></h2>
+          <motion.h2
+            initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: 0.1, ease }}
+          >
+            Таны онцгой өдөр<br /><em>эндээс эхэлнэ</em>
+          </motion.h2>
           <p>Бүртгэл үнэгүй. Эхний урилгаа одоо бүтээгээрэй.</p>
           <a className="button button-white" href={studioUrl}>Үнэгүй эхлэх</a>
         </motion.div>
       </section>
 
-      <footer>
+      <motion.footer
+        initial={reduceMotion ? false : { opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
         <img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" />
         <a href="mailto:hello@invites.mn">hello@invites.mn <ArrowUpRight size={14} /></a>
-      </footer>
+      </motion.footer>
     </main>
   )
 }
