@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { getTemplate, formatPrice } from '../templates'
-import { FunnelHeader, InvitationSummary } from '../components/Shared'
+import { FunnelHeader, InvitationSummary, ShareQr } from '../components/Shared'
 
 /*
  * Step 4/4: payment. Mock for now — the pay button records a paid mock
@@ -78,6 +78,7 @@ export default function PayPage({ invitationId }) {
               <code>{window.location.origin}/i/{invitation.slug}</code>
               <button className="kbutton kbutton-small" onClick={copyLink}>{copied ? 'Хуулагдлаа ✓' : 'Хуулах'}</button>
             </div>
+            <ShareQr url={`${window.location.origin}/i/${invitation.slug}`} />
             <div className="kform-actions">
               <a className="klink" href={`/i/${invitation.slug}`} target="_blank" rel="noreferrer">Урилгаа үзэх ↗</a>
               <a className="kbutton" href="/my">Миний урилгууд →</a>

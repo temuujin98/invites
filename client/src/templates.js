@@ -3,6 +3,7 @@
 export const templates = [
   {
     id: 'lavender-wedding',
+    layout: 'classic',
     name: 'Лаванда',
     eventType: 'Хурим',
     tone: 'lavender',
@@ -12,6 +13,7 @@ export const templates = [
   },
   {
     id: 'rose-wedding',
+    layout: 'romance',
     name: 'Сарнай',
     eventType: 'Хурим',
     tone: 'rose',
@@ -21,6 +23,7 @@ export const templates = [
   },
   {
     id: 'coral-birthday',
+    layout: 'party',
     name: 'Корал',
     eventType: 'Төрсөн өдөр',
     tone: 'coral',
@@ -30,6 +33,7 @@ export const templates = [
   },
   {
     id: 'sage-ceremony',
+    layout: 'minimal',
     name: 'Ногоон',
     eventType: 'Ёслол',
     tone: 'sage',
@@ -39,6 +43,7 @@ export const templates = [
   },
   {
     id: 'gold-reception',
+    layout: 'luxe',
     name: 'Алт',
     eventType: 'Хүлээн авалт',
     tone: 'gold',
@@ -48,6 +53,7 @@ export const templates = [
   },
   {
     id: 'ocean-graduation',
+    layout: 'modern',
     name: 'Далай',
     eventType: 'Төгсөлт',
     tone: 'ocean',

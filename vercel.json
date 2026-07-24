@@ -8,6 +8,7 @@
     { "source": "/create", "destination": "/index.html" },
     { "source": "/create/:path*", "destination": "/index.html" },
     { "source": "/pay/:path*", "destination": "/index.html" },
+    { "source": "/edit/:path*", "destination": "/index.html" },
     { "source": "/my", "destination": "/index.html" },
     { "source": "/admin", "destination": "/index.html" },
     { "source": "/admin/:path*", "destination": "/index.html" }

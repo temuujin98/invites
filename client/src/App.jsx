@@ -5,6 +5,7 @@ import CreateGallery from './pages/CreateGallery'
 import CreateEditor from './pages/CreateEditor'
 import ConfirmPage from './pages/ConfirmPage'
 import PayPage from './pages/PayPage'
+import EditPage from './pages/EditPage'
 import MyPage from './pages/MyPage'
 
 function ScrollIndicator() {
@@ -107,6 +108,7 @@ export default function App() {
   if (path.startsWith('/create/')) return <CreateEditor templateId={path.split('/')[2]} />
   if (path === '/create') return <CreateGallery />
   if (path.startsWith('/pay/')) return <PayPage invitationId={path.split('/')[2]} />
+  if (path.startsWith('/edit/')) return <EditPage invitationId={path.split('/')[2]} />
   if (path.startsWith('/my')) return <MyPage />
   return <Landing />
 }

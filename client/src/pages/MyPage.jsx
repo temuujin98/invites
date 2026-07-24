@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import { formatPrice } from '../templates'
-import { FunnelHeader, InvitationSummary, statusLabels } from '../components/Shared'
+import { FunnelHeader, InvitationSummary, ShareQr, statusLabels } from '../components/Shared'
 
 /* Minimal user area: just your invitations, their status, and RSVP details. */
 export default function MyPage() {
@@ -140,19 +140,25 @@ export default function MyPage() {
                   <h2>{invitation.title}</h2>
                   <p className="my-facts">{invitation.event_type} · {invitation.venue || 'Байршилгүй'} · RSVP {rsvpCount}</p>
                   {invitation.status === 'active' ? (
-                    <div className="share-row">
-                      <code>/i/{invitation.slug}</code>
-                      <button
-                        className="kbutton kbutton-small"
-                        onClick={() => navigator.clipboard.writeText(`${window.location.origin}/i/${invitation.slug}`)}
-                      >Хуулах</button>
-                    </div>
+                    <>
+                      <div className="share-row">
+                        <code>/i/{invitation.slug}</code>
+                        <button
+                          className="kbutton kbutton-small"
+                          onClick={() => navigator.clipboard.writeText(`${window.location.origin}/i/${invitation.slug}`)}
+                        >Хуулах</button>
+                      </div>
+                      <ShareQr url={`${window.location.origin}/i/${invitation.slug}`} size={120} />
+                    </>
                   ) : invitation.status === 'pending_payment' ? (
                     <a className="kbutton kbutton-small" href={`/pay/${invitation.id}`}>Төлбөр төлөх →</a>
                   ) : null}
-                  <button className="klink klink-button" onClick={() => toggleDetails(invitation)}>
-                    {openId === invitation.id ? 'Хариунуудыг хаах ↑' : 'RSVP хариунууд ↓'}
-                  </button>
+                  <div className="my-actions">
+                    <a className="klink" href={`/edit/${invitation.id}`}>Засах</a>
+                    <button className="klink klink-button" onClick={() => toggleDetails(invitation)}>
+                      {openId === invitation.id ? 'Хариунуудыг хаах ↑' : 'RSVP хариунууд ↓'}
+                    </button>
+                  </div>
                   {openId === invitation.id && (
                     <div className="rsvp-details">
                       {!details ? <p className="kpanel-note">Ачаалж байна…</p> : details.length === 0 ? (

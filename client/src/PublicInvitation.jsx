@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { ArrowLeft, CalendarDays, MapPin, User, Users } from 'lucide-react'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
-import { formatEventDate } from './templates'
+import { formatEventDate, getTemplate } from './templates'
 
 export default function PublicInvitation() {
   const [response, setResponse] = useState('')
@@ -19,7 +19,7 @@ export default function PublicInvitation() {
     let alive = true
     supabase
       .from('invitations')
-      .select('id, event_type, title, message, event_at, venue, theme')
+      .select('id, event_type, title, message, event_at, venue, theme, template_id')
       .eq('slug', slug)
       .eq('status', 'active')
       .maybeSingle()
@@ -63,10 +63,12 @@ export default function PublicInvitation() {
     )
   }
 
+  const layout = getTemplate(invitation.template_id)?.layout || 'classic'
+
   return (
     <main className="public-invite">
       <a className="public-brand" href="/"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a>
-      <section className={`public-card ${invitation.theme || 'lavender'}`}>
+      <section className={`public-card ${invitation.theme || 'lavender'} layout-${layout}`}>
         <p className="public-type">{invitation.event_type}</p>
         <h1>{invitation.title}</h1>
         {invitation.message && <p className="public-message">{invitation.message}</p>}

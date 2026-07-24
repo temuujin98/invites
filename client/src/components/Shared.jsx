@@ -1,4 +1,25 @@
+import { useEffect, useState } from 'react'
+import QRCode from 'qrcode'
 import { formatEventDate } from '../templates'
+
+/* QR code for the invitation share link */
+export function ShareQr({ url, size = 160 }) {
+  const [dataUrl, setDataUrl] = useState('')
+  useEffect(() => {
+    let alive = true
+    QRCode.toDataURL(url, { width: size * 2, margin: 1, color: { dark: '#000000', light: '#ffffff' } })
+      .then((result) => { if (alive) setDataUrl(result) })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [url, size])
+  if (!dataUrl) return null
+  return (
+    <div className="share-qr">
+      <img src={dataUrl} alt={`QR: ${url}`} width={size} height={size} />
+      <a className="klink" href={dataUrl} download="invites-qr.png">QR татах</a>
+    </div>
+  )
+}
 
 /* Header for funnel pages: logo home link + step label */
 export function FunnelHeader({ label }) {

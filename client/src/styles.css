@@ -163,6 +163,9 @@ a { color: inherit; text-decoration: none; }
 .kbadge.active { background: var(--k-brand); }
 .kbadge.pending_payment { background: #ffd166; }
 .kbadge.paused, .kbadge.archived, .kbadge.draft { background: #00000014; }
+.my-actions { display: flex; align-items: center; gap: 18px; }
+.share-qr { display: flex; align-items: center; gap: 16px; }
+.share-qr img { border: 2px solid var(--k-black); background: var(--k-white); padding: 6px; display: block; }
 .rsvp-details { width: 100%; border-top: 2px solid var(--k-black); padding-top: 12px; display: grid; gap: 8px; }
 .rsvp-total { font-family: 'JetBrains Mono', monospace; margin: 0; font-size: 11px; font-weight: 700; text-transform: uppercase; }
 .rsvp-line { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 13px; }
@@ -201,6 +204,33 @@ a { color: inherit; text-decoration: none; }
 .public-card.rose { background: linear-gradient(135deg, #ffd7ea, #d55f9c); }
 .public-card.ocean { background: linear-gradient(135deg, #c2ecff, #3f7fc4); }
 .public-type { color: #6e4db1; font-size: 10px; letter-spacing: .17em; font-weight: 800; margin: 0 0 20px; }
+
+/* ---- Per-template layouts ---- */
+/* classic (lavender): centered, as-is */
+/* romance (rose): italic serif title, soft */
+.public-card.layout-romance h1 { font-family: Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -.03em; line-height: .95; font-size: clamp(2.6rem, 10vw, 4.4rem); }
+.public-card.layout-romance .public-type { letter-spacing: .3em; }
+.public-card.layout-romance .public-message { font-style: italic; }
+/* party (coral): left-aligned, loud, tilted type badge */
+.public-card.layout-party { text-align: left; }
+.public-card.layout-party .public-type { display: inline-block; background: #00000018; padding: 6px 12px; transform: rotate(-3deg); letter-spacing: .2em; }
+.public-card.layout-party h1 { text-transform: uppercase; letter-spacing: -.05em; }
+.public-card.layout-party .public-message { margin-left: 0; }
+/* minimal (sage): quiet, ruled, wide tracking */
+.public-card.layout-minimal { text-align: left; }
+.public-card.layout-minimal .public-type { letter-spacing: .4em; color: #3c5a46; }
+.public-card.layout-minimal h1 { font-weight: 600; letter-spacing: 0; line-height: 1.05; font-size: clamp(2.2rem, 9vw, 3.6rem); border-bottom: 1px solid #00000033; padding-bottom: 22px; }
+.public-card.layout-minimal .public-message { margin-left: 0; }
+/* luxe (gold): framed, uppercase serif, formal */
+.public-card.layout-luxe { border: 1px solid #00000059; outline: 1px solid #00000059; outline-offset: -8px; }
+.public-card.layout-luxe .public-type { color: #6b4b12; letter-spacing: .35em; }
+.public-card.layout-luxe h1 { font-family: Georgia, serif; font-weight: 400; text-transform: uppercase; letter-spacing: .04em; line-height: 1.05; font-size: clamp(2rem, 8.4vw, 3.4rem); }
+/* modern (ocean): bold left, mono facts */
+.public-card.layout-modern { text-align: left; }
+.public-card.layout-modern h1 { text-transform: uppercase; letter-spacing: -.04em; line-height: .85; }
+.public-card.layout-modern .public-type { font-family: 'JetBrains Mono', monospace; letter-spacing: .1em; color: #1c3a55; }
+.public-card.layout-modern .event-facts { font-family: 'JetBrains Mono', monospace; }
+.public-card.layout-modern .public-message { margin-left: 0; }
 .rsvp .public-type { color: #c9a9ff; }
 .public-card h1 { font-size: clamp(3rem, 12vw, 5.2rem); letter-spacing: -.06em; line-height: .85; margin: 0; overflow-wrap: anywhere; }
 .public-message { max-width: 290px; margin: 28px auto; line-height: 1.7; font-size: 12px; }
