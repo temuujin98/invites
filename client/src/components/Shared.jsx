@@ -21,13 +21,12 @@ export function ShareQr({ url, size = 160 }) {
   )
 }
 
-/* Header for funnel pages: logo home link + step label */
+/* Header for funnel pages: logo home link + step label only (no CTA — you're already in the flow) */
 export function FunnelHeader({ label }) {
   return (
     <nav className="knav" aria-label="Үндсэн хэсэг">
       <a className="knav-brand" href="/"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a>
       {label && <p className="knav-step">{label}</p>}
-      <a className="kbutton kbutton-small" href="/create">Урилга үүсгэх</a>
     </nav>
   )
 }
