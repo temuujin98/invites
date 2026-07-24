@@ -47,7 +47,17 @@
       "Bash(curl -s https://invites-temuujin98-temuujin98s-projects.vercel.app/)",
       "Bash(powershell -Command 'Get-ChildItem -Path $env:USERPROFILE -Recurse -Filter '\\\\''auth.json'\\\\'' -Depth 4 -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match '\\\\''vercel'\\\\'' } | Select-Object -First 3 -ExpandProperty FullName')",
       "Bash(powershell -Command 'Get-ChildItem \"$env:APPDATA\\\\com.vercel.cli\" -Force -Recurse -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName')",
-      "Bash(powershell -Command 'Get-ChildItem \"$env:APPDATA\\\\xdg.data\\\\com.vercel.cli\" -Force -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name; Get-ChildItem \"$env:APPDATA\\\\xdg.config\\\\com.vercel.cli\" -Force -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name')"
+      "Bash(powershell -Command 'Get-ChildItem \"$env:APPDATA\\\\xdg.data\\\\com.vercel.cli\" -Force -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name; Get-ChildItem \"$env:APPDATA\\\\xdg.config\\\\com.vercel.cli\" -Force -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name')",
+      "Bash(curl -s -o /dev/null -w \"invites.mn: %{http_code}\\\\n\" https://invites.mn/)",
+      "Bash(curl -s https://invites.mn/)",
+      "Bash(curl -s -o /dev/null -w \"/create: %{http_code}\\\\n\" https://invites.mn/create)",
+      "Bash(curl -s -o /dev/null -w \"/og.png: %{http_code}\\\\n\" https://invites.mn/og.png)",
+      "Bash(curl -s -o /dev/null -w \"/my: %{http_code}\\\\n\" https://invites.mn/my)",
+      "Bash(curl -s https://invites.mn/create)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://invites.mn/create)",
+      "Bash(npx supabase *)",
+      "Bash(powershell -Command 'Get-ChildItem \"$env:APPDATA\\\\supabase\",\"$env:LOCALAPPDATA\\\\supabase\" -Force -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name')",
+      "Bash(node -e \"const os=require\\('os'\\),fs=require\\('fs'\\),p=os.homedir\\(\\)+'/.supabase/access-token'; console.log\\(fs.existsSync\\(p\\) ? 'token file exists' : 'no token file'\\)\")"
     ]
   }
 }

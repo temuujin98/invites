@@ -43,6 +43,14 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
 .admin-actions button { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; border: 2px solid var(--k-black); background: var(--k-white); padding: 6px 10px; transition: background .15s, color .15s; white-space: nowrap; }
 .admin-actions button:hover { background: var(--k-black); color: var(--k-white); }
 
+.admin-rsvp-row td { background: #f4f0fd; }
+.admin-rsvp-panel { display: grid; gap: 8px; }
+.admin-rsvp-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.admin-rsvp-head button { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; border: 2px solid var(--k-black); background: var(--k-white); padding: 6px 10px; }
+.admin-rsvp-head button:hover { background: var(--k-black); color: var(--k-white); }
+.admin-rsvp-line { display: flex; align-items: center; gap: 12px; margin: 0; }
+.admin-rsvp-line small { margin-left: auto; font-family: 'JetBrains Mono', monospace; color: #00000080; font-size: 10px; }
+
 /* ---------- Status badges ---------- */
 .kbadge { font-family: 'JetBrains Mono', monospace; display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: -.02em; padding: 4px 10px; border: 2px solid var(--k-black); background: var(--k-white); white-space: nowrap; }
 .kbadge.active { background: var(--k-brand); }

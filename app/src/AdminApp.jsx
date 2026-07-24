@@ -65,6 +65,8 @@ export default function AdminApp() {
   const [invitations, setInvitations] = useState([])
   const [payments, setPayments] = useState([])
   const [error, setError] = useState('')
+  const [openId, setOpenId] = useState(null)
+  const [rsvpDetails, setRsvpDetails] = useState({})
 
   useEffect(() => {
     if (!supabase) return undefined
@@ -99,6 +101,36 @@ export default function AdminApp() {
     const { error: updateError } = await supabase.from('invitations').update({ status }).eq('id', invitation.id)
     if (updateError) { setError('Төлөв өөрчлөхөд алдаа гарлаа.'); return }
     setInvitations((items) => items.map((item) => item.id === invitation.id ? { ...item, status } : item))
+  }
+
+  async function toggleRsvps(invitation) {
+    const next = openId === invitation.id ? null : invitation.id
+    setOpenId(next)
+    if (next && !rsvpDetails[invitation.id]) {
+      const { data } = await supabase
+        .from('rsvps')
+        .select('guest_name, response, party_size, created_at')
+        .eq('invitation_id', invitation.id)
+        .order('created_at', { ascending: false })
+      setRsvpDetails((current) => ({ ...current, [invitation.id]: data || [] }))
+    }
+  }
+
+  function downloadCsv(invitation) {
+    const rows = rsvpDetails[invitation.id] || []
+    const header = 'Нэр,Хариу,Хүний тоо,Огноо'
+    const lines = rows.map((rsvp) => [
+      `"${(rsvp.guest_name || 'Нэргүй').replace(/"/g, '""')}"`,
+      rsvp.response === 'attending' ? 'Ирнэ' : 'Үгүй',
+      rsvp.party_size,
+      formatDate(rsvp.created_at),
+    ].join(','))
+    const blob = new Blob(['﻿' + [header, ...lines].join('\n')], { type: 'text/csv;charset=utf-8' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `rsvp-${invitation.slug}.csv`
+    link.click()
+    URL.revokeObjectURL(link.href)
   }
 
   async function markPaid(invitation) {
@@ -164,23 +196,50 @@ export default function AdminApp() {
                 <tr><th>Урилга</th><th>Эзэмшигч</th><th>Загвар</th><th>Үнэ</th><th>RSVP</th><th>Төлөв</th><th>Үүссэн</th><th>Үйлдэл</th></tr>
               </thead>
               <tbody>
-                {invitations.map((invitation) => (
-                  <tr key={invitation.id}>
-                    <td><b>{invitation.title}</b><small>/i/{invitation.slug}</small></td>
-                    <td>{invitation.owner_email || '—'}</td>
-                    <td>{invitation.template_id || invitation.theme}</td>
-                    <td>{formatPrice(invitation.price)}</td>
-                    <td>{invitation.rsvps?.[0]?.count || 0}</td>
-                    <td><span className={`kbadge ${invitation.status}`}>{statusLabels[invitation.status] || invitation.status}</span></td>
-                    <td>{formatDate(invitation.created_at)}</td>
-                    <td className="admin-actions">
-                      {invitation.status === 'pending_payment' && <button onClick={() => markPaid(invitation)}>Төлөгдсөн болгох</button>}
-                      {invitation.status === 'active' && <button onClick={() => setStatus(invitation, 'paused')}>Түр хаах</button>}
-                      {invitation.status === 'paused' && <button onClick={() => setStatus(invitation, 'active')}>Идэвхжүүлэх</button>}
-                      {invitation.status !== 'archived' && <button onClick={() => setStatus(invitation, 'archived')}>Архивлах</button>}
-                    </td>
-                  </tr>
-                ))}
+                {invitations.map((invitation) => {
+                  const details = rsvpDetails[invitation.id]
+                  const attending = details?.filter((rsvp) => rsvp.response === 'attending') || []
+                  const guestTotal = attending.reduce((total, rsvp) => total + rsvp.party_size, 0)
+                  return [
+                    <tr key={invitation.id}>
+                      <td><b>{invitation.title}</b><small>/i/{invitation.slug}</small></td>
+                      <td>{invitation.owner_email || '—'}</td>
+                      <td>{invitation.template_id || invitation.theme}</td>
+                      <td>{formatPrice(invitation.price)}</td>
+                      <td>{invitation.rsvps?.[0]?.count || 0}</td>
+                      <td><span className={`kbadge ${invitation.status}`}>{statusLabels[invitation.status] || invitation.status}</span></td>
+                      <td>{formatDate(invitation.created_at)}</td>
+                      <td className="admin-actions">
+                        <button onClick={() => toggleRsvps(invitation)}>{openId === invitation.id ? 'RSVP хаах' : 'RSVP харах'}</button>
+                        {invitation.status === 'pending_payment' && <button onClick={() => markPaid(invitation)}>Төлөгдсөн болгох</button>}
+                        {invitation.status === 'active' && <button onClick={() => setStatus(invitation, 'paused')}>Түр хаах</button>}
+                        {invitation.status === 'paused' && <button onClick={() => setStatus(invitation, 'active')}>Идэвхжүүлэх</button>}
+                        {invitation.status !== 'archived' && <button onClick={() => setStatus(invitation, 'archived')}>Архивлах</button>}
+                      </td>
+                    </tr>,
+                    openId === invitation.id && (
+                      <tr key={`${invitation.id}-rsvps`} className="admin-rsvp-row">
+                        <td colSpan="8">
+                          {!details ? 'Ачаалж байна…' : details.length === 0 ? 'Хариу ирээгүй байна.' : (
+                            <div className="admin-rsvp-panel">
+                              <div className="admin-rsvp-head">
+                                <b>Ирнэ: {attending.length} хариу · нийт {guestTotal} зочин</b>
+                                <button onClick={() => downloadCsv(invitation)}>CSV татах</button>
+                              </div>
+                              {details.map((rsvp, index) => (
+                                <p key={index} className="admin-rsvp-line">
+                                  <span className={`kbadge ${rsvp.response === 'attending' ? 'active' : 'paused'}`}>{rsvp.response === 'attending' ? 'ИРНЭ' : 'ҮГҮЙ'}</span>
+                                  <b>{rsvp.guest_name || 'Нэргүй зочин'}</b>
+                                  <small>{rsvp.party_size} хүн · {formatDate(rsvp.created_at)}</small>
+                                </p>
+                              ))}
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ),
+                  ]
+                })}
                 {invitations.length === 0 && <tr><td colSpan="8">Урилга алга байна.</td></tr>}
               </tbody>
             </table>

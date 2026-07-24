@@ -4,7 +4,7 @@
   "buildCommand": "npm run build --workspace=client",
   "outputDirectory": "client/dist",
   "rewrites": [
-    { "source": "/i/:path*", "destination": "/index.html" },
+    { "source": "/i/:slug", "destination": "/api/invite?slug=:slug" },
     { "source": "/create", "destination": "/index.html" },
     { "source": "/create/:path*", "destination": "/index.html" },
     { "source": "/pay/:path*", "destination": "/index.html" },
