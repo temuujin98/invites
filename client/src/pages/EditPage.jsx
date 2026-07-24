@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import { FunnelHeader, InvitePreview } from '../components/Shared'
+import DateTimeField from '../components/DateTimeField'
 
 /*
  * Edit an existing invitation. The share link (slug) never changes, so
@@ -57,6 +58,7 @@ export default function EditPage({ invitationId }) {
 
   async function save(event) {
     event.preventDefault()
+    if (!eventAt) { setError('Огноо, цагаа бүрэн сонгоно уу.'); return }
     setBusy(true)
     setError('')
     setSaved(false)
@@ -152,7 +154,7 @@ export default function EditPage({ invitationId }) {
             <input required maxLength={120} value={title} onChange={(event) => setTitle(event.target.value)} />
           </label>
           <label>Огноо ба цаг
-            <input type="datetime-local" required value={eventAt} onChange={(event) => setEventAt(event.target.value)} />
+            <DateTimeField value={eventAt} onChange={setEventAt} />
           </label>
           <label>Байршил
             <input required maxLength={160} value={venue} onChange={(event) => setVenue(event.target.value)} />

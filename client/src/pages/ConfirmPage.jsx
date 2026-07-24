@@ -1,122 +1,62 @@
- 
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useRef, useState } from 'react'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
-import { getTemplate, loadDraft, clearDraft, makeSlug, formatPrice } from '../templates'
+import { insertDraftInvitation } from '../lib/createInvitation'
+import { loadDraft } from '../templates'
 import { FunnelHeader } from '../components/Shared'
 
 /*
- * Step 3/4: verify with email (magic link). The draft lives in localStorage,
- * so after the user clicks the link and returns here with a session we
- * insert the invitation and forward them to payment.
+ * Magic-link landing page only: when the emailed link brings the user
+ * back with a session, the draft is saved and they continue to payment.
+ * No UI decisions happen here.
  */
 export default function ConfirmPage() {
-  const draft = loadDraft()
-  const template = draft ? getTemplate(draft.templateId) : null
-  const [email, setEmail] = useState('')
-  const [sent, setSent] = useState(false)
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
-  const [phase, setPhase] = useState('loading') // loading | need-email | saving
+  const [status, setStatus] = useState('waiting') // waiting | saving | failed | no-draft
   const inserting = useRef(false)
 
   useEffect(() => {
     if (!supabase) return undefined
-    let alive = true
 
-    async function insertAndPay(session) {
+    async function proceed(session) {
       if (inserting.current) return
       inserting.current = true
-      setPhase('saving')
-      const currentDraft = loadDraft()
-      const currentTemplate = currentDraft ? getTemplate(currentDraft.templateId) : null
-      if (!currentDraft || !currentTemplate) { window.location.href = '/create'; return }
-      const values = currentDraft.values
-      const { data, error: insertError } = await supabase.from('invitations').insert({
-        owner_id: session.user.id,
-        owner_email: session.user.email,
-        slug: makeSlug(values.title),
-        title: values.title,
-        event_type: currentTemplate.eventType,
-        event_at: values.eventAt ? new Date(values.eventAt).toISOString() : null,
-        venue: values.venue || null,
-        message: values.message || null,
-        theme: currentTemplate.tone,
-        template_id: currentTemplate.id,
-        price: currentTemplate.price,
-        status: 'pending_payment',
-      }).select('id').single()
-      if (insertError) {
-        inserting.current = false
-        setPhase('need-email')
-        setError('Урилга хадгалахад алдаа гарлаа. Дахин оролдоно уу.')
-        return
-      }
-      clearDraft()
-      window.location.href = `/pay/${data.id}`
+      setStatus('saving')
+      const result = await insertDraftInvitation(session)
+      if (result.error === 'no-draft') { setStatus('no-draft'); inserting.current = false; return }
+      if (result.error) { setStatus('failed'); inserting.current = false; return }
+      window.location.href = `/pay/${result.id}`
     }
 
     supabase.auth.getSession().then(({ data }) => {
-      if (!alive) return
-      if (data.session) insertAndPay(data.session)
-      else setPhase('need-email')
+      if (data.session) proceed(data.session)
+      else if (!loadDraft()) setStatus('no-draft')
     })
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) insertAndPay(session)
+      if (session) proceed(session)
     })
-    return () => { alive = false; listener.subscription.unsubscribe() }
+    return () => listener.subscription.unsubscribe()
   }, [])
-
-  async function sendLink(event) {
-    event.preventDefault()
-    setBusy(true)
-    setError('')
-    const { error: sendError } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/create/confirm` },
-    })
-    setBusy(false)
-    if (sendError) setError('Илгээхэд алдаа гарлаа. Имэйл хаягаа шалгаад дахин оролдоно уу.')
-    else setSent(true)
-  }
-
-  if (!isSupabaseConfigured) {
-    return <main className="kpage funnel-page"><FunnelHeader /><header className="funnel-head"><h1>Тохиргоо дутуу</h1><p className="funnel-lead">.env.local дахь Supabase URL болон key-г шалгана уу.</p></header></main>
-  }
-
-  if (!draft || !template) {
-    return (
-      <main className="kpage funnel-page">
-        <FunnelHeader />
-        <header className="funnel-head"><h1>Ноорог олдсонгүй</h1><p className="funnel-lead"><a className="klink" href="/create">Загвар сонгож урилгаа үүсгээрэй →</a></p></header>
-      </main>
-    )
-  }
 
   return (
     <main className="kpage funnel-page">
-      <FunnelHeader label="3/4 · БАТАЛГААЖУУЛАХ" />
+      <FunnelHeader label="БАТАЛГААЖУУЛАЛТ" />
       <section className="kpanel-center">
         <div className="kpanel">
-          <p className="kpanel-kicker">ИМЭЙЛ БАТАЛГААЖУУЛАЛТ</p>
-          <h1>Имэйлээ баталгаажуулаад үргэлжлүүлээрэй</h1>
-          <p className="kpanel-copy">
-            «{draft.values.title}» ({template.name} · {formatPrice(template.price)}) урилгыг таны бүртгэлд холбохын тулд
-            имэйл рүү тань нэвтрэх холбоос илгээнэ. Холбоос дээр дарахад бүртгэл автоматаар үүснэ.
-          </p>
-          {phase === 'saving' ? (
-            <p className="kpanel-note">Урилгыг хадгалж байна…</p>
-          ) : sent ? (
-            <p className="kpanel-note">Холбоос илгээгдлээ — <b>{email}</b> хаягаа шалгаад холбоос дээр дарна уу. Энэ хуудсыг хаасан ч болно, холбоос таныг буцааж авчирна.</p>
+          {!isSupabaseConfigured ? (
+            <><h1>Тохиргоо дутуу</h1><p className="kpanel-copy">.env.local дахь Supabase URL болон key-г шалгана уу.</p></>
+          ) : status === 'saving' ? (
+            <><p className="kpanel-kicker">ТҮР ХҮЛЭЭНЭ ҮҮ</p><h1>Урилгыг хадгалж байна…</h1></>
+          ) : status === 'failed' ? (
+            <><h1>Алдаа гарлаа</h1><p className="kpanel-copy">Урилга хадгалагдсангүй. <a className="klink" href="/create">Дахин оролдох →</a></p></>
+          ) : status === 'no-draft' ? (
+            <><h1>Ноорог олдсонгүй</h1><p className="kpanel-copy">Урилгаа эхнээс нь үүсгээрэй. <a className="klink" href="/create">Загвар сонгох →</a></p></>
           ) : (
-            <form className="kform" onSubmit={sendLink}>
-              <label>Имэйл хаяг
-                <input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="tanii@gmail.com" />
-              </label>
-              {error && <p className="kerror">{error}</p>}
-              <button className="kbutton" disabled={busy || phase === 'loading'} type="submit">
-                {busy ? 'Илгээж байна…' : 'Нэвтрэх холбоос илгээх'}
-              </button>
-            </form>
+            <>
+              <p className="kpanel-kicker">ИМЭЙЛЭЭ ШАЛГААРАЙ</p>
+              <h1>Холбоос дээр дарахад энд үргэлжилнэ</h1>
+              <p className="kpanel-copy">Имэйл рүү тань илгээсэн холбоос дээр дарснаар урилга тань хадгалагдаж, төлбөрийн хуудас руу орно.</p>
+              <p className="kpanel-note">Имэйл ирээгүй бол СПАМ хавтсаа шалгаарай.</p>
+            </>
           )}
         </div>
       </section>

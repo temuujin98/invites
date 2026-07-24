@@ -62,7 +62,7 @@ export default function PayPage({ invitationId }) {
 
   return (
     <main className="kpage funnel-page">
-      <FunnelHeader label={paid ? 'БЭЛЭН БОЛЛОО' : '4/4 · ТӨЛБӨР'} />
+      <FunnelHeader label={paid ? 'БЭЛЭН БОЛЛОО' : 'ТӨЛБӨР'} />
       <section className="kpanel-center">
         {loading ? (
           <p className="kpanel-note">Ачаалж байна…</p>

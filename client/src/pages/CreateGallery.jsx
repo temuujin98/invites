@@ -4,7 +4,7 @@ import { FunnelHeader, InvitePreview } from '../components/Shared'
 export default function CreateGallery() {
   return (
     <main className="kpage funnel-page">
-      <FunnelHeader label="1/4 · ЗАГВАР СОНГОХ" />
+      <FunnelHeader label="ЗАГВАР СОНГОХ" />
       <header className="funnel-head">
         <h1>Загвараа<br />сонгоорой</h1>
         <p className="funnel-lead">Загвар дээр дараад мэдээллээ оруулна. Загвар бүр өөрийн үнэтэй.</p>
