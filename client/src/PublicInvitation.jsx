@@ -230,9 +230,9 @@ export default function PublicInvitation() {
   const introSeenKey = `invites.introSeen.${slug}`
   const showIntro = options.intro === 'curtain' && !introDone && !localStorage.getItem(introSeenKey)
   const bank = options.bank
-  const bankText = typeof bank === 'object'
-    ? [bank.bank, bank.number, bank.holder].filter(Boolean).join(' · ')
-    : bank
+  const bankParts = typeof bank === 'object'
+    ? [bank.bank, bank.number, bank.holder].filter(Boolean)
+    : bank ? [bank] : []
   const mapHref = options.mapUrl
     || (invitation.venue ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(invitation.venue)}` : '')
   const bgUrl = invitation.template_id ? `/backgrounds/${invitation.template_id}.jpg` : ''
@@ -291,10 +291,15 @@ export default function PublicInvitation() {
           </section>
         )}
 
-        {bankText && (
+        {bankParts.length > 0 && (
           <section className="pv-section">
-            <h2>Хишиг хүргэх</h2>
-            <p className="pv-note pv-bank"><Gift size={18} /> {bankText}</p>
+            <h2>Данс</h2>
+            <div className="pv-bank">
+              <Gift size={18} />
+              <div className="pv-bank-lines">
+                {bankParts.map((part, index) => <p key={index} className={index === 1 || bankParts.length === 1 ? 'pv-bank-number' : ''}>{part}</p>)}
+              </div>
+            </div>
           </section>
         )}
 
