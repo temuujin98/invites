@@ -70,7 +70,8 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"https://api.openverse.org/v1/images/?q=wedding&license=cc0&per_page=3\")",
       "Bash(curl -s \"https://api.openverse.org/v1/images/?q=wedding&license=cc0&per_page=3\")",
       "Bash(curl -s \"https://unsplash.com/napi/search/photos?query=wedding%20flowers%20pastel&per_page=6&orientation=landscape\" -H \"User-Agent: Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/126 Safari/537.36\")",
-      "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\).on\\('end',\\(\\)=>{try{const j=JSON.parse\\(d\\);\\(j.results||[]\\).slice\\(0,6\\).forEach\\(r=>console.log\\(r.id, r.width+'x'+r.height, '|', \\(r.alt_description||''\\).slice\\(0,60\\)\\)\\)}catch\\(e\\){console.log\\('ERR:', d.slice\\(0,150\\)\\)}}\\)\")"
+      "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\).on\\('end',\\(\\)=>{try{const j=JSON.parse\\(d\\);\\(j.results||[]\\).slice\\(0,6\\).forEach\\(r=>console.log\\(r.id, r.width+'x'+r.height, '|', \\(r.alt_description||''\\).slice\\(0,60\\)\\)\\)}catch\\(e\\){console.log\\('ERR:', d.slice\\(0,150\\)\\)}}\\)\")",
+      "Bash(node --experimental-vm-modules -e ' *)"
     ]
   }
 }

@@ -1,8 +1,80 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useEffect, useState } from 'react'
-import { ArrowLeft, CalendarDays, Gift, MapPin, Phone, User, Users } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { ArrowLeft, CalendarDays, Gift, MapPin, Music, Pause, Phone, User, Users } from 'lucide-react'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
 import { formatEventDate, getTemplate } from './templates'
+
+/*
+ * YouTube background music: hidden iframe player + a floating toggle.
+ * Loops the chosen clip (or the whole track); starts on the guest's
+ * first tap — either the floating button or the curtain-open button.
+ */
+function MusicPlayer({ music }) {
+  const [playing, setPlaying] = useState(false)
+  const playerRef = useRef(null)
+  const readyRef = useRef(false)
+
+  useEffect(() => {
+    let cancelled = false
+
+    function createPlayer() {
+      if (cancelled) return
+      playerRef.current = new window.YT.Player('yt-music-holder', {
+        width: 1,
+        height: 1,
+        videoId: music.id,
+        playerVars: { start: music.start || 0, end: music.end, playsinline: 1, controls: 0, disablekb: 1, rel: 0 },
+        events: {
+          onReady: () => { readyRef.current = true },
+          onStateChange: (event) => {
+            if (event.data === window.YT.PlayerState.PLAYING) setPlaying(true)
+            if (event.data === window.YT.PlayerState.PAUSED) setPlaying(false)
+            if (event.data === window.YT.PlayerState.ENDED) {
+              // loop the clip
+              playerRef.current.loadVideoById({ videoId: music.id, startSeconds: music.start || 0, endSeconds: music.end })
+            }
+          },
+        },
+      })
+    }
+
+    if (window.YT?.Player) createPlayer()
+    else {
+      const previous = window.onYouTubeIframeAPIReady
+      window.onYouTubeIframeAPIReady = () => { previous?.(); createPlayer() }
+      if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+        const script = document.createElement('script')
+        script.src = 'https://www.youtube.com/iframe_api'
+        document.head.appendChild(script)
+      }
+    }
+
+    function startFromGesture() {
+      if (readyRef.current) playerRef.current?.playVideo()
+    }
+    window.addEventListener('invite-open-clicked', startFromGesture)
+    return () => {
+      cancelled = true
+      window.removeEventListener('invite-open-clicked', startFromGesture)
+      playerRef.current?.destroy?.()
+    }
+  }, [music])
+
+  function toggle() {
+    if (!readyRef.current) return
+    if (playing) playerRef.current.pauseVideo()
+    else playerRef.current.playVideo()
+  }
+
+  return (
+    <div className="music-dock">
+      <div id="yt-music-holder" className="yt-hidden" aria-hidden="true" />
+      <button className={`music-toggle ${playing ? 'playing' : ''}`} onClick={toggle} aria-label={playing ? 'Дууг зогсоох' : 'Дуу тоглуулах'}>
+        {playing ? <Pause size={20} /> : <Music size={20} />}
+      </button>
+    </div>
+  )
+}
 
 /*
  * Ceremonial curtain intro (paid add-on): velvet curtains part when the
@@ -13,6 +85,8 @@ function CurtainIntro({ eventType, guest, onDone }) {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   function openCurtains() {
+    // synchronous dispatch keeps the user-gesture context for audio start
+    window.dispatchEvent(new Event('invite-open-clicked'))
     if (reduceMotion) { onDone(); return }
     setOpening(true)
     setTimeout(onDone, 2100)
@@ -139,6 +213,7 @@ export default function PublicInvitation() {
   return (
     <main className="public-invite">
       {showIntro && <CurtainIntro eventType={invitation.event_type} guest={invitedGuest} onDone={() => setIntroDone(true)} />}
+      {options.music?.id && <MusicPlayer music={options.music} />}
       <a className="public-brand" href="/"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a>
 
       <section className={`public-card ${invitation.theme || 'lavender'} layout-${layout} ${invitation.template_id ? `bg-${invitation.template_id}` : ''}`}>

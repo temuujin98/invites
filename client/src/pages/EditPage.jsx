@@ -5,6 +5,7 @@ import { FunnelHeader, InvitePreview } from '../components/Shared'
 import DateTimeField from '../components/DateTimeField'
 import ExtraOptions, { emptyExtras } from '../components/ExtraOptions'
 import { sanitizeExtras } from '../lib/createInvitation'
+import { musicToFields } from '../lib/music'
 
 /*
  * Edit an existing invitation. The share link (slug) never changes, so
@@ -48,7 +49,7 @@ export default function EditPage({ invitationId }) {
           setEventAt(data.event_at ? toLocalInputValue(data.event_at) : '')
           setVenue(data.venue || '')
           setMessage(data.message || '')
-          setExtras({ ...emptyExtras, ...(data.options || {}) })
+          setExtras({ ...emptyExtras, ...(data.options || {}), ...musicToFields(data.options?.music) })
         }
         setLoading(false)
       })

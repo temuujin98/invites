@@ -7,7 +7,7 @@ import { INTRO_PRICE, formatPrice } from '../templates'
  * value: { coverUrl, mapUrl, program: [{time, activity}], note, phone, bank }
  * Everything is optional — empty options simply don't render on the guest page.
  */
-export const emptyExtras = { coverUrl: '', mapUrl: '', program: [], note: '', phone: '', bank: '', intro: '' }
+export const emptyExtras = { coverUrl: '', mapUrl: '', program: [], note: '', phone: '', bank: '', intro: '', musicUrl: '', musicStart: '', musicEnd: '' }
 
 export default function ExtraOptions({ value, onChange, showIntro = true }) {
   const [open, setOpen] = useState(false)
@@ -94,6 +94,22 @@ export default function ExtraOptions({ value, onChange, showIntro = true }) {
               <button type="button" className="klink klink-button" onClick={() => patch({ program: [...extras.program, { time: '', activity: '' }] })}>+ Мөр нэмэх</button>
             )}
           </div>
+
+          <label>Дуу (YouTube линк)
+            <input type="url" value={extras.musicUrl} onChange={(event) => patch({ musicUrl: event.target.value })} placeholder="https://youtu.be/..." />
+            <span className="kfield-hint">Урилга нээгдэхэд дуу тоглоно (зочин унтраах боломжтой)</span>
+          </label>
+          {extras.musicUrl && (
+            <div className="music-range">
+              <label>Эхлэх цэг
+                <input value={extras.musicStart} onChange={(event) => patch({ musicStart: event.target.value })} placeholder="0:30" maxLength={8} />
+              </label>
+              <label>Дуусах цэг
+                <input value={extras.musicEnd} onChange={(event) => patch({ musicEnd: event.target.value })} placeholder="1:30" maxLength={8} />
+              </label>
+              <span className="kfield-hint music-range-hint">Сонгосон хэсгийг давтаж тоглуулна (хамгийн багадаа 10 сек). Хоосон бол эхнээс нь бүтнээр давтана.</span>
+            </div>
+          )}
 
           <label>Тусгай тэмдэглэл
             <textarea maxLength={300} value={extras.note} onChange={(event) => patch({ note: event.target.value })} placeholder="Жишээ: Dress code — гоёлын хувцас. Хүүхдийн өрөө тусдаа байгаа." />

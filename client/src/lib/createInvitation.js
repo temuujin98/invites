@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { getTemplate, loadDraft, clearDraft, makeSlug, INTRO_PRICE } from '../templates'
+import { buildMusic } from './music'
 
 /* keep only known option keys, drop empty values and blank program rows */
 export function sanitizeExtras(extras) {
@@ -15,6 +16,8 @@ export function sanitizeExtras(extras) {
   if (source.phone?.trim()) clean.phone = source.phone.trim()
   if (source.bank?.trim()) clean.bank = source.bank.trim()
   if (source.intro === 'curtain') clean.intro = 'curtain'
+  const music = buildMusic(source)
+  if (music) clean.music = music
   return clean
 }
 
