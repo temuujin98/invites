@@ -109,7 +109,7 @@ export default function AdminApp() {
     if (next && !rsvpDetails[invitation.id]) {
       const { data } = await supabase
         .from('rsvps')
-        .select('guest_name, response, party_size, created_at')
+        .select('guest_name, guest_phone, wish, response, party_size, created_at')
         .eq('invitation_id', invitation.id)
         .order('created_at', { ascending: false })
       setRsvpDetails((current) => ({ ...current, [invitation.id]: data || [] }))
@@ -118,11 +118,13 @@ export default function AdminApp() {
 
   function downloadCsv(invitation) {
     const rows = rsvpDetails[invitation.id] || []
-    const header = 'Нэр,Хариу,Хүний тоо,Огноо'
+    const header = 'Нэр,Утас,Хариу,Хүний тоо,Мэндчилгээ,Огноо'
     const lines = rows.map((rsvp) => [
       `"${(rsvp.guest_name || 'Нэргүй').replace(/"/g, '""')}"`,
+      `"${(rsvp.guest_phone || '').replace(/"/g, '""')}"`,
       rsvp.response === 'attending' ? 'Ирнэ' : 'Үгүй',
       rsvp.party_size,
+      `"${(rsvp.wish || '').replace(/"/g, '""')}"`,
       formatDate(rsvp.created_at),
     ].join(','))
     const blob = new Blob(['﻿' + [header, ...lines].join('\n')], { type: 'text/csv;charset=utf-8' })
@@ -227,11 +229,14 @@ export default function AdminApp() {
                                 <button onClick={() => downloadCsv(invitation)}>CSV татах</button>
                               </div>
                               {details.map((rsvp, index) => (
-                                <p key={index} className="admin-rsvp-line">
-                                  <span className={`kbadge ${rsvp.response === 'attending' ? 'active' : 'paused'}`}>{rsvp.response === 'attending' ? 'ИРНЭ' : 'ҮГҮЙ'}</span>
-                                  <b>{rsvp.guest_name || 'Нэргүй зочин'}</b>
-                                  <small>{rsvp.party_size} хүн · {formatDate(rsvp.created_at)}</small>
-                                </p>
+                                <div key={index}>
+                                  <p className="admin-rsvp-line">
+                                    <span className={`kbadge ${rsvp.response === 'attending' ? 'active' : 'paused'}`}>{rsvp.response === 'attending' ? 'ИРНЭ' : 'ҮГҮЙ'}</span>
+                                    <b>{rsvp.guest_name || 'Нэргүй зочин'}</b>
+                                    <small>{rsvp.guest_phone ? `${rsvp.guest_phone} · ` : ''}{rsvp.party_size} хүн · {formatDate(rsvp.created_at)}</small>
+                                  </p>
+                                  {rsvp.wish && <p className="admin-rsvp-wish">«{rsvp.wish}»</p>}
+                                </div>
                               ))}
                             </div>
                           )}

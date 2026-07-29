@@ -1,25 +1,51 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from 'react'
-import { ArrowLeft, CalendarDays, MapPin, User, Users } from 'lucide-react'
+import { ArrowLeft, CalendarDays, Gift, MapPin, Phone, User, Users } from 'lucide-react'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
 import { formatEventDate, getTemplate } from './templates'
+
+function Countdown({ target }) {
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(timer)
+  }, [])
+  const diff = new Date(target).getTime() - now
+  if (!target || diff <= 0) return null
+  const days = Math.floor(diff / 86400000)
+  const hours = Math.floor(diff / 3600000) % 24
+  const minutes = Math.floor(diff / 60000) % 60
+  const seconds = Math.floor(diff / 1000) % 60
+  const pad = (part) => String(part).padStart(2, '0')
+  const units = [[days, 'ХОНОГ'], [pad(hours), 'ЦАГ'], [pad(minutes), 'МИН'], [pad(seconds), 'СЕК']]
+  return (
+    <div className="countdown" aria-label="Тооллого">
+      {units.map(([value, label]) => (
+        <div className="count-unit" key={label}><b>{value}</b><small>{label}</small></div>
+      ))}
+    </div>
+  )
+}
 
 export default function PublicInvitation() {
   const [response, setResponse] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [guestName, setGuestName] = useState('')
+  const [guestPhone, setGuestPhone] = useState('')
+  const [wish, setWish] = useState('')
   const [partySize, setPartySize] = useState(1)
   const [invitation, setInvitation] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const slug = window.location.pathname.split('/').filter(Boolean).at(-1)
+  const invitedGuest = new URLSearchParams(window.location.search).get('g') || ''
 
   useEffect(() => {
     if (!supabase || !slug) { setLoading(false); return undefined }
     let alive = true
     supabase
       .from('invitations')
-      .select('id, event_type, title, message, event_at, venue, theme, template_id')
+      .select('id, event_type, title, message, event_at, venue, theme, template_id, options')
       .eq('slug', slug)
       .eq('status', 'active')
       .maybeSingle()
@@ -32,15 +58,28 @@ export default function PublicInvitation() {
     return () => { alive = false }
   }, [slug])
 
+  useEffect(() => {
+    if (invitedGuest) setGuestName(invitedGuest)
+  }, [invitedGuest])
+
   async function submitRsvp() {
     if (!response) return
     setError('')
-    const { error: submitError } = await supabase.from('rsvps').insert({
+    const base = {
       invitation_id: invitation.id,
       guest_name: guestName.trim() || null,
       response: response === 'yes' ? 'attending' : 'declined',
       party_size: partySize,
+    }
+    let { error: submitError } = await supabase.from('rsvps').insert({
+      ...base,
+      guest_phone: guestPhone.trim() || null,
+      wish: wish.trim() || null,
     })
+    // graceful fallback while the phone/wish columns are not migrated yet
+    if (submitError && /column|schema/i.test(submitError.message || '')) {
+      ({ error: submitError } = await supabase.from('rsvps').insert(base))
+    }
     if (submitError) setError('Хариу илгээж чадсангүй. Дахин оролдоно уу')
     else setSubmitted(true)
   }
@@ -64,19 +103,60 @@ export default function PublicInvitation() {
   }
 
   const layout = getTemplate(invitation.template_id)?.layout || 'classic'
+  const options = invitation.options || {}
+  const mapHref = options.mapUrl
+    || (invitation.venue ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(invitation.venue)}` : '')
 
   return (
     <main className="public-invite">
       <a className="public-brand" href="/"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a>
+
       <section className={`public-card ${invitation.theme || 'lavender'} layout-${layout}`}>
+        {options.coverUrl && <img className="public-cover" src={options.coverUrl} alt="" />}
+        {invitedGuest && <p className="public-guest">Хүндэт <b>{invitedGuest}</b> танд</p>}
         <p className="public-type">{invitation.event_type}</p>
         <h1>{invitation.title}</h1>
         {invitation.message && <p className="public-message">{invitation.message}</p>}
         <div className="event-facts">
           <p><CalendarDays size={18} /><span>{formatEventDate(invitation.event_at)}</span></p>
-          <p><MapPin size={18} /><span>{invitation.venue || 'Байршил удахгүй зарлагдана'}</span></p>
+          <p>
+            <MapPin size={18} />
+            <span>
+              {invitation.venue || 'Байршил удахгүй зарлагдана'}
+              {mapHref && <> · <a className="map-link" href={mapHref} target="_blank" rel="noreferrer">Газрын зурагт харах</a></>}
+            </span>
+          </p>
+          {options.phone && <p><Phone size={18} /><span><a className="map-link" href={`tel:${options.phone}`}>{options.phone}</a></span></p>}
         </div>
       </section>
+
+      <Countdown target={invitation.event_at} />
+
+      {options.program?.length > 0 && (
+        <section className="public-section">
+          <p className="public-type">ХӨТӨЛБӨР</p>
+          <div className="program-list">
+            {options.program.map((row, index) => (
+              <p className="program-item" key={index}><b>{row.time}</b><span>{row.activity}</span></p>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {options.note && (
+        <section className="public-section">
+          <p className="public-type">ТЭМДЭГЛЭЛ</p>
+          <p className="public-note">{options.note}</p>
+        </section>
+      )}
+
+      {options.bank && (
+        <section className="public-section">
+          <p className="public-type">ХИШИГ ХҮРГЭХ</p>
+          <p className="public-note bank-note"><Gift size={16} /> {options.bank}</p>
+        </section>
+      )}
+
       <section className="rsvp">
         <p className="public-type">RSVP</p>
         <h2>Та ирэх үү</h2>
@@ -91,6 +171,9 @@ export default function PublicInvitation() {
             <label><User size={17} /> Таны нэр
               <input type="text" value={guestName} onChange={(event) => setGuestName(event.target.value)} placeholder="Нэрээ бичнэ үү" maxLength={80} />
             </label>
+            <label style={{ marginTop: 10 }}><Phone size={17} /> Утасны дугаар
+              <input type="tel" value={guestPhone} onChange={(event) => setGuestPhone(event.target.value)} placeholder="9911xxxx" maxLength={20} />
+            </label>
             {response === 'yes' && (
               <label style={{ marginTop: 10 }}><Users size={17} /> Зочдын тоо
                 <select value={partySize} onChange={(event) => setPartySize(Number(event.target.value))}>
@@ -98,11 +181,13 @@ export default function PublicInvitation() {
                 </select>
               </label>
             )}
+            <textarea className="wish-input" maxLength={300} value={wish} onChange={(event) => setWish(event.target.value)} placeholder="Мэндчилгээ, ерөөлөө үлдээгээрэй (заавал биш)" />
             <button className="rsvp-submit" disabled={!response} onClick={submitRsvp}>Хариу илгээх</button>
             {error && <p role="alert">{error}</p>}
           </>
         )}
       </section>
+
       <a className="public-back" href="/"><ArrowLeft size={15} /> Invites.mn</a>
     </main>
   )

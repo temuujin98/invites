@@ -59,7 +59,8 @@
       "Bash(powershell -Command 'Get-ChildItem \"$env:APPDATA\\\\supabase\",\"$env:LOCALAPPDATA\\\\supabase\" -Force -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name')",
       "Bash(node -e \"const os=require\\('os'\\),fs=require\\('fs'\\),p=os.homedir\\(\\)+'/.supabase/access-token'; console.log\\(fs.existsSync\\(p\\) ? 'token file exists' : 'no token file'\\)\")",
       "Bash(curl -s -o /dev/null -w \"/i/test-slug: %{http_code}\\\\n\" https://invites.mn/i/test-slug-that-does-not-exist)",
-      "Bash(curl -s https://invites.mn/i/test-slug-that-does-not-exist)"
+      "Bash(curl -s https://invites.mn/i/test-slug-that-does-not-exist)",
+      "WebFetch(domain:urilga.mn)"
     ]
   }
 }

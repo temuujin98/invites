@@ -4,6 +4,24 @@ import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import { formatPrice } from '../templates'
 import { FunnelHeader, InvitationSummary, ShareQr, statusLabels } from '../components/Shared'
 
+/* Personal guest links: /i/slug?g=Нэр renders «Хүндэт Нэр танд» */
+function GuestLinkMaker({ slug }) {
+  const [name, setName] = useState('')
+  const [copied, setCopied] = useState(false)
+  async function copy() {
+    if (!name.trim()) return
+    await navigator.clipboard.writeText(`${window.location.origin}/i/${slug}?g=${encodeURIComponent(name.trim())}`)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+  return (
+    <div className="guest-link">
+      <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Зочны нэрээр холбоос…" maxLength={60} />
+      <button className="kbutton kbutton-small" onClick={copy} disabled={!name.trim()}>{copied ? '✓' : 'Хуулах'}</button>
+    </div>
+  )
+}
+
 /* Minimal user area: just your invitations, their status, and RSVP details. */
 export default function MyPage() {
   const [session, setSession] = useState(null)
@@ -45,7 +63,7 @@ export default function MyPage() {
     if (next && !rsvps[invitation.id]) {
       const { data } = await supabase
         .from('rsvps')
-        .select('guest_name, response, party_size, created_at')
+        .select('guest_name, guest_phone, wish, response, party_size, created_at')
         .eq('invitation_id', invitation.id)
         .order('created_at', { ascending: false })
       setRsvps((current) => ({ ...current, [invitation.id]: data || [] }))
@@ -149,6 +167,7 @@ export default function MyPage() {
                         >Хуулах</button>
                       </div>
                       <ShareQr url={`${window.location.origin}/i/${invitation.slug}`} size={120} />
+                      <GuestLinkMaker slug={invitation.slug} />
                     </>
                   ) : invitation.status === 'pending_payment' ? (
                     <a className="kbutton kbutton-small" href={`/pay/${invitation.id}`}>Төлбөр төлөх →</a>
@@ -167,11 +186,14 @@ export default function MyPage() {
                         <>
                           <p className="rsvp-total">Ирнэ: {attending.length} хариу · нийт {guestTotal} зочин</p>
                           {details.map((rsvp, index) => (
-                            <p className="rsvp-line" key={index}>
-                              <span className={`rsvp-flag ${rsvp.response}`}>{rsvp.response === 'attending' ? 'ИРНЭ' : 'ҮГҮЙ'}</span>
-                              <b>{rsvp.guest_name || 'Нэргүй зочин'}</b>
-                              <small>{rsvp.party_size} хүн</small>
-                            </p>
+                            <div className="rsvp-entry" key={index}>
+                              <p className="rsvp-line">
+                                <span className={`rsvp-flag ${rsvp.response}`}>{rsvp.response === 'attending' ? 'ИРНЭ' : 'ҮГҮЙ'}</span>
+                                <b>{rsvp.guest_name || 'Нэргүй зочин'}</b>
+                                <small>{rsvp.guest_phone ? `${rsvp.guest_phone} · ` : ''}{rsvp.party_size} хүн</small>
+                              </p>
+                              {rsvp.wish && <p className="rsvp-wish">«{rsvp.wish}»</p>}
+                            </div>
                           ))}
                         </>
                       )}

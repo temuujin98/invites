@@ -5,6 +5,7 @@ import { insertDraftInvitation } from '../lib/createInvitation'
 import { getTemplate, formatPrice, saveDraft, loadDraft } from '../templates'
 import { FunnelHeader, InvitePreview } from '../components/Shared'
 import DateTimeField from '../components/DateTimeField'
+import ExtraOptions, { emptyExtras } from '../components/ExtraOptions'
 
 /*
  * One page does it all: fill in details + email, hit continue.
@@ -20,6 +21,7 @@ export default function CreateEditor({ templateId }) {
   const [dateError, setDateError] = useState(false)
   const [venue, setVenue] = useState(initial.venue || '')
   const [message, setMessage] = useState(initial.message || '')
+  const [extras, setExtras] = useState(existing?.templateId === templateId ? { ...emptyExtras, ...existing.extras } : emptyExtras)
   const [email, setEmail] = useState('')
   const [session, setSession] = useState(null)
   const [busy, setBusy] = useState(false)
@@ -47,7 +49,7 @@ export default function CreateEditor({ templateId }) {
     if (!eventAt) { setDateError(true); return }
     setDateError(false)
     setError('')
-    saveDraft({ templateId, values: { title: title.trim(), eventAt, venue: venue.trim(), message: message.trim() }, savedAt: Date.now() })
+    saveDraft({ templateId, values: { title: title.trim(), eventAt, venue: venue.trim(), message: message.trim() }, extras, savedAt: Date.now() })
 
     if (!isSupabaseConfigured) { setError('Тохиргоо дутуу байна.'); return }
     setBusy(true)
@@ -107,6 +109,7 @@ export default function CreateEditor({ templateId }) {
             <label>Урилгын мессеж
               <textarea maxLength={400} value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Таныг бидний онцгой өдөрт урьж байна" />
             </label>
+            <ExtraOptions value={extras} onChange={setExtras} />
             {!session && (
               <label>Имэйл хаяг
                 <input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="tanii@gmail.com" />

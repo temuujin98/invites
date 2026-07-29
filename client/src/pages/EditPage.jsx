@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import { FunnelHeader, InvitePreview } from '../components/Shared'
 import DateTimeField from '../components/DateTimeField'
+import ExtraOptions, { emptyExtras } from '../components/ExtraOptions'
+import { sanitizeExtras } from '../lib/createInvitation'
 
 /*
  * Edit an existing invitation. The share link (slug) never changes, so
@@ -17,6 +19,7 @@ export default function EditPage({ invitationId }) {
   const [eventAt, setEventAt] = useState('')
   const [venue, setVenue] = useState('')
   const [message, setMessage] = useState('')
+  const [extras, setExtras] = useState(emptyExtras)
   const [busy, setBusy] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -45,6 +48,7 @@ export default function EditPage({ invitationId }) {
           setEventAt(data.event_at ? toLocalInputValue(data.event_at) : '')
           setVenue(data.venue || '')
           setMessage(data.message || '')
+          setExtras({ ...emptyExtras, ...(data.options || {}) })
         }
         setLoading(false)
       })
@@ -69,6 +73,7 @@ export default function EditPage({ invitationId }) {
         event_at: eventAt ? new Date(eventAt).toISOString() : null,
         venue: venue.trim() || null,
         message: message.trim() || null,
+        options: sanitizeExtras(extras),
         updated_at: new Date().toISOString(),
       })
       .eq('id', invitationId)
@@ -162,6 +167,7 @@ export default function EditPage({ invitationId }) {
           <label>Урилгын мессеж
             <textarea maxLength={400} value={message} onChange={(event) => setMessage(event.target.value)} />
           </label>
+          <ExtraOptions value={extras} onChange={setExtras} />
           {error && <p className="kerror">{error}</p>}
           {saved && <p className="kpanel-note">✓ Хадгалагдлаа — зочдод шинэ мэдээлэл харагдана</p>}
           <div className="kform-actions">

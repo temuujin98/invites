@@ -50,6 +50,7 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
 .admin-rsvp-head button:hover { background: var(--k-black); color: var(--k-white); }
 .admin-rsvp-line { display: flex; align-items: center; gap: 12px; margin: 0; }
 .admin-rsvp-line small { margin-left: auto; font-family: 'JetBrains Mono', monospace; color: #00000080; font-size: 10px; }
+.admin-rsvp-wish { margin: 2px 0 0 8px; font-size: 12px; font-style: italic; color: #000000a6; }
 
 /* ---------- Status badges ---------- */
 .kbadge { font-family: 'JetBrains Mono', monospace; display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: -.02em; padding: 4px 10px; border: 2px solid var(--k-black); background: var(--k-white); white-space: nowrap; }
