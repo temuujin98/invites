@@ -1,13 +1,20 @@
 import { useRef, useState } from 'react'
 import { uploadCover } from '../lib/uploadCover'
-import { INTRO_PRICE, formatPrice } from '../templates'
+import { INTRO_PRICE, formatPrice, banks, curtainColors } from '../templates'
 
 /*
  * "Нэмэлт сонголтууд" fieldset shared by the create and edit forms.
- * value: { coverUrl, mapUrl, program: [{time, activity}], note, phone, bank }
+ * value: { gallery: [urls], mapUrl, program: [{time, activity}], note,
+ *          phone, bankName, bankNumber, bankHolder, intro, introColor,
+ *          musicUrl, musicStart, musicEnd }
  * Everything is optional — empty options simply don't render on the guest page.
  */
-export const emptyExtras = { coverUrl: '', mapUrl: '', program: [], note: '', phone: '', bank: '', intro: '', musicUrl: '', musicStart: '', musicEnd: '' }
+export const emptyExtras = {
+  gallery: [], mapUrl: '', program: [], note: '', phone: '',
+  bankName: '', bankNumber: '', bankHolder: '',
+  intro: '', introColor: 'violet',
+  musicUrl: '', musicStart: '', musicEnd: '',
+}
 
 export default function ExtraOptions({ value, onChange, showIntro = true }) {
   const [open, setOpen] = useState(false)
@@ -20,15 +27,21 @@ export default function ExtraOptions({ value, onChange, showIntro = true }) {
     onChange({ ...extras, ...part })
   }
 
-  async function pickCover(event) {
-    const file = event.target.files?.[0]
-    if (!file) return
+  async function pickImages(event) {
+    const files = Array.from(event.target.files || [])
+    if (!files.length) return
     setUploading(true)
     setUploadError('')
-    const result = await uploadCover(file)
+    const urls = [...extras.gallery]
+    for (const file of files) {
+      if (urls.length >= 8) break
+      const result = await uploadCover(file)
+      if (result.error) { setUploadError('Зарим зургийг оруулж чадсангүй. Дахин оролдоно уу.'); continue }
+      urls.push(result.url)
+    }
     setUploading(false)
-    if (result.error) { setUploadError('Зураг оруулахад алдаа гарлаа. Дахин оролдоно уу.'); return }
-    patch({ coverUrl: result.url })
+    patch({ gallery: urls })
+    if (fileRef.current) fileRef.current.value = ''
   }
 
   function setProgramRow(index, part) {
@@ -40,7 +53,7 @@ export default function ExtraOptions({ value, onChange, showIntro = true }) {
     <div className="extras">
       <button type="button" className="extras-toggle" onClick={() => setOpen(!open)} aria-expanded={open}>
         {open ? '− Нэмэлт сонголтууд' : '+ Нэмэлт сонголтууд'}
-        <span className="extras-hint">зураг · газрын зураг · хөтөлбөр · данс…</span>
+        <span className="extras-hint">зургийн цомог · хөтөлбөр · дуу · данс…</span>
       </button>
       {open && (
         <div className="extras-body">
@@ -59,21 +72,42 @@ export default function ExtraOptions({ value, onChange, showIntro = true }) {
                   onClick={() => patch({ intro: 'curtain' })}
                 >🎭 Хөшиг нээгдэх</button>
               </div>
+              {extras.intro === 'curtain' && (
+                <div className="curtain-colors">
+                  {curtainColors.map((color) => (
+                    <button
+                      key={color.id}
+                      type="button"
+                      className={`curtain-swatch cs-${color.id} ${extras.introColor === color.id ? 'selected' : ''}`}
+                      onClick={() => patch({ introColor: color.id })}
+                      aria-label={color.name}
+                      title={color.name}
+                    />
+                  ))}
+                  <span className="kfield-hint">Хөшигний өнгө</span>
+                </div>
+              )}
               <span className="kfield-hint">Зочин урилгыг нээхэд тайзны хөшиг сүр жавхлантай нээгдэж урилга ил гарна</span>
             </label>
           )}
 
-          <label>Ковер зураг
-            {extras.coverUrl ? (
-              <span className="cover-preview">
-                <img src={extras.coverUrl} alt="Ковер зураг" />
-                <button type="button" className="klink klink-button" onClick={() => { patch({ coverUrl: '' }); if (fileRef.current) fileRef.current.value = '' }}>Устгах</button>
-              </span>
-            ) : (
-              <input ref={fileRef} type="file" accept="image/*" onChange={pickCover} disabled={uploading} />
+          <label>Зургийн цомог ({extras.gallery.length}/8)
+            {extras.gallery.length > 0 && (
+              <div className="gallery-thumbs">
+                {extras.gallery.map((url, index) => (
+                  <span className="gallery-thumb" key={url}>
+                    <img src={url} alt={`Зураг ${index + 1}`} />
+                    <button type="button" aria-label="Устгах" onClick={() => patch({ gallery: extras.gallery.filter((_, i) => i !== index) })}>×</button>
+                  </span>
+                ))}
+              </div>
+            )}
+            {extras.gallery.length < 8 && (
+              <input ref={fileRef} type="file" accept="image/*" multiple onChange={pickImages} disabled={uploading} />
             )}
             {uploading && <span className="kfield-hint">Зураг илгээж байна…</span>}
             {uploadError && <span className="kerror">{uploadError}</span>}
+            <span className="kfield-hint">Урилга дээр зургийн цомог хэлбэрээр харагдана</span>
           </label>
 
           <label>Газрын зургийн линк
@@ -119,8 +153,15 @@ export default function ExtraOptions({ value, onChange, showIntro = true }) {
             <input value={extras.phone} onChange={(event) => patch({ phone: event.target.value })} placeholder="9911xxxx" maxLength={40} />
           </label>
 
-          <label>Хишгийн данс
-            <input value={extras.bank} onChange={(event) => patch({ bank: event.target.value })} placeholder="Хаан банк · 5041xxxxxx · Тэмүүлэн" maxLength={120} />
+          <label>Данс
+            <div className="bank-fields">
+              <select className="kdate-select bank-select" value={extras.bankName} onChange={(event) => patch({ bankName: event.target.value })}>
+                <option value="" disabled>Банк сонгох</option>
+                {banks.map((bank) => <option key={bank} value={bank}>{bank}</option>)}
+              </select>
+              <input value={extras.bankNumber} onChange={(event) => patch({ bankNumber: event.target.value })} placeholder="Дансны дугаар" maxLength={30} />
+              <input value={extras.bankHolder} onChange={(event) => patch({ bankHolder: event.target.value })} placeholder="Эзэмшигчийн нэр" maxLength={60} />
+            </div>
             <span className="kfield-hint">Бэлэг хүргэх дансаа оруулбал урилгад харагдана</span>
           </label>
 

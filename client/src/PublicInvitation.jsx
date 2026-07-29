@@ -30,7 +30,6 @@ function MusicPlayer({ music }) {
             if (event.data === window.YT.PlayerState.PLAYING) setPlaying(true)
             if (event.data === window.YT.PlayerState.PAUSED) setPlaying(false)
             if (event.data === window.YT.PlayerState.ENDED) {
-              // loop the clip
               playerRef.current.loadVideoById({ videoId: music.id, startSeconds: music.start || 0, endSeconds: music.end })
             }
           },
@@ -80,7 +79,7 @@ function MusicPlayer({ music }) {
  * Ceremonial curtain intro (paid add-on): velvet curtains part when the
  * guest presses «Урилгыг нээх», then the overlay fades away.
  */
-function CurtainIntro({ eventType, guest, onDone }) {
+function CurtainIntro({ eventType, guest, color, onDone }) {
   const [opening, setOpening] = useState(false)
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -93,7 +92,7 @@ function CurtainIntro({ eventType, guest, onDone }) {
   }
 
   return (
-    <div className={`intro-overlay ${opening ? 'opening' : ''}`} role="dialog" aria-label="Урилга нээх">
+    <div className={`intro-overlay c-${color || 'violet'} ${opening ? 'opening' : ''}`} role="dialog" aria-label="Урилга нээх">
       <div className="curtain curtain-left" />
       <div className="curtain curtain-right" />
       <div className="intro-center">
@@ -120,11 +119,28 @@ function Countdown({ target }) {
   const pad = (part) => String(part).padStart(2, '0')
   const units = [[days, 'ХОНОГ'], [pad(hours), 'ЦАГ'], [pad(minutes), 'МИН'], [pad(seconds), 'СЕК']]
   return (
-    <div className="countdown" aria-label="Тооллого">
-      {units.map(([value, label]) => (
-        <div className="count-unit" key={label}><b>{value}</b><small>{label}</small></div>
+    <div className="pv-countdown" aria-label="Тооллого">
+      {units.map(([value, label], index) => (
+        <div className="pv-count" key={label}>
+          <b>{value}</b><small>{label}</small>
+          {index < 3 && <span className="pv-count-sep" aria-hidden="true" />}
+        </div>
       ))}
     </div>
+  )
+}
+
+/* Horizontal photo album with scroll-snap */
+function Gallery({ images }) {
+  return (
+    <section className="pv-gallery" aria-label="Зургийн цомог">
+      <div className="pv-gallery-track">
+        {images.map((url, index) => (
+          <img key={url} src={url} alt={`Зураг ${index + 1}`} loading="lazy" />
+        ))}
+      </div>
+      {images.length > 1 && <p className="pv-gallery-hint">← зургуудыг гүйлгэж үзээрэй →</p>}
+    </section>
   )
 }
 
@@ -178,7 +194,6 @@ export default function PublicInvitation() {
       guest_phone: guestPhone.trim() || null,
       wish: wish.trim() || null,
     })
-    // graceful fallback while the phone/wish columns are not migrated yet
     if (submitError && /column|schema/i.test(submitError.message || '')) {
       ({ error: submitError } = await supabase.from('rsvps').insert(base))
     }
@@ -187,113 +202,123 @@ export default function PublicInvitation() {
   }
 
   if (!isSupabaseConfigured) {
-    return <main className="public-invite"><p>Тохиргоо дутуу байна.</p></main>
+    return <main className="pv"><p className="pv-loading">Тохиргоо дутуу байна.</p></main>
   }
 
   if (loading) {
-    return <main className="public-invite"><a className="public-brand" href="/"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a><p style={{ marginTop: 60 }}>Урилгыг ачаалж байна…</p></main>
+    return <main className="pv"><p className="pv-loading">Урилгыг ачаалж байна…</p></main>
   }
 
   if (!invitation) {
     return (
-      <main className="public-invite">
-        <a className="public-brand" href="/"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a>
-        <section className="public-card"><h1 style={{ fontSize: '2rem', letterSpacing: 0 }}>{error || 'Урилга олдсонгүй'}</h1></section>
-        <a className="public-back" href="/"><ArrowLeft size={15} /> Invites.mn</a>
+      <main className="pv">
+        <div className="pv-content">
+          <a className="pv-brand" href="/"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a>
+          <h1 className="pv-missing">{error || 'Урилга олдсонгүй'}</h1>
+          <a className="pv-back" href="/"><ArrowLeft size={15} /> Invites.mn</a>
+        </div>
       </main>
     )
   }
 
-  const layout = getTemplate(invitation.template_id)?.layout || 'classic'
+  const template = getTemplate(invitation.template_id)
+  const layout = template?.layout || 'classic'
+  const tone = invitation.theme || 'lavender'
   const options = invitation.options || {}
+  const gallery = options.gallery || (options.coverUrl ? [options.coverUrl] : [])
   const showIntro = options.intro === 'curtain' && !introDone
+  const bank = options.bank
+  const bankText = typeof bank === 'object'
+    ? [bank.bank, bank.number, bank.holder].filter(Boolean).join(' · ')
+    : bank
   const mapHref = options.mapUrl
     || (invitation.venue ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(invitation.venue)}` : '')
+  const bgUrl = invitation.template_id ? `/backgrounds/${invitation.template_id}.jpg` : ''
 
   return (
-    <main className="public-invite">
-      {showIntro && <CurtainIntro eventType={invitation.event_type} guest={invitedGuest} onDone={() => setIntroDone(true)} />}
+    <main className={`pv tone-${tone} layout-${layout}`} style={bgUrl ? { backgroundImage: `url(${bgUrl})` } : undefined}>
+      <div className="pv-veil" aria-hidden="true" />
+      {showIntro && <CurtainIntro eventType={invitation.event_type} guest={invitedGuest} color={options.introColor} onDone={() => setIntroDone(true)} />}
       {options.music?.id && <MusicPlayer music={options.music} />}
-      <a className="public-brand" href="/"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a>
 
-      <section className={`public-card ${invitation.theme || 'lavender'} layout-${layout} ${invitation.template_id ? `bg-${invitation.template_id}` : ''}`}>
-        {options.coverUrl && <img className="public-cover" src={options.coverUrl} alt="" />}
-        {invitedGuest && <p className="public-guest">Хүндэт <b>{invitedGuest}</b> танд</p>}
-        <p className="public-type">{invitation.event_type}</p>
-        <h1>{invitation.title}</h1>
-        {invitation.message && <p className="public-message">{invitation.message}</p>}
-        <div className="event-facts">
-          <p><CalendarDays size={18} /><span>{formatEventDate(invitation.event_at)}</span></p>
-          <p>
-            <MapPin size={18} />
-            <span>
-              {invitation.venue || 'Байршил удахгүй зарлагдана'}
-              {mapHref && <> · <a className="map-link" href={mapHref} target="_blank" rel="noreferrer">Газрын зурагт харах</a></>}
-            </span>
-          </p>
-          {options.phone && <p><Phone size={18} /><span><a className="map-link" href={`tel:${options.phone}`}>{options.phone}</a></span></p>}
-        </div>
-      </section>
+      <div className="pv-content">
+        <a className="pv-brand" href="/"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a>
 
-      <Countdown target={invitation.event_at} />
+        <header className="pv-hero">
+          {invitedGuest && <p className="pv-guest">Хүндэт <b>{invitedGuest}</b> танд</p>}
+          <p className="pv-type">{invitation.event_type}</p>
+          <h1>{invitation.title}</h1>
+          {invitation.message && <p className="pv-message">{invitation.message}</p>}
+        </header>
 
-      {options.program?.length > 0 && (
-        <section className="public-section">
-          <p className="public-type">ХӨТӨЛБӨР</p>
-          <div className="program-list">
-            {options.program.map((row, index) => (
-              <p className="program-item" key={index}><b>{row.time}</b><span>{row.activity}</span></p>
-            ))}
-          </div>
+        <Countdown target={invitation.event_at} />
+
+        <section className="pv-facts">
+          <p><CalendarDays size={20} /><span>{formatEventDate(invitation.event_at)}</span></p>
+          <p><MapPin size={20} /><span>{invitation.venue || 'Байршил удахгүй зарлагдана'}</span></p>
+          {mapHref && <a className="pv-map-button" href={mapHref} target="_blank" rel="noreferrer">Газрын зурагт харах</a>}
+          {options.phone && <p><Phone size={20} /><a href={`tel:${options.phone}`}>{options.phone}</a></p>}
         </section>
-      )}
 
-      {options.note && (
-        <section className="public-section">
-          <p className="public-type">ТЭМДЭГЛЭЛ</p>
-          <p className="public-note">{options.note}</p>
-        </section>
-      )}
+        {gallery.length > 0 && <Gallery images={gallery} />}
 
-      {options.bank && (
-        <section className="public-section">
-          <p className="public-type">ХИШИГ ХҮРГЭХ</p>
-          <p className="public-note bank-note"><Gift size={16} /> {options.bank}</p>
-        </section>
-      )}
-
-      <section className="rsvp">
-        <p className="public-type">RSVP</p>
-        <h2>Та ирэх үү</h2>
-        {submitted ? (
-          <div className="thanks">Баярлалаа<br /><span>Таны хариуг хүлээн авлаа</span></div>
-        ) : (
-          <>
-            <div className="response-buttons">
-              <button className={response === 'yes' ? 'selected' : ''} onClick={() => setResponse('yes')}>Тийм</button>
-              <button className={response === 'no' ? 'selected' : ''} onClick={() => setResponse('no')}>Харамсалтай нь үгүй</button>
+        {options.program?.length > 0 && (
+          <section className="pv-section">
+            <h2>Хөтөлбөр</h2>
+            <div className="pv-program">
+              {options.program.map((row, index) => (
+                <p key={index}><b>{row.time}</b><span>{row.activity}</span></p>
+              ))}
             </div>
-            <label><User size={17} /> Таны нэр
-              <input type="text" value={guestName} onChange={(event) => setGuestName(event.target.value)} placeholder="Нэрээ бичнэ үү" maxLength={80} />
-            </label>
-            <label style={{ marginTop: 10 }}><Phone size={17} /> Утасны дугаар
-              <input type="tel" value={guestPhone} onChange={(event) => setGuestPhone(event.target.value)} placeholder="9911xxxx" maxLength={20} />
-            </label>
-            {response === 'yes' && (
-              <label style={{ marginTop: 10 }}><Users size={17} /> Зочдын тоо
-                <select value={partySize} onChange={(event) => setPartySize(Number(event.target.value))}>
-                  {[1, 2, 3, 4, 5].map((size) => <option key={size} value={size}>{size}</option>)}
-                </select>
-              </label>
-            )}
-            <textarea className="wish-input" maxLength={300} value={wish} onChange={(event) => setWish(event.target.value)} placeholder="Мэндчилгээ, ерөөлөө үлдээгээрэй (заавал биш)" />
-            <button className="rsvp-submit" disabled={!response} onClick={submitRsvp}>Хариу илгээх</button>
-            {error && <p role="alert">{error}</p>}
-          </>
+          </section>
         )}
-      </section>
 
-      <a className="public-back" href="/"><ArrowLeft size={15} /> Invites.mn</a>
+        {options.note && (
+          <section className="pv-section">
+            <h2>Тэмдэглэл</h2>
+            <p className="pv-note">{options.note}</p>
+          </section>
+        )}
+
+        {bankText && (
+          <section className="pv-section">
+            <h2>Хишиг хүргэх</h2>
+            <p className="pv-note pv-bank"><Gift size={18} /> {bankText}</p>
+          </section>
+        )}
+
+        <section className="pv-section pv-rsvp">
+          <h2>Ирэх эсэхээ мэдэгдээрэй</h2>
+          {submitted ? (
+            <div className="pv-thanks">Баярлалаа 💜<br /><span>Таны хариуг хүлээн авлаа</span></div>
+          ) : (
+            <>
+              <div className="pv-choice">
+                <button className={response === 'yes' ? 'selected' : ''} onClick={() => setResponse('yes')}>Тийм, ирнэ</button>
+                <button className={response === 'no' ? 'selected' : ''} onClick={() => setResponse('no')}>Харамсалтай нь үгүй</button>
+              </div>
+              <label className="pv-field"><span className="pv-field-name"><User size={18} /> Таны нэр</span>
+                <input type="text" value={guestName} onChange={(event) => setGuestName(event.target.value)} placeholder="Нэрээ бичнэ үү" maxLength={80} />
+              </label>
+              <label className="pv-field"><span className="pv-field-name"><Phone size={18} /> Утасны дугаар</span>
+                <input type="tel" value={guestPhone} onChange={(event) => setGuestPhone(event.target.value)} placeholder="9911xxxx" maxLength={20} />
+              </label>
+              {response === 'yes' && (
+                <label className="pv-field"><span className="pv-field-name"><Users size={18} /> Хэдүүлээ ирэх вэ?</span>
+                  <select value={partySize} onChange={(event) => setPartySize(Number(event.target.value))}>
+                    {[1, 2, 3, 4, 5].map((size) => <option key={size} value={size}>{size}</option>)}
+                  </select>
+                </label>
+              )}
+              <textarea className="pv-wish" maxLength={300} value={wish} onChange={(event) => setWish(event.target.value)} placeholder="Мэндчилгээ, ерөөлөө үлдээгээрэй (заавал биш)" />
+              <button className="pv-submit" disabled={!response} onClick={submitRsvp}>Хариу илгээх</button>
+              {error && <p className="pv-error" role="alert">{error}</p>}
+            </>
+          )}
+        </section>
+
+        <a className="pv-back" href="/"><ArrowLeft size={15} /> Invites.mn</a>
+      </div>
     </main>
   )
 }

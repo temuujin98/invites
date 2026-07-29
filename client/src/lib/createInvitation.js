@@ -9,13 +9,23 @@ export function sanitizeExtras(extras) {
     .map((row) => ({ time: (row.time || '').trim(), activity: (row.activity || '').trim() }))
     .filter((row) => row.time || row.activity)
   const clean = {}
-  if (source.coverUrl) clean.coverUrl = source.coverUrl
+  const gallery = (source.gallery || []).filter(Boolean).slice(0, 8)
+  if (gallery.length) clean.gallery = gallery
   if (source.mapUrl?.trim()) clean.mapUrl = source.mapUrl.trim()
   if (program.length) clean.program = program
   if (source.note?.trim()) clean.note = source.note.trim()
   if (source.phone?.trim()) clean.phone = source.phone.trim()
-  if (source.bank?.trim()) clean.bank = source.bank.trim()
-  if (source.intro === 'curtain') clean.intro = 'curtain'
+  if (source.bankNumber?.trim()) {
+    clean.bank = {
+      bank: source.bankName || '',
+      number: source.bankNumber.trim(),
+      holder: (source.bankHolder || '').trim(),
+    }
+  }
+  if (source.intro === 'curtain') {
+    clean.intro = 'curtain'
+    clean.introColor = source.introColor || 'violet'
+  }
   const music = buildMusic(source)
   if (music) clean.music = music
   return clean

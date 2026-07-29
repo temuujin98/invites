@@ -106,6 +106,15 @@ export const templates = [
 /* Paid add-on: ceremonial opening effect on the guest page */
 export const INTRO_PRICE = 9900
 
+export const banks = ['Хаан банк', 'Голомт банк', 'Худалдаа хөгжлийн банк', 'Төрийн банк', 'Хас банк', 'М банк', 'Капитрон банк', 'Ариг банк', 'Богд банк']
+
+export const curtainColors = [
+  { id: 'violet', name: 'Нил ягаан' },
+  { id: 'burgundy', name: 'Бордо улаан' },
+  { id: 'noir', name: 'Хар' },
+  { id: 'navy', name: 'Шөнийн хөх' },
+]
+
 export function getTemplate(id) {
   return templates.find((template) => template.id === id) || null
 }

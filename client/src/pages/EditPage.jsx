@@ -49,7 +49,17 @@ export default function EditPage({ invitationId }) {
           setEventAt(data.event_at ? toLocalInputValue(data.event_at) : '')
           setVenue(data.venue || '')
           setMessage(data.message || '')
-          setExtras({ ...emptyExtras, ...(data.options || {}), ...musicToFields(data.options?.music) })
+          const options = data.options || {}
+          const bank = options.bank
+          setExtras({
+            ...emptyExtras,
+            ...options,
+            gallery: options.gallery || (options.coverUrl ? [options.coverUrl] : []),
+            bankName: typeof bank === 'object' ? (bank.bank || '') : '',
+            bankNumber: typeof bank === 'object' ? (bank.number || '') : (bank || ''),
+            bankHolder: typeof bank === 'object' ? (bank.holder || '') : '',
+            ...musicToFields(options.music),
+          })
         }
         setLoading(false)
       })
