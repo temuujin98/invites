@@ -117,6 +117,18 @@ a { color: inherit; text-decoration: none; }
 .tpl-card.blossom { background: linear-gradient(135deg, #ffe8f0, #f397c0); }
 .tpl-card.forest { background: linear-gradient(135deg, #dcefe2, #3e7d5e); }
 
+/* Photo backgrounds (CC0, self-hosted) blended under the tone gradient */
+.tpl-card.bg-lavender-wedding, .public-card.bg-lavender-wedding { background: linear-gradient(135deg, #f1d8ffd9, #8560efb8), url('/backgrounds/lavender-wedding.jpg') center/cover; }
+.tpl-card.bg-rose-wedding, .public-card.bg-rose-wedding { background: linear-gradient(135deg, #ffd7ead9, #d55f9cb8), url('/backgrounds/rose-wedding.jpg') center/cover; }
+.tpl-card.bg-coral-birthday, .public-card.bg-coral-birthday { background: linear-gradient(135deg, #ffc9acd9, #ed6578b8), url('/backgrounds/coral-birthday.jpg') center/cover; }
+.tpl-card.bg-sage-ceremony, .public-card.bg-sage-ceremony { background: linear-gradient(135deg, #d9f6c8d9, #58a986b8), url('/backgrounds/sage-ceremony.jpg') center/cover; }
+.tpl-card.bg-gold-reception, .public-card.bg-gold-reception { background: linear-gradient(135deg, #ffedbed9, #d29a4bb8), url('/backgrounds/gold-reception.jpg') center/cover; }
+.tpl-card.bg-ocean-graduation, .public-card.bg-ocean-graduation { background: linear-gradient(135deg, #c2ecffd9, #3f7fc4b8), url('/backgrounds/ocean-graduation.jpg') center/cover; }
+.tpl-card.bg-midnight-anniversary, .public-card.bg-midnight-anniversary { background: linear-gradient(135deg, #46429cb8, #191636d9), url('/backgrounds/midnight-anniversary.jpg') center/cover; color: #edf0ff; }
+.tpl-card.bg-noir-party, .public-card.bg-noir-party { background: linear-gradient(135deg, #2c2c36c9, #0d0d12e0), url('/backgrounds/noir-party.jpg') center/cover; color: #f2eefc; }
+.tpl-card.bg-blossom-naming, .public-card.bg-blossom-naming { background: linear-gradient(135deg, #ffe8f0d9, #f397c0b8), url('/backgrounds/blossom-naming.jpg') center/cover; }
+.tpl-card.bg-forest-corporate, .public-card.bg-forest-corporate { background: linear-gradient(135deg, #dcefe2d9, #4f8d69b8), url('/backgrounds/forest-corporate.jpg') center/cover; }
+
 /* Editor */
 .editor-grid { display: grid; grid-template-columns: minmax(300px, .9fr) 1.1fr; gap: clamp(26px, 4vw, 60px); align-items: start; padding: 34px clamp(20px, 4vw, 44px) 0; }
 .editor-preview-panel { border: 2px solid var(--k-black); background: var(--k-white); padding: 20px; position: sticky; top: 20px; }

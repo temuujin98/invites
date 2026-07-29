@@ -17,6 +17,7 @@ export default function CreateGallery() {
               eventType={template.eventType}
               title={template.sample.title}
               dateText={template.sample.date}
+              bgId={template.id}
             />
             <div className="tpl-meta">
               <div>

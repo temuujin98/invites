@@ -132,6 +132,7 @@ export default function CreateEditor({ templateId }) {
             eventType={template.eventType}
             title={title || template.sample.title}
             dateText={venue ? `${previewDate} · ${venue}` : previewDate}
+            bgId={template.id}
             big
           />
         </div>

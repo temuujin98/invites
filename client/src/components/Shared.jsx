@@ -32,9 +32,9 @@ export function FunnelHeader({ label }) {
 }
 
 /* Invitation preview card used in the gallery, editor, /my and admin */
-export function InvitePreview({ tone, eventType, title, dateText, big }) {
+export function InvitePreview({ tone, eventType, title, dateText, big, bgId }) {
   return (
-    <article className={`tpl-card ${tone} ${big ? 'tpl-card-big' : ''}`} aria-hidden="true">
+    <article className={`tpl-card ${tone} ${bgId ? `bg-${bgId}` : ''} ${big ? 'tpl-card-big' : ''}`} aria-hidden="true">
       <span>{eventType}</span>
       <div>
         <p className="tpl-name">{title}</p>
@@ -52,6 +52,7 @@ export function InvitationSummary({ invitation }) {
       eventType={invitation.event_type}
       title={invitation.title}
       dateText={formatEventDate(invitation.event_at)}
+      bgId={invitation.template_id}
     />
   )
 }

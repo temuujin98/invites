@@ -141,7 +141,7 @@ export default function PublicInvitation() {
       {showIntro && <CurtainIntro eventType={invitation.event_type} guest={invitedGuest} onDone={() => setIntroDone(true)} />}
       <a className="public-brand" href="/"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a>
 
-      <section className={`public-card ${invitation.theme || 'lavender'} layout-${layout}`}>
+      <section className={`public-card ${invitation.theme || 'lavender'} layout-${layout} ${invitation.template_id ? `bg-${invitation.template_id}` : ''}`}>
         {options.coverUrl && <img className="public-cover" src={options.coverUrl} alt="" />}
         {invitedGuest && <p className="public-guest">Хүндэт <b>{invitedGuest}</b> танд</p>}
         <p className="public-type">{invitation.event_type}</p>

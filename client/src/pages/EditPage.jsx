@@ -182,6 +182,7 @@ export default function EditPage({ invitationId }) {
             eventType={invitation.event_type}
             title={title || invitation.title}
             dateText={venue ? `${previewDate} · ${venue}` : previewDate}
+            bgId={invitation.template_id}
             big
           />
         </div>
