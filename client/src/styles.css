@@ -132,6 +132,10 @@ a { color: inherit; text-decoration: none; }
 .kdate { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .kdate-select { border: 2px solid var(--k-black); background: var(--k-white); color: var(--k-black); font-family: Montserrat, sans-serif; font-size: 14px; font-weight: 600; padding: 12px 10px; outline: none; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23000'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; transition: box-shadow .15s; }
 .kdate-select:focus { box-shadow: 4px 4px 0 var(--k-black); }
+.kdate-select { color-scheme: light; }
+.kdate-select option { font-family: Montserrat, sans-serif; font-size: 15px; font-weight: 600; background: var(--k-white); color: var(--k-black); padding: 10px 12px; }
+.kdate-select option:checked { background: var(--k-brand); color: var(--k-black); }
+.kdate-select option:disabled { color: #00000059; }
 .kdate-sep { font-weight: 900; }
 .kform-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 6px; flex-wrap: wrap; }
 .kerror { font-family: 'JetBrains Mono', monospace; color: var(--k-white); background: #d32f2f; border: 2px solid var(--k-black); padding: 10px 12px; font-size: 11px; line-height: 1.5; margin: 0; }
@@ -348,8 +352,10 @@ a { color: inherit; text-decoration: none; }
 .rsvp label { border: 1px solid #ffffff21; border-radius: 9px; padding: 10px 12px; justify-content: space-between; color: #baaecb; }
 .rsvp input[type="text"] { border: 0; background: transparent; font: inherit; color: #f1ecf8; text-align: right; flex: 1; min-width: 0; outline: none; }
 .rsvp input[type="text"]::placeholder { color: #8d81a0; }
-.rsvp select { margin-left: auto; border: 0; background: transparent; font: inherit; color: #f1ecf8; }
-.rsvp select option { color: #241c2d; }
+.rsvp select { margin-left: auto; border: 1px solid #ffffff26; border-radius: 7px; padding: 6px 10px; background: transparent; font: inherit; color: #f1ecf8; cursor: pointer; color-scheme: dark; outline: none; }
+.rsvp select:focus { border-color: #8b5cf6; }
+.rsvp select option { font-family: Montserrat, sans-serif; font-size: 14px; background: #1a1424; color: #f1ecf8; padding: 8px 12px; }
+.rsvp select option:checked { background: #8b5cf6; color: #fff; }
 .rsvp-submit { width: 100%; border: 0; margin-top: 17px; border-radius: 99px; padding: 13px; background: #8b5cf6; color: white; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 0 20px #8b5cf640; transition: box-shadow .25s, transform .25s; }
 .rsvp-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 0 32px #8b5cf66b; }
 .rsvp-submit:disabled { opacity: .4; }
