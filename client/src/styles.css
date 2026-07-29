@@ -48,13 +48,10 @@ a { color: inherit; text-decoration: none; }
 .kmarquee-track.reverse { animation: k-marquee-rev 30s linear infinite; }
 @keyframes k-marquee { from { transform: translateX(0); } to { transform: translateX(-33.333%); } }
 @keyframes k-marquee-rev { from { transform: translateX(-33.333%); } to { transform: translateX(0); } }
-.kmarquee span { display: inline-flex; align-items: center; font-family: Montserrat, sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: -.04em; }
-.kmarquee em { font-style: normal; margin: 0 3vw; }
+.kmarquee span { display: inline-flex; align-items: center; font-family: Montserrat, sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: -.04em; padding-right: 6vw; }
 .krow-1 span { font-size: 10vw; color: var(--k-brand); }
-.krow-1 em { font-size: 5vw; color: var(--k-brand); }
 .krow-2 { margin-top: 2vh; }
 .krow-2 span { font-size: 4vw; color: #ffffffcc; }
-.krow-2 em { font-size: 2vw; color: #ffffffcc; }
 
 /* ---------- Vertical service list ---------- */
 .kservices { background: var(--k-black); color: var(--k-white); padding: 14vh clamp(20px, 4vw, 44px) 12vh; margin-top: -8vh; }

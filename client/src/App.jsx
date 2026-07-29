@@ -39,7 +39,7 @@ function MarqueeRow({ items, reverse, className }) {
   return (
     <div className={`kmarquee ${className || ''}`}>
       <div className={`kmarquee-track ${reverse ? 'reverse' : ''}`}>
-        {content.map((item, index) => <span key={index}>{item}<em>✦</em></span>)}
+        {content.map((item, index) => <span key={index}>{item}</span>)}
       </div>
     </div>
   )
