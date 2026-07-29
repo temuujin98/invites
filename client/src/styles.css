@@ -213,6 +213,51 @@ a { color: inherit; text-decoration: none; }
   .kcta h2 { font-size: 17vw; }
   .kfooter { flex-direction: column; align-items: flex-start; }
 }
+@media (max-width: 680px) {
+  /* header */
+  .knav { padding: 14px 16px; }
+  .knav-brand img { height: 24px; }
+  .knav-step { font-size: 10px; text-align: right; }
+  .kbutton { padding: 14px 22px; font-size: 13px; }
+  /* landing */
+  .khero-meta { padding: 22px 16px 28px; }
+  .kskew { padding: 4vh 0; }
+  .kservices { padding: 10vh 16px 9vh; }
+  .kservice { padding: 28px 6px; }
+  .kcta { padding: 12vh 16px 10vh; }
+  .kcta-button { padding: 18px 38px; }
+  .kfooter { padding: 22px 16px 30px; }
+  /* funnel pages */
+  .funnel-head { padding: 20px 16px 26px; }
+  .funnel-lead { font-size: 13px; }
+  .tpl-grid { grid-template-columns: 1fr; padding: 22px 16px 0; gap: 16px; }
+  .editor-grid { padding: 22px 16px 0; gap: 24px; }
+  .kpanel-center { padding: 28px 16px 0; }
+  .kpanel { padding: 26px 20px; }
+  .kpanel h1 { font-size: 1.5rem; }
+  .kform-actions { gap: 12px; }
+  .kdate { gap: 6px; }
+  .kdate-select { padding: 10px 26px 10px 9px; font-size: 13px; background-position: right 8px center; }
+  .share-row { flex-wrap: wrap; }
+  .my-grid { grid-template-columns: 1fr; padding: 22px 16px 0; gap: 16px; }
+  .pay-lines p { font-size: 12px; }
+  /* extras fieldset */
+  .extras-hint { display: none; }
+  .extras-body { padding: 14px 12px 18px; }
+  .program-time { width: 74px; }
+  /* guest page */
+  .public-invite { padding: 24px 14px; }
+  .public-card { padding: 40px 22px; }
+  .public-cover { width: calc(100% + 44px); margin: -40px -22px 22px; }
+  .public-card h1 { font-size: clamp(2.4rem, 11vw, 3.6rem); }
+  .countdown { width: 100%; max-width: 480px; gap: 8px; }
+  .count-unit { min-width: 0; flex: 1; padding: 12px 6px; }
+  .count-unit b { font-size: 20px; }
+  .public-section { padding: 22px 18px; }
+  .rsvp { padding: 24px 18px; }
+  .program-item { gap: 12px; }
+  .program-item b { flex-basis: 46px; }
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
   .spin-badge > svg.spin-text { animation: none !important; }
