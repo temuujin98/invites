@@ -1,14 +1,15 @@
 import { useRef, useState } from 'react'
 import { uploadCover } from '../lib/uploadCover'
+import { INTRO_PRICE, formatPrice } from '../templates'
 
 /*
  * "Нэмэлт сонголтууд" fieldset shared by the create and edit forms.
  * value: { coverUrl, mapUrl, program: [{time, activity}], note, phone, bank }
  * Everything is optional — empty options simply don't render on the guest page.
  */
-export const emptyExtras = { coverUrl: '', mapUrl: '', program: [], note: '', phone: '', bank: '' }
+export const emptyExtras = { coverUrl: '', mapUrl: '', program: [], note: '', phone: '', bank: '', intro: '' }
 
-export default function ExtraOptions({ value, onChange }) {
+export default function ExtraOptions({ value, onChange, showIntro = true }) {
   const [open, setOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
@@ -43,6 +44,24 @@ export default function ExtraOptions({ value, onChange }) {
       </button>
       {open && (
         <div className="extras-body">
+
+          {showIntro && (
+            <label>Нээлтийн эффект <span className="intro-price">+{formatPrice(INTRO_PRICE)}</span>
+              <div className="intro-choices">
+                <button
+                  type="button"
+                  className={`intro-choice ${!extras.intro ? 'selected' : ''}`}
+                  onClick={() => patch({ intro: '' })}
+                >Байхгүй</button>
+                <button
+                  type="button"
+                  className={`intro-choice ${extras.intro === 'curtain' ? 'selected' : ''}`}
+                  onClick={() => patch({ intro: 'curtain' })}
+                >🎭 Хөшиг нээгдэх</button>
+              </div>
+              <span className="kfield-hint">Зочин урилгыг нээхэд тайзны хөшиг сүр жавхлантай нээгдэж урилга ил гарна</span>
+            </label>
+          )}
 
           <label>Ковер зураг
             {extras.coverUrl ? (

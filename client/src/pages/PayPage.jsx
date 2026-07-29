@@ -1,7 +1,7 @@
  
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { getTemplate, formatPrice } from '../templates'
+import { getTemplate, formatPrice, INTRO_PRICE } from '../templates'
 import { FunnelHeader, InvitationSummary, ShareQr } from '../components/Shared'
 
 /*
@@ -91,7 +91,13 @@ export default function PayPage({ invitationId }) {
             <div className="pay-summary"><InvitationSummary invitation={invitation} /></div>
             <div className="pay-lines">
               <p><span>Загвар</span><b>{template ? `${template.name} · ${template.eventType}` : invitation.template_id}</b></p>
-              <p><span>Үнэ</span><b>{formatPrice(invitation.price)}</b></p>
+              {invitation.options?.intro ? (
+                <>
+                  <p><span>Загварын үнэ</span><b>{formatPrice(template ? template.price : invitation.price - INTRO_PRICE)}</b></p>
+                  <p><span>Нээлтийн эффект</span><b>+{formatPrice(INTRO_PRICE)}</b></p>
+                </>
+              ) : null}
+              <p><span>Нийт үнэ</span><b>{formatPrice(invitation.price)}</b></p>
               <p><span>Төлбөрийн хэлбэр</span><b>Туршилтын төлбөр</b></p>
             </div>
             {error && <p className="kerror">{error}</p>}

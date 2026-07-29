@@ -167,7 +167,7 @@ export default function EditPage({ invitationId }) {
           <label>Урилгын мессеж
             <textarea maxLength={400} value={message} onChange={(event) => setMessage(event.target.value)} />
           </label>
-          <ExtraOptions value={extras} onChange={setExtras} />
+          <ExtraOptions value={extras} onChange={setExtras} showIntro={false} />
           {error && <p className="kerror">{error}</p>}
           {saved && <p className="kpanel-note">✓ Хадгалагдлаа — зочдод шинэ мэдээлэл харагдана</p>}
           <div className="kform-actions">

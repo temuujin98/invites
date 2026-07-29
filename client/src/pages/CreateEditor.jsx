@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import { insertDraftInvitation } from '../lib/createInvitation'
-import { getTemplate, formatPrice, saveDraft, loadDraft } from '../templates'
+import { getTemplate, formatPrice, saveDraft, loadDraft, INTRO_PRICE } from '../templates'
 import { FunnelHeader, InvitePreview } from '../components/Shared'
 import DateTimeField from '../components/DateTimeField'
 import ExtraOptions, { emptyExtras } from '../components/ExtraOptions'
@@ -80,7 +80,7 @@ export default function CreateEditor({ templateId }) {
       <FunnelHeader label="МЭДЭЭЛЛЭЭ ОРУУЛАХ" />
       <header className="funnel-head">
         <h1>{template.name} · {template.eventType}</h1>
-        <p className="funnel-lead">{template.description} Үнэ: <b>{formatPrice(template.price)}</b></p>
+        <p className="funnel-lead">{template.description} Үнэ: <b>{formatPrice(template.price + (extras.intro ? INTRO_PRICE : 0))}</b>{extras.intro ? ' (нээлтийн эффект орсон)' : ''}</p>
       </header>
       <section className="editor-grid">
         {sent ? (

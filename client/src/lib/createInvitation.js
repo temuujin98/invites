@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { getTemplate, loadDraft, clearDraft, makeSlug } from '../templates'
+import { getTemplate, loadDraft, clearDraft, makeSlug, INTRO_PRICE } from '../templates'
 
 /* keep only known option keys, drop empty values and blank program rows */
 export function sanitizeExtras(extras) {
@@ -14,6 +14,7 @@ export function sanitizeExtras(extras) {
   if (source.note?.trim()) clean.note = source.note.trim()
   if (source.phone?.trim()) clean.phone = source.phone.trim()
   if (source.bank?.trim()) clean.bank = source.bank.trim()
+  if (source.intro === 'curtain') clean.intro = 'curtain'
   return clean
 }
 
@@ -26,6 +27,7 @@ export async function insertDraftInvitation(session) {
   const template = draft ? getTemplate(draft.templateId) : null
   if (!draft || !template || !draft.values?.title) return { error: 'no-draft' }
   const values = draft.values
+  const options = sanitizeExtras(draft.extras)
   const { data, error } = await supabase.from('invitations').insert({
     owner_id: session.user.id,
     owner_email: session.user.email,
@@ -37,9 +39,9 @@ export async function insertDraftInvitation(session) {
     message: values.message || null,
     theme: template.tone,
     template_id: template.id,
-    price: template.price,
+    price: template.price + (options.intro ? INTRO_PRICE : 0),
     status: 'pending_payment',
-    options: sanitizeExtras(draft.extras),
+    options,
   }).select('id').single()
   if (error) return { error: 'insert-failed' }
   clearDraft()

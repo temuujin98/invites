@@ -4,6 +4,33 @@ import { ArrowLeft, CalendarDays, Gift, MapPin, Phone, User, Users } from 'lucid
 import { isSupabaseConfigured, supabase } from './lib/supabase'
 import { formatEventDate, getTemplate } from './templates'
 
+/*
+ * Ceremonial curtain intro (paid add-on): velvet curtains part when the
+ * guest presses «Урилгыг нээх», then the overlay fades away.
+ */
+function CurtainIntro({ eventType, guest, onDone }) {
+  const [opening, setOpening] = useState(false)
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  function openCurtains() {
+    if (reduceMotion) { onDone(); return }
+    setOpening(true)
+    setTimeout(onDone, 2100)
+  }
+
+  return (
+    <div className={`intro-overlay ${opening ? 'opening' : ''}`} role="dialog" aria-label="Урилга нээх">
+      <div className="curtain curtain-left" />
+      <div className="curtain curtain-right" />
+      <div className="intro-center">
+        <p className="intro-type">{eventType}</p>
+        {guest && <p className="intro-guest">Хүндэт {guest} танд</p>}
+        <button className="intro-open" onClick={openCurtains}>Урилгыг нээх</button>
+      </div>
+    </div>
+  )
+}
+
 function Countdown({ target }) {
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
@@ -36,6 +63,7 @@ export default function PublicInvitation() {
   const [partySize, setPartySize] = useState(1)
   const [invitation, setInvitation] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [introDone, setIntroDone] = useState(false)
   const [error, setError] = useState('')
   const slug = window.location.pathname.split('/').filter(Boolean).at(-1)
   const invitedGuest = new URLSearchParams(window.location.search).get('g') || ''
@@ -104,11 +132,13 @@ export default function PublicInvitation() {
 
   const layout = getTemplate(invitation.template_id)?.layout || 'classic'
   const options = invitation.options || {}
+  const showIntro = options.intro === 'curtain' && !introDone
   const mapHref = options.mapUrl
     || (invitation.venue ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(invitation.venue)}` : '')
 
   return (
     <main className="public-invite">
+      {showIntro && <CurtainIntro eventType={invitation.event_type} guest={invitedGuest} onDone={() => setIntroDone(true)} />}
       <a className="public-brand" href="/"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a>
 
       <section className={`public-card ${invitation.theme || 'lavender'} layout-${layout}`}>

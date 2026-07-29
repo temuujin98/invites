@@ -103,6 +103,9 @@ export const templates = [
   },
 ]
 
+/* Paid add-on: ceremonial opening effect on the guest page */
+export const INTRO_PRICE = 9900
+
 export function getTemplate(id) {
   return templates.find((template) => template.id === id) || null
 }
