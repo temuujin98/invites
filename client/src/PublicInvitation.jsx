@@ -134,7 +134,7 @@ function Countdown({ target }) {
 function Gallery({ images }) {
   return (
     <section className="pv-gallery" aria-label="Зургийн цомог">
-      <div className="pv-gallery-track">
+      <div className={`pv-gallery-track ${images.length === 1 ? 'single' : ''}`}>
         {images.map((url, index) => (
           <img key={url} src={url} alt={`Зураг ${index + 1}`} loading="lazy" />
         ))}
@@ -226,7 +226,9 @@ export default function PublicInvitation() {
   const tone = invitation.theme || 'lavender'
   const options = invitation.options || {}
   const gallery = options.gallery || (options.coverUrl ? [options.coverUrl] : [])
-  const showIntro = options.intro === 'curtain' && !introDone
+  // the curtain shows once per device: repeat visits go straight to the invitation
+  const introSeenKey = `invites.introSeen.${slug}`
+  const showIntro = options.intro === 'curtain' && !introDone && !localStorage.getItem(introSeenKey)
   const bank = options.bank
   const bankText = typeof bank === 'object'
     ? [bank.bank, bank.number, bank.holder].filter(Boolean).join(' · ')
@@ -238,12 +240,10 @@ export default function PublicInvitation() {
   return (
     <main className={`pv tone-${tone} layout-${layout}`} style={bgUrl ? { backgroundImage: `url(${bgUrl})` } : undefined}>
       <div className="pv-veil" aria-hidden="true" />
-      {showIntro && <CurtainIntro eventType={invitation.event_type} guest={invitedGuest} color={options.introColor} onDone={() => setIntroDone(true)} />}
+      {showIntro && <CurtainIntro eventType={invitation.event_type} guest={invitedGuest} color={options.introColor} onDone={() => { localStorage.setItem(introSeenKey, '1'); setIntroDone(true) }} />}
       {options.music?.id && <MusicPlayer music={options.music} />}
 
       <div className="pv-content">
-        <a className="pv-brand" href="/"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /></a>
-
         <header className="pv-hero">
           {invitedGuest && <p className="pv-guest">Хүндэт <b>{invitedGuest}</b> танд</p>}
           <p className="pv-type">{invitation.event_type}</p>
@@ -256,8 +256,19 @@ export default function PublicInvitation() {
         <section className="pv-facts">
           <p><CalendarDays size={20} /><span>{formatEventDate(invitation.event_at)}</span></p>
           <p><MapPin size={20} /><span>{invitation.venue || 'Байршил удахгүй зарлагдана'}</span></p>
-          {mapHref && <a className="pv-map-button" href={mapHref} target="_blank" rel="noreferrer">Газрын зурагт харах</a>}
           {options.phone && <p><Phone size={20} /><a href={`tel:${options.phone}`}>{options.phone}</a></p>}
+          {invitation.venue && (
+            <div className="pv-map">
+              <iframe
+                src={`https://www.google.com/maps?q=${encodeURIComponent(invitation.venue)}&output=embed`}
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Газрын зураг"
+              />
+            </div>
+          )}
+          {mapHref && <a className="pv-map-button" href={mapHref} target="_blank" rel="noreferrer">Газрын зураг нээх ↗</a>}
         </section>
 
         {gallery.length > 0 && <Gallery images={gallery} />}
