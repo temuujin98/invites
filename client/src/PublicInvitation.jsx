@@ -240,7 +240,7 @@ export default function PublicInvitation() {
   return (
     <main className={`pv tone-${tone} layout-${layout}`} style={bgUrl ? { backgroundImage: `url(${bgUrl})` } : undefined}>
       <div className="pv-veil" aria-hidden="true" />
-      {showIntro && <CurtainIntro eventType={invitation.event_type} guest={invitedGuest} color={options.introColor} onDone={() => { localStorage.setItem(introSeenKey, '1'); setIntroDone(true) }} />}
+      {showIntro && <CurtainIntro eventType={invitation.event_type} guest={invitedGuest} color={options.introColor} onDone={() => setIntroDone(true)} />}
       {options.music?.id && <MusicPlayer music={options.music} />}
 
       <div className="pv-content">
