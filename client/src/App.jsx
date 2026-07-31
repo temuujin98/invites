@@ -7,6 +7,7 @@ import ConfirmPage from './pages/ConfirmPage'
 import PayPage from './pages/PayPage'
 import EditPage from './pages/EditPage'
 import MyPage from './pages/MyPage'
+import LegalPage from './pages/LegalPage'
 
 function ScrollIndicator() {
   return (
@@ -89,6 +90,8 @@ function Landing() {
         <p>© 2026 INVITES.MN — БҮХ ЭРХ ХУУЛИАР ХАМГААЛАГДСАН</p>
         <div className="kfooter-links">
           <a href="/my">МИНИЙ УРИЛГУУД</a>
+          <a href="/terms">НӨХЦӨЛ</a>
+          <a href="/privacy">НУУЦЛАЛ</a>
           <a href="mailto:hello@invites.mn">HELLO@INVITES.MN</a>
         </div>
       </footer>
@@ -99,6 +102,7 @@ function Landing() {
 export default function App() {
   const path = window.location.pathname
   if (path.startsWith('/i/')) return <PublicInvitation />
+  if (path.startsWith('/demo/')) return <PublicInvitation demoTemplateId={path.split('/')[2]} />
   if (path.startsWith('/admin')) return <AdminApp />
   if (path.startsWith('/create/confirm')) return <ConfirmPage />
   if (path.startsWith('/create/')) return <CreateEditor templateId={path.split('/')[2]} />
@@ -106,5 +110,7 @@ export default function App() {
   if (path.startsWith('/pay/')) return <PayPage invitationId={path.split('/')[2]} />
   if (path.startsWith('/edit/')) return <EditPage invitationId={path.split('/')[2]} />
   if (path.startsWith('/my')) return <MyPage />
+  if (path === '/terms') return <LegalPage kind="terms" />
+  if (path === '/privacy') return <LegalPage kind="privacy" />
   return <Landing />
 }

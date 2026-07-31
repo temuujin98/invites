@@ -11,7 +11,8 @@ export function sanitizeExtras(extras) {
   const clean = {}
   const gallery = (source.gallery || []).filter(Boolean).slice(0, 8)
   if (gallery.length) clean.gallery = gallery
-  if (source.mapUrl?.trim()) clean.mapUrl = source.mapUrl.trim()
+  // only http(s) links — blocks javascript: and other schemes
+  if (/^https?:\/\//i.test(source.mapUrl?.trim() || '')) clean.mapUrl = source.mapUrl.trim()
   if (program.length) clean.program = program
   if (source.note?.trim()) clean.note = source.note.trim()
   if (source.phone?.trim()) clean.phone = source.phone.trim()

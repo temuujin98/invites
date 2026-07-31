@@ -11,14 +11,16 @@ export default function CreateGallery() {
       </header>
       <section className="tpl-grid" aria-label="Урилгын загварууд">
         {templates.map((template) => (
-          <a className="tpl-item" href={`/create/${template.id}`} key={template.id}>
-            <InvitePreview
-              tone={template.tone}
-              eventType={template.eventType}
-              title={template.sample.title}
-              dateText={template.sample.date}
-              bgId={template.id}
-            />
+          <div className="tpl-item" key={template.id}>
+            <a href={`/create/${template.id}`} aria-label={`${template.name} сонгох`}>
+              <InvitePreview
+                tone={template.tone}
+                eventType={template.eventType}
+                title={template.sample.title}
+                dateText={template.sample.date}
+                bgId={template.id}
+              />
+            </a>
             <div className="tpl-meta">
               <div>
                 <b>{template.name}</b>
@@ -26,7 +28,11 @@ export default function CreateGallery() {
               </div>
               <span className="tpl-price">{formatPrice(template.price)}</span>
             </div>
-          </a>
+            <div className="tpl-actions">
+              <a className="klink" href={`/demo/${template.id}`} target="_blank" rel="noreferrer">Жишээ үзэх ↗</a>
+              <a className="kbutton kbutton-small" href={`/create/${template.id}`}>Сонгох →</a>
+            </div>
+          </div>
         ))}
       </section>
     </main>

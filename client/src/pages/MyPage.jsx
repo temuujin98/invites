@@ -1,7 +1,8 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from 'react'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
-import { formatPrice } from '../templates'
+import { formatPrice, saveDraft } from '../templates'
+import { musicToFields } from '../lib/music'
 import { FunnelHeader, InvitationSummary, ShareQr, statusLabels } from '../components/Shared'
 
 /* Personal guest links: /i/slug?g=Нэр renders «Хүндэт Нэр танд» */
@@ -49,6 +50,7 @@ export default function MyPage() {
       .from('invitations')
       .select('*, rsvps(count), payments(status, amount, method)')
       .eq('owner_id', session.user.id)
+      .neq('status', 'archived')
       .order('created_at', { ascending: false })
       .then(({ data, error: requestError }) => {
         if (requestError) setError('Урилгуудыг ачаалж чадсангүй.')
@@ -86,6 +88,42 @@ export default function MyPage() {
   async function signOut() {
     await supabase.auth.signOut()
     setInvitations([])
+  }
+
+  async function removeInvitation(invitation) {
+    if (!window.confirm(`«${invitation.title}» урилгыг устгах уу? Зочид цаашид нээж чадахгүй.`)) return
+    const { error: removeError } = await supabase.from('invitations').update({ status: 'archived' }).eq('id', invitation.id)
+    if (removeError) { setError('Устгахад алдаа гарлаа.'); return }
+    setInvitations((items) => items.filter((item) => item.id !== invitation.id))
+  }
+
+  function duplicateInvitation(invitation) {
+    const options = invitation.options || {}
+    const bank = options.bank
+    saveDraft({
+      templateId: invitation.template_id,
+      values: {
+        title: invitation.title,
+        eventAt: '',
+        venue: invitation.venue || '',
+        message: invitation.message || '',
+      },
+      extras: {
+        gallery: options.gallery || [],
+        mapUrl: options.mapUrl || '',
+        program: options.program || [],
+        note: options.note || '',
+        phone: options.phone || '',
+        bankName: typeof bank === 'object' ? (bank.bank || '') : '',
+        bankNumber: typeof bank === 'object' ? (bank.number || '') : (bank || ''),
+        bankHolder: typeof bank === 'object' ? (bank.holder || '') : '',
+        intro: options.intro || '',
+        introColor: options.introColor || 'violet',
+        ...musicToFields(options.music),
+      },
+      savedAt: Date.now(),
+    })
+    window.location.href = `/create/${invitation.template_id}`
   }
 
   if (!isSupabaseConfigured) {
@@ -156,7 +194,7 @@ export default function MyPage() {
                     <span className="my-price">{formatPrice(invitation.price)}{paidPayment ? ' · Төлөгдсөн' : ''}</span>
                   </div>
                   <h2>{invitation.title}</h2>
-                  <p className="my-facts">{invitation.event_type} · {invitation.venue || 'Байршилгүй'} · RSVP {rsvpCount}</p>
+                  <p className="my-facts">{invitation.event_type} · {invitation.venue || 'Байршилгүй'} · RSVP {rsvpCount} · {invitation.views || 0} үзэлт</p>
                   {invitation.status === 'active' ? (
                     <>
                       <div className="share-row">
@@ -174,8 +212,10 @@ export default function MyPage() {
                   ) : null}
                   <div className="my-actions">
                     <a className="klink" href={`/edit/${invitation.id}`}>Засах</a>
+                    <button className="klink klink-button" onClick={() => duplicateInvitation(invitation)}>Хувилах</button>
+                    <button className="klink klink-button my-delete" onClick={() => removeInvitation(invitation)}>Устгах</button>
                     <button className="klink klink-button" onClick={() => toggleDetails(invitation)}>
-                      {openId === invitation.id ? 'Хариунуудыг хаах ↑' : 'RSVP хариунууд ↓'}
+                      {openId === invitation.id ? 'Хариунуудыг хаах ↑' : 'RSVP ↓'}
                     </button>
                   </div>
                   {openId === invitation.id && (

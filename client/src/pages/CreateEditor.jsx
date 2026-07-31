@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import { insertDraftInvitation } from '../lib/createInvitation'
-import { getTemplate, formatPrice, saveDraft, loadDraft, INTRO_PRICE } from '../templates'
+import { getTemplate, formatPrice, saveDraft, loadDraft, INTRO_PRICE, messagePresets } from '../templates'
 import { FunnelHeader, InvitePreview } from '../components/Shared'
 import DateTimeField from '../components/DateTimeField'
 import ExtraOptions, { emptyExtras } from '../components/ExtraOptions'
@@ -80,7 +80,7 @@ export default function CreateEditor({ templateId }) {
       <FunnelHeader label="МЭДЭЭЛЛЭЭ ОРУУЛАХ" />
       <header className="funnel-head">
         <h1>{template.name} · {template.eventType}</h1>
-        <p className="funnel-lead">{template.description} Үнэ: <b>{formatPrice(template.price + (extras.intro ? INTRO_PRICE : 0))}</b>{extras.intro ? ' (нээлтийн эффект орсон)' : ''}</p>
+        <p className="funnel-lead">{template.description} Үнэ: <b>{formatPrice(template.price + (extras.intro ? INTRO_PRICE : 0))}</b>{extras.intro ? ' (нээлтийн эффект орсон)' : ''} · <a className="klink" href={`/demo/${template.id}`} target="_blank" rel="noreferrer">Жишээ үзэх ↗</a></p>
       </header>
       <section className="editor-grid">
         {sent ? (
@@ -108,6 +108,16 @@ export default function CreateEditor({ templateId }) {
             </label>
             <label>Урилгын мессеж
               <textarea maxLength={400} value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Таныг бидний онцгой өдөрт урьж байна" />
+              {(messagePresets[template.eventType] || []).length > 0 && (
+                <span className="preset-row">
+                  <span className="kfield-hint">Бэлэн текст:</span>
+                  {(messagePresets[template.eventType] || []).map((preset, index) => (
+                    <button type="button" className="preset-chip" key={index} onClick={() => setMessage(preset)}>
+                      {index + 1}. {preset.slice(0, 32)}…
+                    </button>
+                  ))}
+                </span>
+              )}
             </label>
             <ExtraOptions value={extras} onChange={setExtras} />
             {!session && (

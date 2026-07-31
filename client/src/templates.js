@@ -92,6 +92,26 @@ export const templates = [
     sample: { title: 'Наран', date: '2026.10.24' },
   },
   {
+    id: 'sky-sevleg',
+    layout: 'party',
+    name: 'Тэнгэр',
+    eventType: 'Сэвлэг үргээх',
+    tone: 'sky',
+    price: 29000,
+    description: 'Хүүхдийн сэвлэг үргээх ёслолд зориулсан зөөлөн, гэрэлтсэн загвар.',
+    sample: { title: 'Ананд', date: '5 нас' },
+  },
+  {
+    id: 'terra-newhome',
+    layout: 'minimal',
+    name: 'Өргөө',
+    eventType: 'Шинэ гэр',
+    tone: 'terra',
+    price: 35000,
+    description: 'Шинэ гэр, өргөө мялаах ёслолд зориулсан монгол уламжлалт загвар.',
+    sample: { title: 'Өргөө мялаалга', date: '2026.09.01' },
+  },
+  {
     id: 'forest-corporate',
     layout: 'minimal',
     name: 'Ой мод',
@@ -131,10 +151,104 @@ export function formatEventDate(value) {
   return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())} · ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
+const cyrillicMap = {
+  а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'ye', ё: 'yo', ж: 'j', з: 'z', и: 'i', й: 'i',
+  к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', ө: 'u', п: 'p', р: 'r', с: 's', т: 't', у: 'u',
+  ү: 'u', ф: 'f', х: 'kh', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'sh', ъ: '', ы: 'y', ь: '', э: 'e',
+  ю: 'yu', я: 'ya',
+}
+
 export function makeSlug(title) {
-  const latin = (title || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '')
-  const compact = latin.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  const transliterated = (title || '').toLowerCase()
+    .split('').map((ch) => cyrillicMap[ch] ?? ch).join('')
+  const latin = transliterated.normalize('NFKD').replace(/[̀-ͯ]/g, '')
+  const compact = latin.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60)
   return `${compact || 'urilga'}-${Math.random().toString(36).slice(2, 7)}`
+}
+
+/* Ready-made invitation messages, keyed by event type */
+export const messagePresets = {
+  'Хурим': [
+    'Бидний хайрын баталгаа болсон энэхүү нандин мөчид хүрэлцэн ирж, гал голомтоо бадраахад минь ерөөл өргөн, аз жаргалтай оролцохыг хүндэтгэн урьж байна.',
+    'Хоёр зүрх нэг болж, шинэ амьдралын гараагаа эхлүүлэх энэ өдөр таныг бидэнтэй хамт байхыг урьж байна.',
+    'Амьдралын хамгийн үзэсгэлэнтэй өдрөө хайртай хүмүүсийнхээ хүрээлэлд тэмдэглэхийг хүсэж, таныг хүндэтгэн урьж байна.',
+  ],
+  'Төрсөн өдөр': [
+    'Миний төрсөн өдрийн баярт хүрэлцэн ирж, баяр баясгалангаа хуваалцахыг урьж байна!',
+    'Нэг нас нэмж буй энэ өдрөө хамгийн дотны хүмүүстэйгээ тэмдэглэхийг хүсэж байна — таныг урьж байна!',
+    'Төрсөн өдрийн үдэшлэгт тавтай морилно уу — хөгжилтэй үдэш биднийг хүлээж байна!',
+  ],
+  'Ёслол': [
+    'Энэхүү хүндэтгэлийн ёслолд хүрэлцэн ирж, баярын мөчийг бидэнтэй хуваалцахыг урьж байна.',
+    'Амьдралын чухал үйл явдлаа хайртай хүмүүстэйгээ хамт тэмдэглэхийг хүсэж, таныг хүндэтгэн урьж байна.',
+  ],
+  'Хүлээн авалт': [
+    'Хүлээн авалтад хүрэлцэн ирэхийг хүндэтгэн урьж байна. Таныг ирэхийг тэсэн ядан хүлээж байна.',
+    'Онцгой үдэшлэгт таныг урьж байна — тансаг орчин, сайхан хөгжим, дотно яриа таныг хүлээж байна.',
+  ],
+  'Төгсөлт': [
+    'Олон жилийн хөдөлмөрийн үр дүн — төгсөлтийн баяраа хамт тэмдэглэхийг урьж байна!',
+    'Амжилтын баярт минь хүрэлцэн ирж, баяр хөөрөө хуваалцана уу!',
+  ],
+  'Ойн баяр': [
+    'Бидний хамтдаа туулсан жилүүдийн ойн баярт хүрэлцэн ирэхийг хүндэтгэн урьж байна.',
+    'Энэ онцгой ойн баярыг хайртай хүмүүстэйгээ хамт тэмдэглэхийг хүсэж байна — таныг урьж байна.',
+  ],
+  'Үдэшлэг': [
+    'Мартагдашгүй үдэшлэг болно — таныг урьж байна!',
+    'Онцгой үдэшлэгт тавтай морил — хувцаслалтын код болон дэлгэрэнгүйг доороос харна уу.',
+  ],
+  'Нэрийн баяр': [
+    'Манай гэр бүлийн шинэ гишүүний нэрийн баярт хүрэлцэн ирэхийг урьж байна.',
+    'Бяцхан үрийнхээ нэрийн баярыг тэмдэглэхээр таныг хүндэтгэн урьж байна.',
+  ],
+  'Байгууллага': [
+    'Манай байгууллагын арга хэмжээнд хүрэлцэн ирэхийг урьж байна. Хөтөлбөр, дэлгэрэнгүйг доороос танилцана уу.',
+    'Таныг манай арга хэмжээний хүндэт зочноор урьж байна.',
+  ],
+  'Сэвлэг үргээх': [
+    'Хайрт үрийнхээ сэвлэг үргээх ёслолд хүрэлцэн ирж, ерөөлийн үг хайрлахыг хүндэтгэн урьж байна.',
+    'Бяцхан үрийн маань анхны үсийг нь авах өлзийт ёслолд таныг урьж байна.',
+  ],
+  'Шинэ гэр': [
+    'Шинэ өргөөгөө мялаах ёслолд хүрэлцэн ирж, сайн сайхны ерөөл хайрлахыг хүндэтгэн урьж байна.',
+    'Шинэ гэрийн маань босгыг алхаж, баярын мөчийг бидэнтэй хуваалцана уу.',
+  ],
+}
+
+/*
+ * Fully-featured sample invitation for /demo/:templateId — shows buyers
+ * exactly what the guest page (curtain, gallery, program…) looks like.
+ */
+export function buildDemoInvitation(templateId) {
+  const template = getTemplate(templateId)
+  if (!template) return null
+  const eventAt = new Date(Date.now() + 30 * 86400000)
+  eventAt.setHours(18, 0, 0, 0)
+  const others = templates.filter((item) => item.id !== templateId).slice(0, 2)
+  return {
+    id: null,
+    title: template.sample.title,
+    event_type: template.eventType,
+    event_at: eventAt.toISOString(),
+    venue: 'Улаанбаатар · Тансаг өргөө',
+    message: 'Бидний амьдралын онцгой мөчид хүрэлцэн ирж, баяр баясгалангаа хуваалцахыг хүндэтгэн урьж байна.',
+    theme: template.tone,
+    template_id: template.id,
+    options: {
+      gallery: [template.id, ...others.map((item) => item.id)].map((id) => `/backgrounds/${id}.jpg`),
+      program: [
+        { time: '16:00', activity: 'Зочид хүлээн авах' },
+        { time: '17:30', activity: 'Ёслолын ажиллагаа' },
+        { time: '19:00', activity: 'Хүндэтгэлийн зоог' },
+      ],
+      note: 'Энэ бол жишээ урилга — бүх мэдээллийг та өөрөө тохируулна.',
+      phone: '9911xxxx',
+      bank: { bank: 'Хаан банк', number: '5041xxxxxx', holder: template.sample.title.split(' ')[0] },
+      intro: 'curtain',
+      introColor: template.tone === 'noir' || template.tone === 'midnight' ? 'noir' : 'violet',
+    },
+  }
 }
 
 const DRAFT_KEY = 'invites.draft.v1'

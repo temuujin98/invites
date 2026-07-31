@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, CalendarDays, Gift, MapPin, Music, Pause, Phone, User, Users } from 'lucide-react'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
-import { formatEventDate, getTemplate } from './templates'
+import { formatEventDate, getTemplate, buildDemoInvitation } from './templates'
 
 /*
  * YouTube background music: hidden iframe player + a floating toggle.
@@ -144,7 +144,7 @@ function Gallery({ images }) {
   )
 }
 
-export default function PublicInvitation() {
+export default function PublicInvitation({ demoTemplateId }) {
   const [response, setResponse] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [guestName, setGuestName] = useState('')
@@ -159,6 +159,13 @@ export default function PublicInvitation() {
   const invitedGuest = new URLSearchParams(window.location.search).get('g') || ''
 
   useEffect(() => {
+    if (demoTemplateId) {
+      const demo = buildDemoInvitation(demoTemplateId)
+      if (demo) setInvitation(demo)
+      else setError('Загвар олдсонгүй')
+      setLoading(false)
+      return undefined
+    }
     if (!supabase || !slug) { setLoading(false); return undefined }
     let alive = true
     supabase
@@ -170,11 +177,15 @@ export default function PublicInvitation() {
       .then(({ data, error: requestError }) => {
         if (!alive) return
         if (requestError || !data) setError('Энэ урилга олдсонгүй эсвэл идэвхгүй байна')
-        else setInvitation(data)
+        else {
+          setInvitation(data)
+          supabase.rpc('increment_views', { invite_slug: slug }).then(() => {})
+        }
         setLoading(false)
       })
     return () => { alive = false }
-  }, [slug])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug, demoTemplateId])
 
   useEffect(() => {
     if (invitedGuest) setGuestName(invitedGuest)
@@ -182,6 +193,7 @@ export default function PublicInvitation() {
 
   async function submitRsvp() {
     if (!response) return
+    if (demoTemplateId) { setSubmitted(true); return }
     setError('')
     const base = {
       invitation_id: invitation.id,
