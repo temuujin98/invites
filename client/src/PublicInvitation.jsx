@@ -226,9 +226,7 @@ export default function PublicInvitation() {
   const tone = invitation.theme || 'lavender'
   const options = invitation.options || {}
   const gallery = options.gallery || (options.coverUrl ? [options.coverUrl] : [])
-  // the curtain shows once per device: repeat visits go straight to the invitation
-  const introSeenKey = `invites.introSeen.${slug}`
-  const showIntro = options.intro === 'curtain' && !introDone && !localStorage.getItem(introSeenKey)
+  const showIntro = options.intro === 'curtain' && !introDone
   const bank = options.bank
   const bankParts = typeof bank === 'object'
     ? [bank.bank, bank.number, bank.holder].filter(Boolean)
