@@ -245,7 +245,7 @@ export function buildDemoInvitation(templateId) {
       note: 'Энэ бол жишээ урилга — бүх мэдээллийг та өөрөө тохируулна.',
       phone: '9911xxxx',
       bank: { bank: 'Хаан банк', number: '5041xxxxxx', holder: template.sample.title.split(' ')[0] },
-      intro: 'curtain',
+      intro: template.eventType === 'Хурим' ? 'envelope' : 'curtain',
       introColor: template.tone === 'noir' || template.tone === 'midnight' ? 'noir' : 'violet',
     },
   }

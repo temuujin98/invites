@@ -71,6 +71,11 @@ export default function ExtraOptions({ value, onChange, showIntro = true }) {
                   className={`intro-choice ${extras.intro === 'curtain' ? 'selected' : ''}`}
                   onClick={() => patch({ intro: 'curtain' })}
                 >🎭 Хөшиг нээгдэх</button>
+                <button
+                  type="button"
+                  className={`intro-choice ${extras.intro === 'envelope' ? 'selected' : ''}`}
+                  onClick={() => patch({ intro: 'envelope' })}
+                >✉️ Захидал нээгдэх</button>
               </div>
               {extras.intro === 'curtain' && (
                 <div className="curtain-colors">

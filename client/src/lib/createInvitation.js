@@ -23,9 +23,9 @@ export function sanitizeExtras(extras) {
       holder: (source.bankHolder || '').trim(),
     }
   }
-  if (source.intro === 'curtain') {
-    clean.intro = 'curtain'
-    clean.introColor = source.introColor || 'violet'
+  if (source.intro === 'curtain' || source.intro === 'envelope') {
+    clean.intro = source.intro
+    if (source.intro === 'curtain') clean.introColor = source.introColor || 'violet'
   }
   const music = buildMusic(source)
   if (music) clean.music = music

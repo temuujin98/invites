@@ -96,9 +96,50 @@ function CurtainIntro({ eventType, guest, color, onDone }) {
       <div className="curtain curtain-left" />
       <div className="curtain curtain-right" />
       <div className="intro-center">
+        <p className="intro-ornament" aria-hidden="true"><span /> ✦ <span /></p>
         <p className="intro-type">{eventType}</p>
         {guest && <p className="intro-guest">Хүндэт {guest} танд</p>}
-        <button className="intro-open" onClick={openCurtains}>Урилгыг нээх</button>
+        <button className="intro-seal" onClick={openCurtains} aria-label="Урилгыг нээх">
+          <span className="intro-seal-ring" aria-hidden="true" />
+          <span className="intro-seal-text">Нээх</span>
+        </button>
+        <p className="intro-ornament" aria-hidden="true"><span /> ✦ <span /></p>
+      </div>
+    </div>
+  )
+}
+
+/*
+ * Envelope intro: a sealed letter opens — the flap lifts, the letter
+ * rises, then the overlay fades to reveal the invitation. Weddings
+ * default to this style.
+ */
+function EnvelopeIntro({ eventType, guest, onDone }) {
+  const [opening, setOpening] = useState(false)
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  function openEnvelope() {
+    window.dispatchEvent(new Event('invite-open-clicked'))
+    if (reduceMotion) { onDone(); return }
+    setOpening(true)
+    setTimeout(onDone, 2500)
+  }
+
+  return (
+    <div className={`intro-overlay env ${opening ? 'opening' : ''}`} role="dialog" aria-label="Урилга нээх">
+      <div className="env-stage">
+        <div className="envelope">
+          <div className="env-back" />
+          <div className="env-letter">
+            <p className="env-letter-type">{eventType}</p>
+            {guest && <p className="env-letter-guest">Хүндэт {guest} танд</p>}
+            <p className="env-letter-line" aria-hidden="true">✦</p>
+          </div>
+          <div className="env-front" />
+          <div className="env-flap" />
+          <button className="env-seal" onClick={openEnvelope} aria-label="Урилгыг нээх">Нээх</button>
+        </div>
+        <p className="env-hint">Лац дээр дарж урилгаа нээгээрэй</p>
       </div>
     </div>
   )
@@ -238,7 +279,7 @@ export default function PublicInvitation({ demoTemplateId }) {
   const tone = invitation.theme || 'lavender'
   const options = invitation.options || {}
   const gallery = options.gallery || (options.coverUrl ? [options.coverUrl] : [])
-  const showIntro = options.intro === 'curtain' && !introDone
+  const showIntro = (options.intro === 'curtain' || options.intro === 'envelope') && !introDone
   const bank = options.bank
   const bankParts = typeof bank === 'object'
     ? [bank.bank, bank.number, bank.holder].filter(Boolean)
@@ -250,7 +291,9 @@ export default function PublicInvitation({ demoTemplateId }) {
   return (
     <main className={`pv tone-${tone} layout-${layout}`} style={bgUrl ? { backgroundImage: `url(${bgUrl})` } : undefined}>
       <div className="pv-veil" aria-hidden="true" />
-      {showIntro && <CurtainIntro eventType={invitation.event_type} guest={invitedGuest} color={options.introColor} onDone={() => setIntroDone(true)} />}
+      {showIntro && (options.intro === 'envelope'
+        ? <EnvelopeIntro eventType={invitation.event_type} guest={invitedGuest} onDone={() => setIntroDone(true)} />
+        : <CurtainIntro eventType={invitation.event_type} guest={invitedGuest} color={options.introColor} onDone={() => setIntroDone(true)} />)}
       {options.music?.id && <MusicPlayer music={options.music} />}
 
       <div className="pv-content">
