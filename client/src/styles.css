@@ -457,6 +457,96 @@ a { color: inherit; text-decoration: none; }
 @keyframes music-pulse { 0%, 100% { box-shadow: 0 0 14px #8b5cf64d; } 50% { box-shadow: 0 0 30px #8b5cf68c; } }
 @media (prefers-reduced-motion: reduce) { .music-toggle.playing { animation: none; } }
 
+/* ==========================================================
+   Wedding layout — Монгол ёслолын сүр жавхлан.
+   Dark ground, gold rules, centred ceremonial typography.
+   Cyrillic rules: keep-all word breaks, roomy line-height,
+   wide tracking only on short uppercase labels.
+   ========================================================== */
+.pv.layout-wedding {
+  --gold: #d9b25c;
+  --gold-line: #d9b25c4d;
+  --gold-faint: #d9b25c26;
+  --wed-serif: Georgia, 'PT Serif', 'Noto Serif', 'Times New Roman', serif;
+}
+/* deeper veil: the page should feel like a hall, not a photo */
+.pv.layout-wedding .pv-veil { background: linear-gradient(180deg, #080411f2 0%, #0a0612cf 30%, #080411f7 100%); }
+.pv-content.wed { gap: 52px; }
+.pv-content.wed h1, .pv-content.wed h2, .wed-name, .wed-parents-name, .wed-appointment-venue {
+  word-break: keep-all; overflow-wrap: break-word;
+}
+
+/* hero inside a double gold frame */
+.wed-hero { position: relative; width: 100%; display: grid; justify-items: center; gap: 20px; padding: 46px clamp(18px, 5vw, 40px) 40px; }
+.wed-frame { position: absolute; inset: 0; border: 1px solid var(--gold-line); pointer-events: none; }
+.wed-frame::after { content: ''; position: absolute; inset: 7px; border: 1px solid var(--gold-faint); }
+.wed-guest { margin: 0; font-size: 15px; line-height: 1.5; color: #efe8fa; }
+.wed-guest b { font-weight: 600; color: #fff; }
+.wed-kicker { margin: 0; font-family: var(--wed-serif); font-size: 13px; letter-spacing: .34em; text-indent: .34em; text-transform: uppercase; color: var(--gold); }
+
+/* the two names are the hero */
+.wed-names { display: grid; justify-items: center; gap: 6px; }
+.wed-name { margin: 0; font-family: var(--wed-serif); font-size: clamp(2.3rem, 11vw, 4.2rem); font-weight: 400; line-height: 1.22; letter-spacing: -.01em; color: #fff; text-shadow: 0 4px 30px #00000073; }
+.wed-amp { font-family: var(--wed-serif); font-style: italic; font-size: clamp(1.5rem, 6vw, 2.4rem); line-height: 1; color: var(--gold); }
+.wed-title { margin: 0; font-family: var(--wed-serif); font-size: clamp(2rem, 9vw, 3.4rem); font-weight: 400; line-height: 1.25; color: #fff; text-align: center; }
+
+/* gold rule with a centre mark, used between movements */
+.wed-ornament { display: flex; align-items: center; gap: 14px; margin: 0; color: var(--gold); font-size: 12px; }
+.wed-ornament span { display: block; width: clamp(46px, 12vw, 104px); height: 1px; background: linear-gradient(90deg, transparent, var(--gold-line)); }
+.wed-ornament span:last-child { background: linear-gradient(90deg, var(--gold-line), transparent); }
+
+/* date plate: weekday · day · month/year */
+.wed-date { display: flex; align-items: center; justify-content: center; gap: clamp(14px, 4vw, 26px); }
+.wed-date-side { display: grid; gap: 4px; font-size: 13px; line-height: 1.35; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); text-align: center; }
+.wed-date-side small { font-size: 11px; letter-spacing: .08em; color: #cfc4e0; font-variant-numeric: tabular-nums; }
+.wed-date-day { font-family: var(--wed-serif); font-size: clamp(2.8rem, 13vw, 4.4rem); font-weight: 400; line-height: 1; color: #fff; font-variant-numeric: tabular-nums; padding: 0 clamp(14px, 4vw, 26px); border-left: 1px solid var(--gold-line); border-right: 1px solid var(--gold-line); }
+
+/* both families, named with respect */
+.wed-parents { width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: clamp(20px, 6vw, 48px); justify-items: center; }
+.wed-parents > div { display: grid; gap: 8px; justify-items: center; text-align: center; }
+.wed-parents-label { margin: 0; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); line-height: 1.4; }
+.wed-parents-name { margin: 0; font-family: var(--wed-serif); font-size: 17px; line-height: 1.5; color: #f1ecf8; }
+
+/* the invitation message, set as a quotation */
+.wed-message { position: relative; margin: 0; max-width: 46ch; font-family: var(--wed-serif); font-style: italic; font-size: 17px; line-height: 1.85; color: #eae3f4; text-align: center; padding-top: 26px; }
+.wed-message::before { content: '❞'; position: absolute; top: -2px; left: 50%; transform: translateX(-50%) rotate(180deg); color: var(--gold); font-size: 26px; line-height: 1; }
+
+/* ceremony and banquet as separate appointments */
+.wed-appointments { width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.wed-appointment { border: 1px solid var(--gold-line); padding: 24px 18px; display: grid; gap: 10px; justify-items: center; text-align: center; background: #ffffff08; }
+.wed-appointment-label { margin: 0; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); line-height: 1.4; }
+.wed-appointment-time { margin: 0; font-family: var(--wed-serif); font-size: 18px; line-height: 1.4; color: #fff; font-variant-numeric: tabular-nums; }
+.wed-appointment-venue { margin: 0; display: flex; align-items: flex-start; gap: 8px; font-size: 14px; line-height: 1.6; color: #dfd6ec; }
+.wed-appointment-venue svg { color: var(--gold); flex: 0 0 auto; margin-top: 3px; }
+
+/* shared sections, retuned for the wedding */
+.pv.layout-wedding .pv-section { border-top-color: var(--gold-faint); }
+.wed-section h2 { font-family: var(--wed-serif); font-size: 13px; letter-spacing: .3em; text-indent: .3em; color: var(--gold); line-height: 1.4; }
+.pv.layout-wedding .pv-count small { color: var(--gold); }
+.pv.layout-wedding .pv-count-sep { background: var(--gold-line); }
+.pv.layout-wedding .pv-program b { color: var(--gold); }
+.pv.layout-wedding .pv-bank svg, .pv.layout-wedding .pv-field svg { color: var(--gold); }
+.pv.layout-wedding .pv-map-button:hover { border-color: var(--gold); }
+.pv.layout-wedding .pv-gallery-track img { border-radius: 2px; }
+.wed-contact { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 16px; }
+.wed-contact svg { color: var(--gold); }
+.wed-contact a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+.pv.layout-wedding .pv-rsvp h2 { font-family: var(--wed-serif); }
+.pv.layout-wedding .pv-choice button.selected { background: var(--gold); border-color: var(--gold); color: #17100a; }
+.pv.layout-wedding .pv-submit { background: var(--gold); color: #17100a; }
+.pv.layout-wedding .pv-submit:hover:not(:disabled) { box-shadow: 0 0 30px #d9b25c66; }
+
+@media (max-width: 680px) {
+  .pv-content.wed { gap: 40px; }
+  .wed-hero { padding: 36px 16px 32px; gap: 16px; }
+  .wed-parents { grid-template-columns: 1fr; gap: 22px; }
+  .wed-message { font-size: 16px; }
+}
+
+/* wedding fields in the create/edit form */
+.wed-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+@media (max-width: 680px) { .wed-pair { grid-template-columns: 1fr; } }
+
 /* ---- Curtain intro (paid add-on) ---- */
 .intro-overlay { position: fixed; inset: 0; z-index: 60; overflow: hidden; display: grid; place-items: center; }
 .curtain { position: absolute; top: 0; bottom: 0; width: 51%; background: repeating-linear-gradient(90deg, #2a1352 0px, #4c2694 26px, #341a66 52px, #56309f 78px, #2a1352 104px); box-shadow: inset 0 -80px 120px #00000066; transition: transform 2s cubic-bezier(.77, 0, .18, 1); }

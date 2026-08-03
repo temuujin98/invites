@@ -6,6 +6,15 @@ import DateTimeField from '../components/DateTimeField'
 import ExtraOptions, { emptyExtras } from '../components/ExtraOptions'
 import { sanitizeExtras } from '../lib/createInvitation'
 import { musicToFields } from '../lib/music'
+import { weddingToFields } from '../lib/wedding'
+import { getTemplate, isWeddingTemplate } from '../templates'
+
+/* ISO → 'YYYY-MM-DDTHH:mm' in local time (what DateTimeField expects) */
+function toLocalInputValue(iso) {
+  const date = new Date(iso)
+  const pad = (part) => String(part).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
 
 /*
  * Edit an existing invitation. The share link (slug) never changes, so
@@ -59,17 +68,12 @@ export default function EditPage({ invitationId }) {
             bankNumber: typeof bank === 'object' ? (bank.number || '') : (bank || ''),
             bankHolder: typeof bank === 'object' ? (bank.holder || '') : '',
             ...musicToFields(options.music),
+            ...weddingToFields(options.wedding),
           })
         }
         setLoading(false)
       })
   }, [session, invitationId])
-
-  function toLocalInputValue(iso) {
-    const date = new Date(iso)
-    const pad = (part) => String(part).padStart(2, '0')
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
-  }
 
   async function save(event) {
     event.preventDefault()
@@ -178,7 +182,7 @@ export default function EditPage({ invitationId }) {
           <label>Урилгын мессеж
             <textarea maxLength={400} value={message} onChange={(event) => setMessage(event.target.value)} />
           </label>
-          <ExtraOptions value={extras} onChange={setExtras} showIntro={false} />
+          <ExtraOptions value={extras} onChange={setExtras} showIntro={false} wedding={isWeddingTemplate(getTemplate(invitation.template_id))} />
           {error && <p className="kerror">{error}</p>}
           {saved && <p className="kpanel-note">✓ Хадгалагдлаа — зочдод шинэ мэдээлэл харагдана</p>}
           <div className="kform-actions">

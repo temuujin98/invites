@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 /*
  * Brutalist-styled date+time picker built from selects, replacing the
@@ -30,24 +30,31 @@ function toValue(parts) {
 
 export default function DateTimeField({ value, onChange }) {
   const [parts, setParts] = useState(() => parse(value))
+  const [lastValue, setLastValue] = useState(value)
 
-  // sync down when the upstream value arrives later (e.g. edit page load)
-  useEffect(() => {
+  /*
+   * Sync down when the upstream value arrives later (e.g. edit page load).
+   * Adjusted during render rather than in an effect — a partial pick emits
+   * '' upstream, and that must not wipe the parts chosen so far.
+   */
+  if (value !== lastValue) {
+    setLastValue(value)
     if (value && toValue(parse(value)) !== toValue(parts)) setParts(parse(value))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value])
+  }
 
   const nowYear = new Date().getFullYear()
   const years = [nowYear, nowYear + 1, nowYear + 2]
   const dayCount = daysInMonth(parts.y, parts.mo)
 
+  /*
+   * Next state is computed outside the updater: an updater may re-run during
+   * render, and notifying the parent from there updates it mid-render.
+   */
   function update(patch) {
-    setParts((current) => {
-      const next = { ...current, ...patch }
-      if (next.d && Number(next.d) > daysInMonth(next.y, next.mo)) next.d = pad(daysInMonth(next.y, next.mo))
-      onChange(toValue(next))
-      return next
-    })
+    const next = { ...parts, ...patch }
+    if (next.d && Number(next.d) > daysInMonth(next.y, next.mo)) next.d = pad(daysInMonth(next.y, next.mo))
+    setParts(next)
+    onChange(toValue(next))
   }
 
   return (

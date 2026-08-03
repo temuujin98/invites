@@ -1,12 +1,14 @@
 import { useRef, useState } from 'react'
 import { uploadCover } from '../lib/uploadCover'
 import { INTRO_PRICE, formatPrice, banks, curtainColors } from '../templates'
+import WeddingFields, { emptyWeddingFields } from './WeddingFields'
 
 /*
  * "Нэмэлт сонголтууд" fieldset shared by the create and edit forms.
  * value: { gallery: [urls], mapUrl, program: [{time, activity}], note,
  *          phone, bankName, bankNumber, bankHolder, intro, introColor,
- *          musicUrl, musicStart, musicEnd }
+ *          musicUrl, musicStart, musicEnd } plus the wedding-only fields
+ *          when `wedding` is set.
  * Everything is optional — empty options simply don't render on the guest page.
  */
 export const emptyExtras = {
@@ -14,9 +16,10 @@ export const emptyExtras = {
   bankName: '', bankNumber: '', bankHolder: '',
   intro: '', introColor: 'violet',
   musicUrl: '', musicStart: '', musicEnd: '',
+  ...emptyWeddingFields,
 }
 
-export default function ExtraOptions({ value, onChange, showIntro = true }) {
+export default function ExtraOptions({ value, onChange, showIntro = true, wedding = false }) {
   const [open, setOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
@@ -53,10 +56,12 @@ export default function ExtraOptions({ value, onChange, showIntro = true }) {
     <div className="extras">
       <button type="button" className="extras-toggle" onClick={() => setOpen(!open)} aria-expanded={open}>
         {open ? '− Нэмэлт сонголтууд' : '+ Нэмэлт сонголтууд'}
-        <span className="extras-hint">зургийн цомог · хөтөлбөр · дуу · данс…</span>
+        <span className="extras-hint">{wedding ? 'хосын нэр · эцэг эх · ёслол · цомог · дуу…' : 'зургийн цомог · хөтөлбөр · дуу · данс…'}</span>
       </button>
       {open && (
         <div className="extras-body">
+
+          {wedding && <WeddingFields extras={extras} patch={patch} />}
 
           {showIntro && (
             <label>Нээлтийн эффект <span className="intro-price">+{formatPrice(INTRO_PRICE)}</span>

@@ -3,23 +3,25 @@
 export const templates = [
   {
     id: 'lavender-wedding',
-    layout: 'classic',
+    layout: 'wedding',
     name: 'Лаванда',
     eventType: 'Хурим',
     tone: 'lavender',
     price: 49000,
     description: 'Зөөлөн ягаан шилжилттэй, хоёр нэрийг том гаргадаг сонгодог хуримын загвар.',
     sample: { title: 'Тэмүүлэн × Номин', date: '2026.09.18' },
+    couple: { groom: 'Тэмүүлэн', bride: 'Номин' },
   },
   {
     id: 'rose-wedding',
-    layout: 'romance',
+    layout: 'wedding',
     name: 'Сарнай',
     eventType: 'Хурим',
     tone: 'rose',
     price: 49000,
     description: 'Дулаан ягаан өнгийн романтик хуримын загвар.',
     sample: { title: 'Сүрэн × Бат', date: '2026.08.09' },
+    couple: { groom: 'Бат', bride: 'Сүрэн' },
   },
   {
     id: 'coral-birthday',
@@ -151,6 +153,28 @@ export function formatEventDate(value) {
   return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())} · ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
+const weekdays = ['Ням', 'Даваа', 'Мягмар', 'Лхагва', 'Пүрэв', 'Баасан', 'Бямба']
+
+/* Date broken into display parts — the wedding layout sets them separately */
+export function splitEventDate(value) {
+  if (!value) return null
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  const pad = (part) => String(part).padStart(2, '0')
+  return {
+    weekday: weekdays[date.getDay()],
+    day: pad(date.getDate()),
+    month: date.getMonth() + 1,
+    year: date.getFullYear(),
+    time: `${pad(date.getHours())}:${pad(date.getMinutes())}`,
+  }
+}
+
+/* Wedding templates take extra fields in the editor and their own layout */
+export function isWeddingTemplate(template) {
+  return template?.layout === 'wedding'
+}
+
 const cyrillicMap = {
   а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'ye', ё: 'yo', ж: 'j', з: 'z', и: 'i', й: 'i',
   к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', ө: 'u', п: 'p', р: 'r', с: 's', т: 't', у: 'u',
@@ -225,7 +249,18 @@ export function buildDemoInvitation(templateId) {
   if (!template) return null
   const eventAt = new Date(Date.now() + 30 * 86400000)
   eventAt.setHours(18, 0, 0, 0)
+  const ceremonyAt = new Date(eventAt)
+  ceremonyAt.setHours(14, 0, 0, 0)
   const others = templates.filter((item) => item.id !== templateId).slice(0, 2)
+  const wedding = isWeddingTemplate(template) ? {
+    groom: template.couple.groom,
+    bride: template.couple.bride,
+    groomParents: 'Дорж, Оюунчимэг',
+    brideParents: 'Батбаяр, Цэрэнлхам',
+    ceremonyAt: ceremonyAt.toISOString(),
+    ceremonyVenue: 'Улаанбаатар · Гэрлэх ёслолын ордон',
+    dressCode: 'Гоёлын хувцас — зөөлөн өнгө урьж байна',
+  } : null
   return {
     id: null,
     title: template.sample.title,
@@ -247,6 +282,7 @@ export function buildDemoInvitation(templateId) {
       bank: { bank: 'Хаан банк', number: '5041xxxxxx', holder: template.sample.title.split(' ')[0] },
       intro: template.eventType === 'Хурим' ? 'envelope' : 'curtain',
       introColor: template.tone === 'noir' || template.tone === 'midnight' ? 'noir' : 'violet',
+      ...(wedding ? { wedding } : {}),
     },
   }
 }
