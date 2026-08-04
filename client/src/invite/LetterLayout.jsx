@@ -9,6 +9,7 @@
 import { ArrowLeft, Gift } from 'lucide-react'
 import { formatEventDate, splitEventDate } from '../templates'
 import { Countdown, Gallery, RsvpForm } from './shared'
+import { readDetails } from '../lib/details'
 import { Corner, Divider, SealEmblem } from './ornaments/Ornaments'
 
 function Mark() {
@@ -26,8 +27,8 @@ function Detail({ label, children }) {
 }
 
 export default function LetterLayout({ invitation, options, gallery, bankParts, mapHref, invitedGuest, demo }) {
-  const wedding = options.wedding || {}
-  const hasCouple = Boolean(wedding.groom && wedding.bride)
+  const details = readDetails(options)
+  const hasCouple = Boolean(details.groom && details.bride)
   const parts = splitEventDate(invitation.event_at)
 
   return (
@@ -50,7 +51,7 @@ export default function LetterLayout({ invitation, options, gallery, bankParts, 
           {hasCouple ? (
             <>
               <p className="lt-type">{invitation.event_type}</p>
-              <h1 className="lt-names">{wedding.groom} <span className="lt-amp">ба</span> {wedding.bride}</h1>
+              <h1 className="lt-names">{details.groom} <span className="lt-amp">ба</span> {details.bride}</h1>
             </>
           ) : (
             <>
@@ -64,7 +65,7 @@ export default function LetterLayout({ invitation, options, gallery, bankParts, 
         <section className="lt-details" data-reveal>
           <Detail label="Цаг">
             <p className="lt-strong">{parts ? parts.time : '—'}</p>
-            {wedding.ceremonyAt && <p className="lt-soft">Ёслол: {formatEventDate(wedding.ceremonyAt)}</p>}
+            {details.ceremonyAt && <p className="lt-soft">Ёслол: {formatEventDate(details.ceremonyAt)}</p>}
           </Detail>
 
           <Detail label="Огноо">
@@ -76,19 +77,19 @@ export default function LetterLayout({ invitation, options, gallery, bankParts, 
 
           <Detail label="Байршил">
             <p className="lt-strong">{invitation.venue || 'Байршил удахгүй зарлагдана'}</p>
-            {wedding.ceremonyVenue && <p className="lt-soft">Ёслол: {wedding.ceremonyVenue}</p>}
+            {details.ceremonyVenue && <p className="lt-soft">Ёслол: {details.ceremonyVenue}</p>}
             {mapHref && <a className="lt-link" href={mapHref} target="_blank" rel="noreferrer">Газрын зураг нээх ↗</a>}
           </Detail>
 
-          {(wedding.groomParents || wedding.brideParents) && (
+          {(details.groomParents || details.brideParents) && (
             <Detail label="Гэр бүл">
-              {wedding.groomParents && <p className="lt-soft">Хүргэний эцэг эх — {wedding.groomParents}</p>}
-              {wedding.brideParents && <p className="lt-soft">Бэрийн эцэг эх — {wedding.brideParents}</p>}
+              {details.groomParents && <p className="lt-soft">Хүргэний эцэг эх — {details.groomParents}</p>}
+              {details.brideParents && <p className="lt-soft">Бэрийн эцэг эх — {details.brideParents}</p>}
             </Detail>
           )}
 
-          {wedding.dressCode && (
-            <Detail label="Хувцаслалт"><p className="lt-soft">{wedding.dressCode}</p></Detail>
+          {details.dressCode && (
+            <Detail label="Хувцаслалт"><p className="lt-soft">{details.dressCode}</p></Detail>
           )}
 
           {options.phone && (

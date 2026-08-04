@@ -1,7 +1,7 @@
 import { supabase } from './supabase'
 import { getTemplate, loadDraft, clearDraft, makeSlug, INTRO_PRICE } from '../templates'
 import { buildMusic } from './music'
-import { buildWedding } from './wedding'
+import { buildDetails } from './details'
 
 /* keep only known option keys, drop empty values and blank program rows */
 export function sanitizeExtras(extras) {
@@ -30,8 +30,8 @@ export function sanitizeExtras(extras) {
   }
   const music = buildMusic(source)
   if (music) clean.music = music
-  const wedding = buildWedding(source)
-  if (wedding) clean.wedding = wedding
+  const details = buildDetails(source)
+  if (details) clean.details = details
   return clean
 }
 

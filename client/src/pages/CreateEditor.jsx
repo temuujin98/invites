@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import { insertDraftInvitation } from '../lib/createInvitation'
-import { getTemplate, formatPrice, saveDraft, loadDraft, INTRO_PRICE, messagePresets, isWeddingTemplate } from '../templates'
+import { getTemplate, formatPrice, saveDraft, loadDraft, INTRO_PRICE, messagePresets, templateFields } from '../templates'
 import { FunnelHeader, InvitePreview } from '../components/Shared'
 import DateTimeField from '../components/DateTimeField'
 import ExtraOptions, { emptyExtras } from '../components/ExtraOptions'
@@ -118,7 +118,7 @@ export default function CreateEditor({ templateId }) {
                 </span>
               )}
             </label>
-            <ExtraOptions value={extras} onChange={setExtras} wedding={isWeddingTemplate(template)} />
+            <ExtraOptions value={extras} onChange={setExtras} fields={templateFields(template)} />
             {!session && (
               <label>Имэйл хаяг
                 <input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="tanii@gmail.com" />

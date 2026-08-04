@@ -1,0 +1,94 @@
+/*
+ * Ceremony layout — dignified and quiet.
+ *
+ * The stations of the day run down a single centred hairline, so the guest
+ * reads the order of events as a vertical journey rather than a list.
+ */
+import { ArrowLeft, Gift, MapPin } from 'lucide-react'
+import { formatEventDate, splitEventDate } from '../templates'
+import { readDetails } from '../lib/details'
+import { Countdown, Gallery, RsvpForm } from './shared'
+
+export default function CeremonyLayout({ invitation, options, gallery, bankParts, mapHref, invitedGuest, demo }) {
+  const details = readDetails(options)
+  const parts = splitEventDate(invitation.event_at)
+
+  const stations = []
+  if (details.ceremonyAt || details.ceremonyVenue) {
+    stations.push({ label: 'Ёслолын ажиллагаа', at: details.ceremonyAt, venue: details.ceremonyVenue })
+  }
+  stations.push({ label: stations.length ? 'Хүндэтгэлийн зоог' : 'Ёслол', at: invitation.event_at, venue: invitation.venue })
+
+  return (
+    <div className="pv-content cer">
+      <header className="cer-hero" data-reveal>
+        {invitedGuest && <p className="cer-guest">Хүндэт {invitedGuest} танд</p>}
+        <p className="cer-type">{invitation.event_type}</p>
+        <h1 className="cer-title">{invitation.title}</h1>
+        <p className="cer-date">
+          {parts ? `${parts.year}.${String(parts.month).padStart(2, '0')}.${parts.day}` : 'Огноо тохируулаагүй'}
+        </p>
+      </header>
+
+      {invitation.message && <p className="cer-message" data-reveal>{invitation.message}</p>}
+
+      {/* the day as stations on one hairline */}
+      <ol className="cer-line" data-reveal>
+        {stations.map((station) => (
+          <li key={station.label}>
+            <p className="cer-station-label">{station.label}</p>
+            {station.at && <p className="cer-station-time">{formatEventDate(station.at)}</p>}
+            <p className="cer-station-venue"><MapPin size={14} />{station.venue || 'Байршил удахгүй зарлагдана'}</p>
+          </li>
+        ))}
+      </ol>
+
+      {mapHref && <a className="pv-map-button" href={mapHref} target="_blank" rel="noreferrer">Газрын зураг нээх ↗</a>}
+
+      <Countdown target={invitation.event_at} />
+
+      {gallery.length > 0 && <Gallery images={gallery} />}
+
+      {options.program?.length > 0 && (
+        <section className="pv-section cer-section" data-reveal>
+          <h2>Хөтөлбөр</h2>
+          <div className="pv-program">
+            {options.program.map((row, index) => (
+              <p key={index}><b>{row.time}</b><span>{row.activity}</span></p>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {details.dressCode && (
+        <section className="pv-section cer-section" data-reveal>
+          <h2>Хувцаслалт</h2>
+          <p className="pv-note">{details.dressCode}</p>
+        </section>
+      )}
+
+      {options.note && (
+        <section className="pv-section cer-section" data-reveal>
+          <h2>Тэмдэглэл</h2>
+          <p className="pv-note">{options.note}</p>
+        </section>
+      )}
+
+      {bankParts.length > 0 && (
+        <section className="pv-section cer-section" data-reveal>
+          <h2>Данс</h2>
+          <div className="pv-bank">
+            <Gift size={18} />
+            <div className="pv-bank-lines">
+              {bankParts.map((part, index) => <p key={index} className={index === 1 || bankParts.length === 1 ? 'pv-bank-number' : ''}>{part}</p>)}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <RsvpForm invitationId={invitation.id} demo={demo} initialGuest={invitedGuest} heading="Хүрэлцэн ирэхээ мэдэгдээрэй" />
+
+      <a className="pv-back" href="/"><ArrowLeft size={15} /> Invites.mn</a>
+    </div>
+  )
+}

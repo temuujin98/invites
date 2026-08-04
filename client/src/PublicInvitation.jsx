@@ -15,10 +15,30 @@ import EnvelopeIntro from './invite/intro/EnvelopeIntro'
 import DefaultLayout from './invite/DefaultLayout'
 import WeddingLayout from './invite/WeddingLayout'
 import LetterLayout from './invite/LetterLayout'
+import BirthdayLayout from './invite/BirthdayLayout'
+import GalaLayout from './invite/GalaLayout'
+import CorporateLayout from './invite/CorporateLayout'
+import CeremonyLayout from './invite/CeremonyLayout'
+import GraduationLayout from './invite/GraduationLayout'
+import AnniversaryLayout from './invite/AnniversaryLayout'
+import PartyLayout from './invite/PartyLayout'
+import NamingLayout from './invite/NamingLayout'
+import SevlegLayout from './invite/SevlegLayout'
+import NewHomeLayout from './invite/NewHomeLayout'
 
 const layouts = {
   wedding: WeddingLayout,
   letter: LetterLayout,
+  birthday: BirthdayLayout,
+  gala: GalaLayout,
+  corporate: CorporateLayout,
+  ceremony: CeremonyLayout,
+  graduation: GraduationLayout,
+  anniversary: AnniversaryLayout,
+  party: PartyLayout,
+  naming: NamingLayout,
+  sevleg: SevlegLayout,
+  newhome: NewHomeLayout,
 }
 
 /* the letter layout paints its own envelope, so it takes no photo backdrop */

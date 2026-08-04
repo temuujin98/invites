@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react'
 import { uploadCover } from '../lib/uploadCover'
 import { INTRO_PRICE, formatPrice, banks, curtainColors } from '../templates'
-import WeddingFields, { emptyWeddingFields } from './WeddingFields'
+import TemplateFields from './TemplateFields'
+import { emptyDetails } from '../lib/details'
 
 /*
  * "Нэмэлт сонголтууд" fieldset shared by the create and edit forms.
@@ -16,10 +17,10 @@ export const emptyExtras = {
   bankName: '', bankNumber: '', bankHolder: '',
   intro: '', introColor: 'auto',
   musicUrl: '', musicStart: '', musicEnd: '',
-  ...emptyWeddingFields,
+  ...emptyDetails,
 }
 
-export default function ExtraOptions({ value, onChange, showIntro = true, wedding = false }) {
+export default function ExtraOptions({ value, onChange, showIntro = true, fields = [] }) {
   const [open, setOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
@@ -56,12 +57,12 @@ export default function ExtraOptions({ value, onChange, showIntro = true, weddin
     <div className="extras">
       <button type="button" className="extras-toggle" onClick={() => setOpen(!open)} aria-expanded={open}>
         {open ? '− Нэмэлт сонголтууд' : '+ Нэмэлт сонголтууд'}
-        <span className="extras-hint">{wedding ? 'хосын нэр · эцэг эх · ёслол · цомог · дуу…' : 'зургийн цомог · хөтөлбөр · дуу · данс…'}</span>
+        <span className="extras-hint">{fields.length ? 'загварын талбарууд · цомог · хөтөлбөр · дуу…' : 'зургийн цомог · хөтөлбөр · дуу · данс…'}</span>
       </button>
       {open && (
         <div className="extras-body">
 
-          {wedding && <WeddingFields extras={extras} patch={patch} />}
+          <TemplateFields fields={fields} extras={extras} patch={patch} />
 
           {showIntro && (
             <label>Нээлтийн эффект <span className="intro-price">+{formatPrice(INTRO_PRICE)}</span>

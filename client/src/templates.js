@@ -3,6 +3,7 @@
 export const templates = [
   {
     id: 'lavender-wedding',
+    fields: ['couple', 'parents', 'ceremony', 'dressCode'],
     layout: 'letter',
     name: 'Лаванда',
     eventType: 'Хурим',
@@ -14,6 +15,7 @@ export const templates = [
   },
   {
     id: 'rose-wedding',
+    fields: ['couple', 'parents', 'ceremony', 'dressCode'],
     layout: 'wedding',
     name: 'Сарнай',
     eventType: 'Хурим',
@@ -25,7 +27,8 @@ export const templates = [
   },
   {
     id: 'coral-birthday',
-    layout: 'party',
+    fields: ['age', 'dressCode'],
+    layout: 'birthday',
     name: 'Корал',
     eventType: 'Төрсөн өдөр',
     tone: 'coral',
@@ -35,7 +38,8 @@ export const templates = [
   },
   {
     id: 'sage-ceremony',
-    layout: 'minimal',
+    fields: ['ceremony', 'dressCode'],
+    layout: 'ceremony',
     name: 'Ногоон',
     eventType: 'Ёслол',
     tone: 'sage',
@@ -45,7 +49,8 @@ export const templates = [
   },
   {
     id: 'gold-reception',
-    layout: 'luxe',
+    fields: ['host', 'dressCode'],
+    layout: 'gala',
     name: 'Алт',
     eventType: 'Хүлээн авалт',
     tone: 'gold',
@@ -55,7 +60,8 @@ export const templates = [
   },
   {
     id: 'ocean-graduation',
-    layout: 'modern',
+    fields: ['honoree', 'host'],
+    layout: 'graduation',
     name: 'Далай',
     eventType: 'Төгсөлт',
     tone: 'ocean',
@@ -65,16 +71,19 @@ export const templates = [
   },
   {
     id: 'midnight-anniversary',
-    layout: 'luxe',
+    fields: ['couple', 'age'],
+    layout: 'anniversary',
     name: 'Шөнө',
     eventType: 'Ойн баяр',
     tone: 'midnight',
     price: 39000,
     description: 'Гүн хөх шөнийн өнгөтэй, ойн баярт зориулсан ёслол төгөлдөр загвар.',
     sample: { title: 'Мишээл × Тэмүүжин', date: '10 жилийн ой' },
+    couple: { groom: 'Тэмүүжин', bride: 'Мишээл' },
   },
   {
     id: 'noir-party',
+    fields: ['host', 'dressCode'],
     layout: 'party',
     name: 'Нуар',
     eventType: 'Үдэшлэг',
@@ -85,7 +94,8 @@ export const templates = [
   },
   {
     id: 'blossom-naming',
-    layout: 'romance',
+    fields: ['honoree', 'family'],
+    layout: 'naming',
     name: 'Цэцэг',
     eventType: 'Нэрийн баяр',
     tone: 'blossom',
@@ -95,7 +105,8 @@ export const templates = [
   },
   {
     id: 'sky-sevleg',
-    layout: 'party',
+    fields: ['honoree', 'age', 'family'],
+    layout: 'sevleg',
     name: 'Тэнгэр',
     eventType: 'Сэвлэг үргээх',
     tone: 'sky',
@@ -105,7 +116,8 @@ export const templates = [
   },
   {
     id: 'terra-newhome',
-    layout: 'minimal',
+    fields: ['host'],
+    layout: 'newhome',
     name: 'Өргөө',
     eventType: 'Шинэ гэр',
     tone: 'terra',
@@ -115,7 +127,8 @@ export const templates = [
   },
   {
     id: 'forest-corporate',
-    layout: 'minimal',
+    fields: ['host', 'dressCode'],
+    layout: 'corporate',
     name: 'Ой мод',
     eventType: 'Байгууллага',
     tone: 'forest',
@@ -171,13 +184,9 @@ export function splitEventDate(value) {
   }
 }
 
-/*
- * Wedding templates take extra editor fields (couple, parents, ceremony).
- * Keyed on the event type, not the layout — a wedding still carries those
- * details whichever layout it is dressed in.
- */
-export function isWeddingTemplate(template) {
-  return template?.eventType === 'Хурим'
+/* Which extra field groups a template asks for — it declares its own */
+export function templateFields(template) {
+  return template?.fields || []
 }
 
 const cyrillicMap = {
@@ -257,15 +266,19 @@ export function buildDemoInvitation(templateId) {
   const ceremonyAt = new Date(eventAt)
   ceremonyAt.setHours(14, 0, 0, 0)
   const others = templates.filter((item) => item.id !== templateId).slice(0, 2)
-  const wedding = isWeddingTemplate(template) ? {
-    groom: template.couple.groom,
-    bride: template.couple.bride,
-    groomParents: 'Дорж, Оюунчимэг',
-    brideParents: 'Батбаяр, Цэрэнлхам',
-    ceremonyAt: ceremonyAt.toISOString(),
-    ceremonyVenue: 'Улаанбаатар · Гэрлэх ёслолын ордон',
-    dressCode: 'Гоёлын хувцас — зөөлөн өнгө урьж байна',
-  } : null
+  /* fill only the detail groups this template actually declares */
+  const asked = templateFields(template)
+  const samples = {
+    couple: template.couple ? { groom: template.couple.groom, bride: template.couple.bride } : {},
+    parents: { groomParents: 'Дорж, Оюунчимэг', brideParents: 'Батбаяр, Цэрэнлхам' },
+    family: { father: 'Ганбат', mother: 'Оюунчимэг' },
+    ceremony: { ceremonyAt: ceremonyAt.toISOString(), ceremonyVenue: 'Улаанбаатар · Гэрлэх ёслолын ордон' },
+    dressCode: { dressCode: 'Гоёлын хувцас — зөөлөн өнгө урьж байна' },
+    age: { age: { 'Ойн баяр': '10 жил', 'Сэвлэг үргээх': '5 нас' }[template.eventType] || '27' },
+    honoree: { honoree: template.sample.title },
+    host: { host: 'Invites.mn ХХК' },
+  }
+  const details = asked.reduce((all, key) => ({ ...all, ...(samples[key] || {}) }), {})
   return {
     id: null,
     title: template.sample.title,
@@ -287,7 +300,7 @@ export function buildDemoInvitation(templateId) {
       bank: { bank: 'Хаан банк', number: '5041xxxxxx', holder: template.sample.title.split(' ')[0] },
       intro: template.eventType === 'Хурим' ? 'envelope' : 'curtain',
       introColor: 'auto',
-      ...(wedding ? { wedding } : {}),
+      ...(Object.keys(details).length ? { details } : {}),
     },
   }
 }

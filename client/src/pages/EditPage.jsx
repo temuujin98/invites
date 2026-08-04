@@ -6,8 +6,8 @@ import DateTimeField from '../components/DateTimeField'
 import ExtraOptions, { emptyExtras } from '../components/ExtraOptions'
 import { sanitizeExtras } from '../lib/createInvitation'
 import { musicToFields } from '../lib/music'
-import { weddingToFields } from '../lib/wedding'
-import { getTemplate, isWeddingTemplate } from '../templates'
+import { detailsToFields } from '../lib/details'
+import { getTemplate, templateFields } from '../templates'
 
 /* ISO → 'YYYY-MM-DDTHH:mm' in local time (what DateTimeField expects) */
 function toLocalInputValue(iso) {
@@ -68,7 +68,7 @@ export default function EditPage({ invitationId }) {
             bankNumber: typeof bank === 'object' ? (bank.number || '') : (bank || ''),
             bankHolder: typeof bank === 'object' ? (bank.holder || '') : '',
             ...musicToFields(options.music),
-            ...weddingToFields(options.wedding),
+            ...detailsToFields(options),
           })
         }
         setLoading(false)
@@ -182,7 +182,7 @@ export default function EditPage({ invitationId }) {
           <label>Урилгын мессеж
             <textarea maxLength={400} value={message} onChange={(event) => setMessage(event.target.value)} />
           </label>
-          <ExtraOptions value={extras} onChange={setExtras} showIntro={false} wedding={isWeddingTemplate(getTemplate(invitation.template_id))} />
+          <ExtraOptions value={extras} onChange={setExtras} showIntro={false} fields={templateFields(getTemplate(invitation.template_id))} />
           {error && <p className="kerror">{error}</p>}
           {saved && <p className="kpanel-note">✓ Хадгалагдлаа — зочдод шинэ мэдээлэл харагдана</p>}
           <div className="kform-actions">

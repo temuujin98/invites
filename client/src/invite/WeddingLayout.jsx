@@ -10,6 +10,7 @@
 import { ArrowLeft, Gift, MapPin, Phone } from 'lucide-react'
 import { formatEventDate, splitEventDate } from '../templates'
 import { Countdown, Gallery, RsvpForm } from './shared'
+import { readDetails } from '../lib/details'
 
 function Ornament({ mark = '✦' }) {
   return <p className="wed-ornament" aria-hidden="true"><span /> {mark} <span /></p>
@@ -32,14 +33,14 @@ function DatePlate({ value }) {
 }
 
 export default function WeddingLayout({ invitation, options, gallery, bankParts, mapHref, invitedGuest, demo }) {
-  const wedding = options.wedding || {}
-  const hasCouple = Boolean(wedding.groom && wedding.bride)
-  const hasParents = Boolean(wedding.groomParents || wedding.brideParents)
+  const details = readDetails(options)
+  const hasCouple = Boolean(details.groom && details.bride)
+  const hasParents = Boolean(details.groomParents || details.brideParents)
 
   /* Ceremony and banquet are separate appointments when the host set both */
   const appointments = []
-  if (wedding.ceremonyAt || wedding.ceremonyVenue) {
-    appointments.push({ label: 'Ёслолын ажиллагаа', at: wedding.ceremonyAt, venue: wedding.ceremonyVenue })
+  if (details.ceremonyAt || details.ceremonyVenue) {
+    appointments.push({ label: 'Ёслолын ажиллагаа', at: details.ceremonyAt, venue: details.ceremonyVenue })
   }
   appointments.push({
     label: appointments.length ? 'Хуримын найр' : 'Хуримын ёслол',
@@ -56,9 +57,9 @@ export default function WeddingLayout({ invitation, options, gallery, bankParts,
 
         {hasCouple ? (
           <div className="wed-names">
-            <p className="wed-name">{wedding.groom}</p>
+            <p className="wed-name">{details.groom}</p>
             <span className="wed-amp" aria-hidden="true">&</span>
-            <p className="wed-name">{wedding.bride}</p>
+            <p className="wed-name">{details.bride}</p>
           </div>
         ) : (
           <h1 className="wed-title">{invitation.title}</h1>
@@ -70,16 +71,16 @@ export default function WeddingLayout({ invitation, options, gallery, bankParts,
 
       {hasParents && (
         <section className="wed-parents" data-reveal aria-label="Хос талын эцэг эх">
-          {wedding.groomParents && (
+          {details.groomParents && (
             <div>
               <p className="wed-parents-label">Хүргэний эцэг эх</p>
-              <p className="wed-parents-name">{wedding.groomParents}</p>
+              <p className="wed-parents-name">{details.groomParents}</p>
             </div>
           )}
-          {wedding.brideParents && (
+          {details.brideParents && (
             <div>
               <p className="wed-parents-label">Бэрийн эцэг эх</p>
-              <p className="wed-parents-name">{wedding.brideParents}</p>
+              <p className="wed-parents-name">{details.brideParents}</p>
             </div>
           )}
         </section>
@@ -127,10 +128,10 @@ export default function WeddingLayout({ invitation, options, gallery, bankParts,
         </section>
       )}
 
-      {wedding.dressCode && (
+      {details.dressCode && (
         <section className="pv-section wed-section" data-reveal>
           <h2>Хувцаслалт</h2>
-          <p className="pv-note">{wedding.dressCode}</p>
+          <p className="pv-note">{details.dressCode}</p>
         </section>
       )}
 
