@@ -974,22 +974,16 @@ a { color: inherit; text-decoration: none; }
 .curtain-intro.opening .curtain-stagelight { opacity: .5; }
 
 /*
- * Velvet: an uneven fold period (146px, not a tidy 104px) with soft colour
- * ramps reads as fabric; even hard-edged stripes read as a barcode.
- * Layered over it: a vertical drape shadow at head and hem.
+ * Velvet is drawn in SVG (see intro/CurtainSvg.jsx) — folds of uneven width,
+ * each lit on its crest, which a repeating gradient cannot do.
  */
 .curtain {
   position: absolute; top: 0; bottom: 0; width: 52%; z-index: 2;
-  background:
-    linear-gradient(180deg, #00000073 0%, transparent 15%, transparent 64%, #000000ad 100%),
-    repeating-linear-gradient(90deg,
-      var(--fab-deep) 0px, var(--fab-mid) 22px, var(--fab-light) 34px,
-      var(--fab-mid) 47px, var(--fab-deep) 68px, var(--fab-mid) 89px,
-      var(--fab-light) 103px, var(--fab-mid) 121px, var(--fab-deep) 146px);
-  box-shadow: inset 0 -90px 130px #00000073;
+  box-shadow: inset 0 -90px 130px #00000059;
   transition: transform 2.3s cubic-bezier(.74, 0, .16, 1);
   will-change: transform;
 }
+.curtain-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 /* leading edge: metal trim catching the stage light */
 .curtain::after { content: ''; position: absolute; top: 0; bottom: 0; width: 5px; background: linear-gradient(180deg, var(--metal), #00000059); opacity: .85; }
 /* satin sweep across the folds */
@@ -1002,7 +996,10 @@ a { color: inherit; text-decoration: none; }
 .curtain-intro.opening .curtain-left { transform: translateX(-88%) scaleX(.82); }
 .curtain-intro.opening .curtain-right { transform: translateX(88%) scaleX(.82); transition-delay: .1s; }
 
-.curtain-rod { position: absolute; top: 0; left: 0; right: 0; height: 12px; z-index: 4; background: linear-gradient(180deg, var(--metal) 0%, #ffffff5c 22%, var(--metal) 46%, #00000080 100%); box-shadow: 0 4px 16px #000000a6; }
+.curtain-rod { position: absolute; top: 0; left: 0; right: 0; height: 10px; z-index: 3; background: linear-gradient(180deg, var(--metal) 0%, #ffffff5c 22%, var(--metal) 46%, #00000080 100%); box-shadow: 0 4px 16px #000000a6; }
+/* the valance is hung, not drawn — it stays put while the panels part */
+.curtain-valance { position: absolute; top: 0; left: 0; right: 0; height: clamp(76px, 15vh, 132px); z-index: 4; filter: drop-shadow(0 10px 18px #000000a6); }
+.curtain-valance-svg { display: block; width: 100%; height: 100%; }
 
 .intro-center { position: relative; z-index: 5; display: grid; justify-items: center; gap: 22px; text-align: center; padding: 20px; transition: opacity .6s; }
 .intro-overlay.opening .intro-center { opacity: 0; pointer-events: none; }

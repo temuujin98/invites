@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { getIntroTheme, introStyle } from './themes'
 import Particles from './Particles'
+import { CurtainPanel, CurtainValance } from './CurtainSvg'
 
 /*
  * Curtain intro (paid add-on): two velvet panels part when the guest
@@ -32,10 +33,16 @@ export default function CurtainIntro({ eventType, guest, tone, color, onDone }) 
       <Particles preset={theme.particle} />
 
       <div className="curtain curtain-left" aria-hidden="true">
+        <CurtainPanel side="l" colors={theme.fabric} />
         <span className="curtain-sheen" />
       </div>
       <div className="curtain curtain-right" aria-hidden="true">
+        <CurtainPanel side="r" colors={theme.fabric} />
         <span className="curtain-sheen" />
+      </div>
+
+      <div className="curtain-valance" aria-hidden="true">
+        <CurtainValance colors={theme.fabric} metal={theme.metal} />
       </div>
       <div className="curtain-rod" aria-hidden="true" />
 
