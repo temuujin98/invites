@@ -298,10 +298,8 @@ a { color: inherit; text-decoration: none; }
 .cs-noir { background: linear-gradient(135deg, #3a3a46, #101014); }
 .cs-navy { background: linear-gradient(135deg, #24448c, #0e1a3a); }
 
-/* ---------- Curtain color variants ---------- */
-.intro-overlay.c-burgundy .curtain { background: repeating-linear-gradient(90deg, #4a0f1e 0px, #8c2740 26px, #5c1526 52px, #9c3049 78px, #4a0f1e 104px); }
-.intro-overlay.c-noir .curtain { background: repeating-linear-gradient(90deg, #141419 0px, #34343f 26px, #1c1c23 52px, #3e3e4b 78px, #141419 104px); }
-.intro-overlay.c-navy .curtain { background: repeating-linear-gradient(90deg, #0e1a3a 0px, #24448c 26px, #14224c 52px, #2c52a5 78px, #0e1a3a 104px); }
+/* Curtain colour is now themed per template — see invite/intro/themes.js */
+.curtain-swatch.cs-auto { background: linear-gradient(135deg, #d9b25c, #8b5cf6 55%, #2a1352); }
 
 /* ==========================================================
    Guest invitation page (pv) full-bleed photo background,
@@ -363,7 +361,12 @@ a { color: inherit; text-decoration: none; }
 .pv-gallery { width: 100vw; display: grid; gap: 14px; }
 .pv-gallery-track { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 6px max(24px, calc(50vw - 320px)); scrollbar-width: none; }
 .pv-gallery-track::-webkit-scrollbar { display: none; }
-.pv-gallery-track img { height: clamp(280px, 52vw, 440px); max-width: 84vw; object-fit: cover; border-radius: 8px; scroll-snap-align: center; box-shadow: 0 30px 70px #00000080; flex: 0 0 auto; }
+/*
+ * aspect-ratio reserves each frame's width before the bytes arrive.
+ * Without it an unloaded img is 0px wide, so the track has nothing to
+ * scroll — and lazy images never enter the viewport to start loading.
+ */
+.pv-gallery-track img { height: clamp(280px, 52vw, 440px); aspect-ratio: 4 / 3; width: auto; max-width: 84vw; object-fit: cover; border-radius: 8px; scroll-snap-align: center; box-shadow: 0 30px 70px #00000080; flex: 0 0 auto; background: #ffffff0f; }
 .pv-gallery-hint { margin: 0; font-size: 11px; letter-spacing: .18em; color: #b9adc9; text-transform: uppercase; text-align: center; }
 
 /* sections: open, separated by thin rules */
@@ -458,6 +461,179 @@ a { color: inherit; text-decoration: none; }
 @media (prefers-reduced-motion: reduce) { .music-toggle.playing { animation: none; } }
 
 /* ==========================================================
+   Letter layout — an ivory sheet drawn out of a coloured envelope.
+   The envelope front is fixed to the bottom of the viewport; the sheet
+   scrolls up behind it. See invite/LetterLayout.jsx.
+   ========================================================== */
+.pv.layout-letter {
+  --env: #5c1526; --env-deep: #380c16; --paper: #fbf6ec; --paper-edge: #f0e6d2;
+  --ink: #6b1220; --ink-soft: #8a4351; --gold: #c49a4a;
+  background-image: none !important;
+  background-color: var(--env);
+  color: var(--ink);
+}
+.pv.layout-letter.tone-lavender { --env: #3a1a6b; --env-deep: #221046; --ink: #3f2280; --ink-soft: #6a4ba8; }
+.pv.layout-letter.tone-rose { --env: #6b1533; --env-deep: #420a1e; --ink: #8c2750; --ink-soft: #ab5c7c; }
+.pv.layout-letter.tone-coral { --env: #7a2a22; --env-deep: #4c1712; --ink: #a8412f; --ink-soft: #c0705f; }
+.pv.layout-letter.tone-sage { --env: #1f4531; --env-deep: #12291d; --ink: #2f6a4c; --ink-soft: #5d9077; }
+.pv.layout-letter.tone-gold { --env: #4a3410; --env-deep: #2a1d07; --ink: #6b4f16; --ink-soft: #94794a; }
+.pv.layout-letter.tone-ocean { --env: #14355e; --env-deep: #0a1f39; --ink: #1f4d86; --ink-soft: #547aa6; }
+.pv.layout-letter.tone-midnight { --env: #1b1950; --env-deep: #0f0e2c; --ink: #26246b; --ink-soft: #5b599c; }
+.pv.layout-letter.tone-noir { --env: #1c1c24; --env-deep: #0c0c11; --ink: #2b2b36; --ink-soft: #5e5e6d; }
+.pv.layout-letter.tone-blossom { --env: #6b2846; --env-deep: #43162a; --ink: #a34470; --ink-soft: #c07d9c; }
+.pv.layout-letter.tone-sky { --env: #1c4b70; --env-deep: #102c43; --ink: #2f6f9e; --ink-soft: #6a9dbf; }
+.pv.layout-letter.tone-terra { --env: #5e2f18; --env-deep: #391b0d; --ink: #8a4a24; --ink-soft: #ad7c5b; }
+.pv.layout-letter.tone-forest { --env: #1b3b28; --env-deep: #102318; --ink: #2b543a; --ink-soft: #5f8a6d; }
+
+/* envelope paper grain instead of the photo veil */
+.pv.layout-letter .pv-veil { background: radial-gradient(ellipse 90% 60% at 50% 12%, #ffffff14, transparent 70%), linear-gradient(180deg, var(--env-deep), var(--env) 30%, var(--env-deep)); }
+
+/* bottom padding clears the fixed envelope plus the sheet's pointed foot */
+.pv-content.letter { display: block; width: min(100%, 620px); padding: 34px 16px clamp(210px, 32vh, 320px); text-align: left; gap: 0; }
+
+/* the sheet */
+.lt-sheet {
+  position: relative; background: var(--paper); color: var(--ink);
+  padding: 68px clamp(26px, 7vw, 52px) 78px;
+  box-shadow: 0 30px 80px #00000073, 0 2px 0 #ffffff40 inset;
+  display: grid; gap: 30px; justify-items: center; text-align: center;
+}
+/* pointed foot, nesting into the envelope */
+.lt-sheet::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 88px; background: var(--paper); clip-path: polygon(0 0, 100% 0, 50% 100%); }
+/*
+ * Ornament edges. The SVG supplies only the shape through its alpha; the
+ * colour comes from background-color, so one asset serves all twelve tones.
+ */
+.lt-edge { position: absolute; pointer-events: none; background-color: var(--ink-soft); opacity: .5; }
+.lt-edge-top, .lt-edge-bottom {
+  left: 0; right: 0; height: 22px;
+  -webkit-mask-image: url('/ornaments/lace-edge.svg'); mask-image: url('/ornaments/lace-edge.svg');
+  -webkit-mask-repeat: repeat-x; mask-repeat: repeat-x;
+  -webkit-mask-size: auto 100%; mask-size: auto 100%;
+  -webkit-mask-position: center; mask-position: center;
+}
+.lt-edge-top { top: 0; }
+.lt-edge-bottom { bottom: 0; transform: scaleY(-1); }
+.lt-edge-left, .lt-edge-right {
+  top: 30px; bottom: 30px; width: 15px;
+  -webkit-mask-image: url('/ornaments/frame-side.svg'); mask-image: url('/ornaments/frame-side.svg');
+  -webkit-mask-repeat: repeat-y; mask-repeat: repeat-y;
+  -webkit-mask-size: 100% auto; mask-size: 100% auto;
+  -webkit-mask-position: center; mask-position: center;
+}
+.lt-edge-left { left: 5px; }
+.lt-edge-right { right: 5px; transform: scaleX(-1); }
+
+/* corner flourishes — one drawing, mirrored into the other three */
+.lt-corner { position: absolute; width: clamp(44px, 12vw, 70px); aspect-ratio: 1; color: var(--gold); opacity: .75; pointer-events: none; }
+.lt-corner-tl { top: 14px; left: 12px; }
+.lt-corner-tr { top: 14px; right: 12px; transform: scaleX(-1); }
+.lt-corner-bl { bottom: 14px; left: 12px; transform: scaleY(-1); }
+.lt-corner-br { bottom: 14px; right: 12px; transform: scale(-1); }
+
+.lt-divider { display: block; width: min(100%, 270px); height: auto; color: var(--gold); }
+
+.lt-head { display: grid; gap: 12px; justify-items: center; }
+.lt-guest { margin: 0; font-family: Georgia, 'PT Serif', 'Noto Serif', serif; font-style: italic; font-size: 14px; line-height: 1.5; color: var(--ink-soft); }
+.lt-script { margin: 0; font-family: Georgia, 'PT Serif', 'Noto Serif', serif; font-style: italic; font-size: clamp(2.4rem, 11vw, 3.6rem); line-height: 1.15; color: var(--ink); }
+.lt-kicker { margin: 0; font-size: 11px; letter-spacing: .22em; text-transform: uppercase; line-height: 1.5; color: var(--ink-soft); }
+.lt-type { margin: 6px 0 0; font-size: 12px; letter-spacing: .3em; text-transform: uppercase; color: var(--ink-soft); }
+.lt-names { margin: 0; font-family: Georgia, 'PT Serif', 'Noto Serif', serif; font-weight: 400; font-size: clamp(1.7rem, 8vw, 2.7rem); line-height: 1.25; letter-spacing: .01em; color: var(--ink); word-break: keep-all; overflow-wrap: break-word; }
+.lt-amp { font-style: italic; color: var(--ink-soft); }
+.lt-rule { display: block; width: 100%; max-width: 260px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+
+.lt-details { display: grid; gap: 24px; width: 100%; }
+.lt-detail { display: grid; gap: 7px; }
+.lt-detail-label { margin: 0; font-size: 11px; letter-spacing: .26em; text-transform: uppercase; line-height: 1.4; color: var(--ink); }
+.lt-mark { color: var(--gold); }
+.lt-detail-body { display: grid; gap: 4px; }
+.lt-strong { margin: 0; font-family: Georgia, 'PT Serif', 'Noto Serif', serif; font-size: 19px; line-height: 1.45; color: var(--ink); }
+.lt-soft { margin: 0; font-size: 14px; line-height: 1.65; color: var(--ink-soft); }
+.lt-strong a { text-decoration: underline; text-underline-offset: 3px; }
+.lt-link { font-size: 13px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.lt-message { margin: 0; max-width: 44ch; font-family: Georgia, 'PT Serif', 'Noto Serif', serif; font-style: italic; font-size: 16px; line-height: 1.9; color: var(--ink-soft); }
+.lt-closing { margin: 0; font-family: Georgia, 'PT Serif', 'Noto Serif', serif; font-style: italic; font-size: 17px; color: var(--ink-soft); }
+
+/* shared blocks, recoloured for paper */
+.pv.layout-letter .pv-countdown { color: var(--ink); }
+.pv.layout-letter .pv-count small { color: var(--ink-soft); }
+.pv.layout-letter .pv-count-sep { background: #00000021; }
+/* every section on the sheet, including the RSVP block, which carries no lt- class */
+.pv.layout-letter .pv-section { border-top-color: #00000017; width: 100%; }
+.pv.layout-letter .pv-section h2 { color: var(--ink); letter-spacing: .28em; }
+.pv.layout-letter .pv-program b { color: var(--gold); }
+.pv.layout-letter .pv-note, .pv.layout-letter .pv-bank-lines p { color: var(--ink-soft); }
+.pv.layout-letter .pv-bank-lines .pv-bank-number { color: var(--ink); }
+.pv.layout-letter .pv-bank svg, .pv.layout-letter .pv-field svg { color: var(--gold); }
+.pv.layout-letter .pv-gallery { width: 100%; }
+.pv.layout-letter .pv-gallery-track { padding: 6px 0; }
+.pv.layout-letter .pv-gallery-track img { box-shadow: 0 12px 30px #0000003d; border-radius: 3px; }
+.pv.layout-letter .pv-gallery-hint { color: var(--ink-soft); }
+.pv.layout-letter .pv-choice button { border-color: #00000029; color: var(--ink); }
+.pv.layout-letter .pv-choice button.selected { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.pv.layout-letter .pv-field { color: var(--ink-soft); }
+.pv.layout-letter .pv-field input, .pv.layout-letter .pv-field select { color: var(--ink); border-bottom-color: #00000029; }
+.pv.layout-letter .pv-field input::placeholder, .pv.layout-letter .pv-wish::placeholder { color: #00000059; }
+.pv.layout-letter .pv-field select { color-scheme: light; }
+.pv.layout-letter .pv-wish { border-color: #00000029; color: var(--ink); }
+.pv.layout-letter .pv-submit { background: var(--ink); color: var(--paper); }
+.pv.layout-letter .pv-thanks { color: var(--ink); }
+.pv.layout-letter .pv-thanks span { color: var(--ink-soft); }
+.lt-back { position: relative; z-index: 6; display: flex; justify-content: center; color: #ffffffa6; margin: 120px 0 0; }
+.pv.layout-letter .pv-back:hover { color: #fff; }
+
+/* envelope front, fixed — the sheet slides up behind it */
+.lt-pocket {
+  position: fixed; left: 0; right: 0; bottom: 0; height: clamp(96px, 17vh, 168px); z-index: 5;
+  background: linear-gradient(180deg, var(--env), var(--env-deep));
+  clip-path: polygon(0 0, 50% 46%, 100% 0, 100% 100%, 0 100%);
+  box-shadow: 0 -18px 40px #00000059;
+}
+.lt-pocket-seal {
+  position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%);
+  width: clamp(58px, 14vw, 80px); aspect-ratio: 1; border-radius: 50%;
+  display: grid; place-items: center;
+  background: radial-gradient(circle at 38% 30%, #ffffff8c, transparent 46%), radial-gradient(circle at 52% 56%, var(--gold), #00000073 130%);
+  box-shadow: inset 0 2px 5px #ffffff40, inset 0 -3px 7px #00000059, 0 5px 16px #00000066;
+}
+/* emblem pressed into the wax: dark recess with a light lip below it */
+.lt-seal-emblem { width: 60%; height: 60%; color: #0000005e; filter: drop-shadow(0 1px 0 #ffffff4d); }
+
+@media (max-width: 680px) {
+  .pv-content.letter { padding: 22px 12px 0; }
+  .lt-sheet { padding: 42px 20px 54px; gap: 26px; }
+  .lt-back { margin-top: 100px; }
+}
+
+/* ==========================================================
+   Scroll reveal — IntersectionObserver adds .revealed once.
+   See invite/useReveal.js; costs no JS library.
+   ========================================================== */
+/* hidden only once JS arms it — an unarmed page is a readable page */
+[data-reveal].reveal-armed { opacity: 0; transform: translateY(20px); transition: opacity .75s ease, transform .75s cubic-bezier(.22, 1, .36, 1); }
+[data-reveal].reveal-armed.revealed { opacity: 1; transform: none; }
+
+/* rows inside a revealed block arrive one after another */
+@keyframes reveal-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.pv-countdown.revealed .pv-count,
+.wed-appointments.revealed .wed-appointment,
+.pv-section.revealed .pv-program p { animation: reveal-rise .55s cubic-bezier(.22, 1, .36, 1) backwards; }
+.pv-countdown.revealed .pv-count:nth-child(2),
+.wed-appointments.revealed .wed-appointment:nth-child(2),
+.pv-section.revealed .pv-program p:nth-child(2) { animation-delay: .08s; }
+.pv-countdown.revealed .pv-count:nth-child(3),
+.pv-section.revealed .pv-program p:nth-child(3) { animation-delay: .16s; }
+.pv-countdown.revealed .pv-count:nth-child(4),
+.pv-section.revealed .pv-program p:nth-child(4) { animation-delay: .24s; }
+.pv-section.revealed .pv-program p:nth-child(5) { animation-delay: .32s; }
+.pv-section.revealed .pv-program p:nth-child(n+6) { animation-delay: .4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal], [data-reveal].reveal-armed { opacity: 1; transform: none; transition: none; }
+  .pv-countdown .pv-count, .wed-appointments .wed-appointment, .pv-program p { animation: none !important; }
+}
+
+/* ==========================================================
    Wedding layout — Монгол ёслолын сүр жавхлан.
    Dark ground, gold rules, centred ceremonial typography.
    Cyrillic rules: keep-all word breaks, roomy line-height,
@@ -547,30 +723,69 @@ a { color: inherit; text-decoration: none; }
 .wed-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 @media (max-width: 680px) { .wed-pair { grid-template-columns: 1fr; } }
 
-/* ---- Curtain intro (paid add-on) ---- */
-.intro-overlay { position: fixed; inset: 0; z-index: 60; overflow: hidden; display: grid; place-items: center; }
-.curtain { position: absolute; top: 0; bottom: 0; width: 51%; background: repeating-linear-gradient(90deg, #2a1352 0px, #4c2694 26px, #341a66 52px, #56309f 78px, #2a1352 104px); box-shadow: inset 0 -80px 120px #00000066; transition: transform 2s cubic-bezier(.77, 0, .18, 1); }
-.curtain::after { content: ''; position: absolute; top: 0; bottom: 0; width: 6px; background: linear-gradient(#d9b25c, #a67c2e); }
-.curtain-left { left: 0; }
+/* ==========================================================
+   Invitation intro — curtain & envelope.
+   Every colour arrives as a custom property from intro/themes.js,
+   so one stylesheet dresses all twelve templates.
+   ========================================================== */
+.intro-overlay { position: fixed; inset: 0; z-index: 60; overflow: hidden; display: grid; place-items: center; background: #07040e; }
+.intro-particles { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+
+/* ---- Curtain (paid add-on) ---- */
+.curtain-intro { transition: opacity .7s ease 1.7s; }
+.curtain-intro.opening { opacity: 0; pointer-events: none; }
+
+/* stage light behind the curtain, blooming as the panels part */
+.curtain-stagelight { position: absolute; inset: 0; z-index: 0; background: radial-gradient(ellipse 62% 52% at 50% 46%, var(--glow), transparent 70%); opacity: .16; transition: opacity 1.7s ease .3s; }
+.curtain-intro.opening .curtain-stagelight { opacity: .5; }
+
+/*
+ * Velvet: an uneven fold period (146px, not a tidy 104px) with soft colour
+ * ramps reads as fabric; even hard-edged stripes read as a barcode.
+ * Layered over it: a vertical drape shadow at head and hem.
+ */
+.curtain {
+  position: absolute; top: 0; bottom: 0; width: 52%; z-index: 2;
+  background:
+    linear-gradient(180deg, #00000073 0%, transparent 15%, transparent 64%, #000000ad 100%),
+    repeating-linear-gradient(90deg,
+      var(--fab-deep) 0px, var(--fab-mid) 22px, var(--fab-light) 34px,
+      var(--fab-mid) 47px, var(--fab-deep) 68px, var(--fab-mid) 89px,
+      var(--fab-light) 103px, var(--fab-mid) 121px, var(--fab-deep) 146px);
+  box-shadow: inset 0 -90px 130px #00000073;
+  transition: transform 2.3s cubic-bezier(.74, 0, .16, 1);
+  will-change: transform;
+}
+/* leading edge: metal trim catching the stage light */
+.curtain::after { content: ''; position: absolute; top: 0; bottom: 0; width: 5px; background: linear-gradient(180deg, var(--metal), #00000059); opacity: .85; }
+/* satin sweep across the folds */
+.curtain-sheen { position: absolute; inset: 0; background: linear-gradient(100deg, transparent 18%, #ffffff21 40%, #ffffff0a 54%, transparent 74%); pointer-events: none; }
+.curtain-left { left: 0; transform-origin: left center; }
 .curtain-left::after { right: 0; }
-.curtain-right { right: 0; }
+.curtain-right { right: 0; transform-origin: right center; }
 .curtain-right::after { left: 0; }
-.intro-overlay.opening .curtain-left { transform: translateX(-104%); }
-.intro-overlay.opening .curtain-right { transform: translateX(104%); }
-.intro-center { position: relative; z-index: 2; display: grid; justify-items: center; gap: 22px; text-align: center; padding: 20px; transition: opacity .6s; }
+/* gather toward the rod ends; the right panel trails so it never looks mirrored */
+.curtain-intro.opening .curtain-left { transform: translateX(-88%) scaleX(.82); }
+.curtain-intro.opening .curtain-right { transform: translateX(88%) scaleX(.82); transition-delay: .1s; }
+
+.curtain-rod { position: absolute; top: 0; left: 0; right: 0; height: 12px; z-index: 4; background: linear-gradient(180deg, var(--metal) 0%, #ffffff5c 22%, var(--metal) 46%, #00000080 100%); box-shadow: 0 4px 16px #000000a6; }
+
+.intro-center { position: relative; z-index: 5; display: grid; justify-items: center; gap: 22px; text-align: center; padding: 20px; transition: opacity .6s; }
 .intro-overlay.opening .intro-center { opacity: 0; pointer-events: none; }
-.intro-ornament { display: flex; align-items: center; gap: 16px; margin: 0; color: #d9b25c; font-size: 13px; }
-.intro-ornament span { display: block; width: clamp(50px, 10vw, 110px); height: 1px; background: linear-gradient(90deg, transparent, #d9b25c); }
-.intro-ornament span:last-child { background: linear-gradient(90deg, #d9b25c, transparent); }
-.intro-type { font-family: Georgia, serif; color: #ecd9a8; font-size: clamp(20px, 3.4vw, 30px); letter-spacing: .42em; text-indent: .42em; text-transform: uppercase; margin: 0; text-shadow: 0 2px 18px #00000059; }
-.intro-guest { font-family: Georgia, serif; font-style: italic; color: #f1e9ff; font-size: 17px; margin: 0; }
-.intro-seal { position: relative; width: 152px; height: 152px; border-radius: 50%; border: 1px solid #d9b25c; background: radial-gradient(circle at 50% 38%, #ffffff14, transparent 65%); cursor: pointer; display: grid; place-items: center; animation: seal-breathe 3s ease-in-out infinite; transition: transform .3s; }
-.intro-seal-ring { position: absolute; inset: 7px; border-radius: 50%; border: 1px solid #d9b25c99; }
-.intro-seal-text { font-family: Georgia, serif; font-style: italic; color: #f4e7c8; font-size: 27px; letter-spacing: .04em; }
-.intro-seal:hover { transform: scale(1.07); animation-play-state: paused; box-shadow: 0 0 50px #d9b25c4d; }
-@keyframes seal-breathe { 0%, 100% { box-shadow: 0 0 18px #d9b25c26; } 50% { box-shadow: 0 0 44px #d9b25c59; } }
-@media (prefers-reduced-motion: reduce) { .intro-seal { animation: none; } }
-@media (prefers-reduced-motion: reduce) { .curtain, .intro-center { transition: none !important; } }
+.intro-ornament { display: flex; align-items: center; gap: 16px; margin: 0; color: var(--metal); font-size: 13px; }
+.intro-ornament span { display: block; width: clamp(50px, 10vw, 110px); height: 1px; background: linear-gradient(90deg, transparent, var(--metal)); }
+.intro-ornament span:last-child { background: linear-gradient(90deg, var(--metal), transparent); }
+.intro-type { font-family: Georgia, 'PT Serif', 'Noto Serif', serif; color: #f4ead2; font-size: clamp(19px, 3.2vw, 29px); letter-spacing: .38em; text-indent: .38em; text-transform: uppercase; line-height: 1.4; margin: 0; text-shadow: 0 2px 18px #00000073; }
+.intro-guest { font-family: Georgia, 'PT Serif', 'Noto Serif', serif; font-style: italic; color: #f1e9ff; font-size: 17px; line-height: 1.5; margin: 0; }
+.intro-seal { position: relative; width: 152px; height: 152px; border-radius: 50%; border: 1px solid var(--metal); background: radial-gradient(circle at 50% 36%, #ffffff1f, transparent 66%); cursor: pointer; display: grid; place-items: center; animation: seal-breathe 3s ease-in-out infinite; transition: transform .3s; }
+.intro-seal-ring { position: absolute; inset: 7px; border-radius: 50%; border: 1px solid var(--metal); opacity: .6; }
+.intro-seal-text { font-family: Georgia, 'PT Serif', 'Noto Serif', serif; font-style: italic; color: #f7ecd6; font-size: 27px; letter-spacing: .04em; }
+.intro-seal:hover { transform: scale(1.07); animation-play-state: paused; box-shadow: 0 0 50px #ffffff40; }
+@keyframes seal-breathe { 0%, 100% { box-shadow: 0 0 18px #ffffff1f; } 50% { box-shadow: 0 0 44px #ffffff45; } }
+@media (prefers-reduced-motion: reduce) {
+  .intro-seal { animation: none; }
+  .curtain, .intro-center, .curtain-stagelight, .curtain-intro { transition: none !important; }
+}
 
 /* intro choice buttons in the create form */
 .intro-price { font-family: 'JetBrains Mono', monospace; display: inline-block; justify-self: start; background: var(--k-brand); border: 2px solid var(--k-black); padding: 2px 8px; font-size: 10px; }
@@ -580,24 +795,40 @@ a { color: inherit; text-decoration: none; }
 .intro-choice.selected { background: var(--k-black); color: var(--k-white); }
 
 
-/* ---------- Envelope intro (letter opening, weddings) ---------- */
-.intro-overlay.env { background: radial-gradient(circle at 50% 42%, #241638 0%, #0a0612 78%); transition: opacity .8s ease 1.6s; }
+/* ---- Envelope intro ---- */
+.intro-overlay.env { background: radial-gradient(circle at 50% 42%, var(--fab-deep) 0%, #07040e 76%); transition: opacity .8s ease 1.75s; }
 .intro-overlay.env.opening { opacity: 0; pointer-events: none; }
-.env-stage { display: grid; justify-items: center; gap: 30px; }
+.env-stage { position: relative; z-index: 2; display: grid; justify-items: center; gap: 30px; }
 .envelope { position: relative; width: min(88vw, 430px); aspect-ratio: 10 / 7; perspective: 1100px; filter: drop-shadow(0 34px 60px #00000080); }
-.env-back { position: absolute; inset: 0; background: linear-gradient(160deg, #f3e7cf, #e2cfa8); border-radius: 8px; }
-.env-letter { position: absolute; left: 5%; right: 5%; top: 6%; bottom: 10%; background: linear-gradient(#fffdf6, #f8f1e2); border-radius: 4px; z-index: 2; display: grid; place-content: center; gap: 12px; text-align: center; transition: transform 1s cubic-bezier(.22, 1, .36, 1) .7s; }
-.env-letter-type { margin: 0; font-family: Georgia, serif; font-size: 19px; letter-spacing: .34em; text-indent: .34em; text-transform: uppercase; color: #8a6a2f; }
-.env-letter-guest { margin: 0; font-family: Georgia, serif; font-style: italic; font-size: 15px; color: #5c4a2a; }
-.env-letter-line { margin: 0; color: #c9a95c; font-size: 13px; }
-.env-front { position: absolute; inset: 0; z-index: 3; background: linear-gradient(200deg, #efe0c2, #dcc394); border-radius: 8px; clip-path: polygon(0 0, 50% 46%, 100% 0, 100% 100%, 0 100%); }
-.env-flap { position: absolute; left: 0; right: 0; top: 0; height: 52%; z-index: 4; background: linear-gradient(180deg, #ecdbb8, #d9bf8c); clip-path: polygon(0 0, 100% 0, 50% 100%); border-radius: 8px 8px 0 0; transform-origin: 50% 0; transition: transform .9s cubic-bezier(.55, 0, .3, 1), z-index 0s .45s; }
-.env-seal { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%); z-index: 5; width: 92px; height: 92px; border-radius: 50%; border: 0; cursor: pointer; background: radial-gradient(circle at 38% 32%, #e8c885, #b3872e 58%, #8a621c); box-shadow: inset 0 0 0 5px #00000021, 0 6px 20px #00000059; color: #fff8e8; font-family: Georgia, serif; font-style: italic; font-size: 21px; text-shadow: 0 1px 2px #00000066; animation: seal-breathe 3s ease-in-out infinite; transition: transform .3s, opacity .4s; }
+.env-back { position: absolute; inset: 0; z-index: 1; background: linear-gradient(160deg, var(--paper-a), var(--paper-b)); border-radius: 8px; box-shadow: inset 0 0 0 1px #00000014; }
+
+.env-letter { position: absolute; left: 5%; right: 5%; top: 6%; bottom: 10%; z-index: 2; background: linear-gradient(#fffefa, var(--paper-a)); border-radius: 4px; display: grid; place-content: center; gap: 11px; text-align: center; padding: 0 18px; box-shadow: 0 1px 3px #00000021; transition: transform 1.05s cubic-bezier(.22, 1, .36, 1) .72s; }
+.env-letter-rule { display: block; width: 52px; height: 1px; background: var(--metal); opacity: .45; justify-self: center; }
+.env-letter-type { margin: 0; font-family: Georgia, 'PT Serif', 'Noto Serif', serif; font-size: 18px; letter-spacing: .3em; text-indent: .3em; text-transform: uppercase; line-height: 1.4; color: var(--ink); }
+.env-letter-guest { margin: 0; font-family: Georgia, 'PT Serif', 'Noto Serif', serif; font-style: italic; font-size: 15px; line-height: 1.5; color: var(--ink); opacity: .82; }
+.env-letter-mark { margin: 0; color: var(--metal); font-size: 13px; }
+
+/* the shadow the flap casts on the letter — this is what sells the thickness */
+.env-flap-shadow { position: absolute; left: 0; right: 0; top: 0; height: 52%; z-index: 3; background: linear-gradient(180deg, #00000066, #00000014 70%, transparent); clip-path: polygon(0 0, 100% 0, 50% 100%); transition: opacity .85s ease; }
+.intro-overlay.env.opening .env-flap-shadow { opacity: 0; }
+
+.env-front { position: absolute; inset: 0; z-index: 4; background: linear-gradient(200deg, var(--paper-b), var(--paper-a)); border-radius: 8px; clip-path: polygon(0 0, 50% 46%, 100% 0, 100% 100%, 0 100%); box-shadow: inset 0 -20px 40px #0000001a; }
+/* drop-shadow follows the clip-path silhouette, giving the flap a paper edge */
+.env-flap { position: absolute; left: 0; right: 0; top: 0; height: 52%; z-index: 5; background: linear-gradient(180deg, var(--paper-a), var(--paper-b)); clip-path: polygon(0 0, 100% 0, 50% 100%); border-radius: 8px 8px 0 0; transform-origin: 50% 0; backface-visibility: hidden; filter: drop-shadow(0 2px 3px #00000038); transition: transform 1s cubic-bezier(.5, 0, .25, 1), z-index 0s .5s; }
+.env-flap-edge { position: absolute; inset: 0; background: linear-gradient(180deg, #ffffff59, transparent 40%); }
+
+.env-seal { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%); z-index: 6; width: 92px; height: 92px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; display: grid; place-items: center; background: radial-gradient(circle at 38% 30%, #ffffff8c, transparent 44%), radial-gradient(circle at 52% 56%, var(--metal), #00000080 128%); box-shadow: 0 6px 20px #00000066; animation: seal-breathe 3s ease-in-out infinite; transition: transform .3s, opacity .4s; }
+.env-seal-face { position: absolute; inset: 6px; border-radius: 50%; box-shadow: inset 0 2px 5px #ffffff45, inset 0 -3px 7px #00000059; }
+.env-seal-mark { position: relative; font-family: Georgia, 'PT Serif', 'Noto Serif', serif; font-size: 22px; color: #fffaf0; text-shadow: 0 1px 2px #00000080; }
 .env-seal:hover { transform: translate(-50%, -50%) scale(1.08); animation-play-state: paused; }
-.env-hint { margin: 0; font-family: Georgia, serif; font-style: italic; color: #cbb98d; font-size: 14px; transition: opacity .3s; }
-/* opening sequence: flap lifts, seal fades, letter rises, overlay fades */
-.intro-overlay.env.opening .env-flap { transform: rotateX(180deg); z-index: 1; }
-.intro-overlay.env.opening .env-seal { opacity: 0; pointer-events: none; }
-.intro-overlay.env.opening .env-letter { transform: translateY(-58%); }
+.env-hint { margin: 0; font-family: Georgia, 'PT Serif', 'Noto Serif', serif; font-style: italic; color: #cbb98d; font-size: 14px; line-height: 1.5; transition: opacity .3s; }
+
+/* opening: wax breaks, flap falls back, letter rises out */
+.intro-overlay.env.opening .env-flap { transform: rotateX(178deg); z-index: 1; }
+.intro-overlay.env.opening .env-seal { opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(.8); }
+.intro-overlay.env.opening .env-letter { transform: translateY(-62%) rotate(-1.2deg) scale(1.02); }
 .intro-overlay.env.opening .env-hint { opacity: 0; }
-@media (prefers-reduced-motion: reduce) { .env-flap, .env-letter, .intro-overlay.env { transition: none !important; } .env-seal { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .env-flap, .env-letter, .env-flap-shadow, .intro-overlay.env { transition: none !important; }
+  .env-seal { animation: none; }
+}

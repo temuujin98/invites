@@ -3,7 +3,7 @@
 export const templates = [
   {
     id: 'lavender-wedding',
-    layout: 'wedding',
+    layout: 'letter',
     name: 'Лаванда',
     eventType: 'Хурим',
     tone: 'lavender',
@@ -131,6 +131,7 @@ export const INTRO_PRICE = 9900
 export const banks = ['Хаан банк', 'Голомт банк', 'Худалдаа хөгжлийн банк', 'Төрийн банк', 'Хас банк', 'М банк', 'Капитрон банк', 'Ариг банк', 'Богд банк']
 
 export const curtainColors = [
+  { id: 'auto', name: 'Загварын өнгө' },
   { id: 'violet', name: 'Нил ягаан' },
   { id: 'burgundy', name: 'Бордо улаан' },
   { id: 'noir', name: 'Хар' },
@@ -170,9 +171,13 @@ export function splitEventDate(value) {
   }
 }
 
-/* Wedding templates take extra fields in the editor and their own layout */
+/*
+ * Wedding templates take extra editor fields (couple, parents, ceremony).
+ * Keyed on the event type, not the layout — a wedding still carries those
+ * details whichever layout it is dressed in.
+ */
 export function isWeddingTemplate(template) {
-  return template?.layout === 'wedding'
+  return template?.eventType === 'Хурим'
 }
 
 const cyrillicMap = {
@@ -281,7 +286,7 @@ export function buildDemoInvitation(templateId) {
       phone: '9911xxxx',
       bank: { bank: 'Хаан банк', number: '5041xxxxxx', holder: template.sample.title.split(' ')[0] },
       intro: template.eventType === 'Хурим' ? 'envelope' : 'curtain',
-      introColor: template.tone === 'noir' || template.tone === 'midnight' ? 'noir' : 'violet',
+      introColor: 'auto',
       ...(wedding ? { wedding } : {}),
     },
   }

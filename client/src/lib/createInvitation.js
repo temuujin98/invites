@@ -26,7 +26,7 @@ export function sanitizeExtras(extras) {
   }
   if (source.intro === 'curtain' || source.intro === 'envelope') {
     clean.intro = source.intro
-    if (source.intro === 'curtain') clean.introColor = source.introColor || 'violet'
+    if (source.intro === 'curtain') clean.introColor = source.introColor || 'auto'
   }
   const music = buildMusic(source)
   if (music) clean.music = music

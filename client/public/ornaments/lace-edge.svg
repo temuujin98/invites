@@ -1,0 +1,15 @@
+<!--
+  Tileable lace edge, one scallop per tile. Used as a CSS mask with
+  repeat-x, so the sheet tints it its own colour.
+  The scallop is exactly one tile wide (r=20 on a 40 box), so neighbouring
+  scallops meet edge to edge with no seam.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 44" width="40" height="44">
+  <path fill="#000" fill-rule="evenodd" d="
+    M0 44 V22 A20 20 0 0 1 40 22 V44 Z
+    M20 25 m-4.2 0 a4.2 4.2 0 1 0 8.4 0 a4.2 4.2 0 1 0 -8.4 0
+    M10 35 m-2 0 a2 2 0 1 0 4 0 a2 2 0 1 0 -4 0
+    M30 35 m-2 0 a2 2 0 1 0 4 0 a2 2 0 1 0 -4 0
+    M20 37.5 m-1.6 0 a1.6 1.6 0 1 0 3.2 0 a1.6 1.6 0 1 0 -3.2 0
+  "/>
+</svg>

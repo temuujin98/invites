@@ -9,7 +9,7 @@ import { Countdown, Gallery, RsvpForm } from './shared'
 export default function DefaultLayout({ invitation, options, gallery, bankParts, mapHref, invitedGuest, demo }) {
   return (
     <div className="pv-content">
-      <header className="pv-hero">
+      <header className="pv-hero" data-reveal>
         {invitedGuest && <p className="pv-guest">Хүндэт <b>{invitedGuest}</b> танд</p>}
         <p className="pv-type">{invitation.event_type}</p>
         <h1>{invitation.title}</h1>
@@ -18,7 +18,7 @@ export default function DefaultLayout({ invitation, options, gallery, bankParts,
 
       <Countdown target={invitation.event_at} />
 
-      <section className="pv-facts">
+      <section className="pv-facts" data-reveal>
         <p><CalendarDays size={20} /><span>{formatEventDate(invitation.event_at)}</span></p>
         <p><MapPin size={20} /><span>{invitation.venue || 'Байршил удахгүй зарлагдана'}</span></p>
         {options.phone && <p><Phone size={20} /><a href={`tel:${options.phone}`}>{options.phone}</a></p>}
@@ -39,7 +39,7 @@ export default function DefaultLayout({ invitation, options, gallery, bankParts,
       {gallery.length > 0 && <Gallery images={gallery} />}
 
       {options.program?.length > 0 && (
-        <section className="pv-section">
+        <section className="pv-section" data-reveal>
           <h2>Хөтөлбөр</h2>
           <div className="pv-program">
             {options.program.map((row, index) => (
@@ -50,14 +50,14 @@ export default function DefaultLayout({ invitation, options, gallery, bankParts,
       )}
 
       {options.note && (
-        <section className="pv-section">
+        <section className="pv-section" data-reveal>
           <h2>Тэмдэглэл</h2>
           <p className="pv-note">{options.note}</p>
         </section>
       )}
 
       {bankParts.length > 0 && (
-        <section className="pv-section">
+        <section className="pv-section" data-reveal>
           <h2>Данс</h2>
           <div className="pv-bank">
             <Gift size={18} />

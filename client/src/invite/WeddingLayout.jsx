@@ -49,7 +49,7 @@ export default function WeddingLayout({ invitation, options, gallery, bankParts,
 
   return (
     <div className="pv-content wed">
-      <header className="wed-hero">
+      <header className="wed-hero" data-reveal>
         <span className="wed-frame" aria-hidden="true" />
         {invitedGuest && <p className="wed-guest">Хүндэт <b>{invitedGuest}</b> танд</p>}
         <p className="wed-kicker">Хуримын ёслол</p>
@@ -69,7 +69,7 @@ export default function WeddingLayout({ invitation, options, gallery, bankParts,
       </header>
 
       {hasParents && (
-        <section className="wed-parents" aria-label="Хос талын эцэг эх">
+        <section className="wed-parents" data-reveal aria-label="Хос талын эцэг эх">
           {wedding.groomParents && (
             <div>
               <p className="wed-parents-label">Хүргэний эцэг эх</p>
@@ -88,10 +88,10 @@ export default function WeddingLayout({ invitation, options, gallery, bankParts,
       <Countdown target={invitation.event_at} />
 
       {invitation.message && (
-        <blockquote className="wed-message">{invitation.message}</blockquote>
+        <blockquote className="wed-message" data-reveal>{invitation.message}</blockquote>
       )}
 
-      <section className="wed-appointments" aria-label="Хөтөлбөрийн цаг, байршил">
+      <section className="wed-appointments" data-reveal aria-label="Хөтөлбөрийн цаг, байршил">
         {appointments.map((item) => (
           <div className="wed-appointment" key={item.label}>
             <p className="wed-appointment-label">{item.label}</p>
@@ -117,7 +117,7 @@ export default function WeddingLayout({ invitation, options, gallery, bankParts,
       {gallery.length > 0 && <Gallery images={gallery} />}
 
       {options.program?.length > 0 && (
-        <section className="pv-section wed-section">
+        <section className="pv-section wed-section" data-reveal>
           <h2>Хөтөлбөр</h2>
           <div className="pv-program">
             {options.program.map((row, index) => (
@@ -128,28 +128,28 @@ export default function WeddingLayout({ invitation, options, gallery, bankParts,
       )}
 
       {wedding.dressCode && (
-        <section className="pv-section wed-section">
+        <section className="pv-section wed-section" data-reveal>
           <h2>Хувцаслалт</h2>
           <p className="pv-note">{wedding.dressCode}</p>
         </section>
       )}
 
       {options.note && (
-        <section className="pv-section wed-section">
+        <section className="pv-section wed-section" data-reveal>
           <h2>Тэмдэглэл</h2>
           <p className="pv-note">{options.note}</p>
         </section>
       )}
 
       {options.phone && (
-        <section className="pv-section wed-section">
+        <section className="pv-section wed-section" data-reveal>
           <h2>Холбоо барих</h2>
           <p className="wed-contact"><Phone size={18} /><a href={`tel:${options.phone}`}>{options.phone}</a></p>
         </section>
       )}
 
       {bankParts.length > 0 && (
-        <section className="pv-section wed-section">
+        <section className="pv-section wed-section" data-reveal>
           <h2>Данс</h2>
           <div className="pv-bank">
             <Gift size={18} />

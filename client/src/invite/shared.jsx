@@ -78,76 +78,6 @@ export function MusicPlayer({ music }) {
   )
 }
 
-/*
- * Ceremonial curtain intro (paid add-on): velvet curtains part when the
- * guest presses the seal, then the overlay fades away.
- */
-export function CurtainIntro({ eventType, guest, color, onDone }) {
-  const [opening, setOpening] = useState(false)
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-  function openCurtains() {
-    // synchronous dispatch keeps the user-gesture context for audio start
-    window.dispatchEvent(new Event('invite-open-clicked'))
-    if (reduceMotion) { onDone(); return }
-    setOpening(true)
-    setTimeout(onDone, 2100)
-  }
-
-  return (
-    <div className={`intro-overlay c-${color || 'violet'} ${opening ? 'opening' : ''}`} role="dialog" aria-label="Урилга нээх">
-      <div className="curtain curtain-left" />
-      <div className="curtain curtain-right" />
-      <div className="intro-center">
-        <p className="intro-ornament" aria-hidden="true"><span /> ✦ <span /></p>
-        <p className="intro-type">{eventType}</p>
-        {guest && <p className="intro-guest">Хүндэт {guest} танд</p>}
-        <button className="intro-seal" onClick={openCurtains} aria-label="Урилгыг нээх">
-          <span className="intro-seal-ring" aria-hidden="true" />
-          <span className="intro-seal-text">Нээх</span>
-        </button>
-        <p className="intro-ornament" aria-hidden="true"><span /> ✦ <span /></p>
-      </div>
-    </div>
-  )
-}
-
-/*
- * Envelope intro: a sealed letter opens — the flap lifts, the letter
- * rises, then the overlay fades to reveal the invitation. Weddings
- * default to this style.
- */
-export function EnvelopeIntro({ eventType, guest, onDone }) {
-  const [opening, setOpening] = useState(false)
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-  function openEnvelope() {
-    window.dispatchEvent(new Event('invite-open-clicked'))
-    if (reduceMotion) { onDone(); return }
-    setOpening(true)
-    setTimeout(onDone, 2500)
-  }
-
-  return (
-    <div className={`intro-overlay env ${opening ? 'opening' : ''}`} role="dialog" aria-label="Урилга нээх">
-      <div className="env-stage">
-        <div className="envelope">
-          <div className="env-back" />
-          <div className="env-letter">
-            <p className="env-letter-type">{eventType}</p>
-            {guest && <p className="env-letter-guest">Хүндэт {guest} танд</p>}
-            <p className="env-letter-line" aria-hidden="true">✦</p>
-          </div>
-          <div className="env-front" />
-          <div className="env-flap" />
-          <button className="env-seal" onClick={openEnvelope} aria-label="Урилгыг нээх">Нээх</button>
-        </div>
-        <p className="env-hint">Лац дээр дарж урилгаа нээгээрэй</p>
-      </div>
-    </div>
-  )
-}
-
 export function Countdown({ target }) {
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
@@ -163,7 +93,7 @@ export function Countdown({ target }) {
   const pad = (part) => String(part).padStart(2, '0')
   const units = [[days, 'ХОНОГ'], [pad(hours), 'ЦАГ'], [pad(minutes), 'МИН'], [pad(seconds), 'СЕК']]
   return (
-    <div className="pv-countdown" aria-label="Тооллого">
+    <div className="pv-countdown" data-reveal aria-label="Тооллого">
       {units.map(([value, label], index) => (
         <div className="pv-count" key={label}>
           <b>{value}</b><small>{label}</small>
@@ -177,7 +107,7 @@ export function Countdown({ target }) {
 /* Horizontal photo album with scroll-snap */
 export function Gallery({ images }) {
   return (
-    <section className="pv-gallery" aria-label="Зургийн цомог">
+    <section className="pv-gallery" data-reveal aria-label="Зургийн цомог">
       <div className={`pv-gallery-track ${images.length === 1 ? 'single' : ''}`}>
         {images.map((url, index) => (
           <img key={url} src={url} alt={`Зураг ${index + 1}`} loading="lazy" />
@@ -224,7 +154,7 @@ export function RsvpForm({ invitationId, demo, initialGuest, heading = 'Ирэх
   }
 
   return (
-    <section className="pv-section pv-rsvp">
+    <section className="pv-section pv-rsvp" data-reveal>
       <h2>{heading}</h2>
       {submitted ? (
         <div className="pv-thanks">Баярлалаа 💜<br /><span>Таны хариуг хүлээн авлаа</span></div>

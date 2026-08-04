@@ -14,7 +14,7 @@ import WeddingFields, { emptyWeddingFields } from './WeddingFields'
 export const emptyExtras = {
   gallery: [], mapUrl: '', program: [], note: '', phone: '',
   bankName: '', bankNumber: '', bankHolder: '',
-  intro: '', introColor: 'violet',
+  intro: '', introColor: 'auto',
   musicUrl: '', musicStart: '', musicEnd: '',
   ...emptyWeddingFields,
 }

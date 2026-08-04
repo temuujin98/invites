@@ -8,13 +8,21 @@ import { useEffect, useState } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
 import { getTemplate, buildDemoInvitation } from './templates'
-import { CurtainIntro, EnvelopeIntro, MusicPlayer } from './invite/shared'
+import { MusicPlayer } from './invite/shared'
+import { useReveal } from './invite/useReveal'
+import CurtainIntro from './invite/intro/CurtainIntro'
+import EnvelopeIntro from './invite/intro/EnvelopeIntro'
 import DefaultLayout from './invite/DefaultLayout'
 import WeddingLayout from './invite/WeddingLayout'
+import LetterLayout from './invite/LetterLayout'
 
 const layouts = {
   wedding: WeddingLayout,
+  letter: LetterLayout,
 }
+
+/* the letter layout paints its own envelope, so it takes no photo backdrop */
+const photoBackdrop = (layout) => layout !== 'letter'
 
 export default function PublicInvitation({ demoTemplateId }) {
   const [invitation, setInvitation] = useState(null)
@@ -52,6 +60,11 @@ export default function PublicInvitation({ demoTemplateId }) {
     return () => { alive = false }
   }, [slug, demoTemplateId])
 
+  // hooks must run before any early return, so the flag is derived here
+  const introKind = invitation?.options?.intro
+  const introPending = !introDone && (introKind === 'curtain' || introKind === 'envelope')
+  useReveal(Boolean(invitation) && !introPending)
+
   if (!isSupabaseConfigured) {
     return <main className="pv"><p className="pv-loading">Тохиргоо дутуу байна.</p></main>
   }
@@ -85,14 +98,14 @@ export default function PublicInvitation({ demoTemplateId }) {
     : bank ? [bank] : []
   const mapHref = options.mapUrl
     || (invitation.venue ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(invitation.venue)}` : '')
-  const bgUrl = invitation.template_id ? `/backgrounds/${invitation.template_id}.jpg` : ''
+  const bgUrl = invitation.template_id && photoBackdrop(layout) ? `/backgrounds/${invitation.template_id}.jpg` : ''
 
   return (
     <main className={`pv tone-${tone} layout-${layout}`} style={bgUrl ? { backgroundImage: `url(${bgUrl})` } : undefined}>
       <div className="pv-veil" aria-hidden="true" />
       {showIntro && (options.intro === 'envelope'
-        ? <EnvelopeIntro eventType={invitation.event_type} guest={invitedGuest} onDone={() => setIntroDone(true)} />
-        : <CurtainIntro eventType={invitation.event_type} guest={invitedGuest} color={options.introColor} onDone={() => setIntroDone(true)} />)}
+        ? <EnvelopeIntro eventType={invitation.event_type} guest={invitedGuest} tone={tone} color={options.introColor} onDone={() => setIntroDone(true)} />
+        : <CurtainIntro eventType={invitation.event_type} guest={invitedGuest} tone={tone} color={options.introColor} onDone={() => setIntroDone(true)} />)}
       {options.music?.id && <MusicPlayer music={options.music} />}
 
       <Layout
