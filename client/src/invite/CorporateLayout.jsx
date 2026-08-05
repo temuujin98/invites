@@ -8,7 +8,7 @@
 import { ArrowLeft, MapPin } from 'lucide-react'
 import { splitEventDate } from '../templates'
 import { readDetails } from '../lib/details'
-import { Countdown, Gallery, RsvpForm } from './shared'
+import { Countdown, DressBlock, Gallery, GiftBlock, RsvpForm } from './shared'
 
 function Row({ label, children }) {
   return (
@@ -45,7 +45,6 @@ export default function CorporateLayout({ invitation, options, gallery, bankPart
           <span className="corp-venue"><MapPin size={15} />{invitation.venue || 'Тодорхойгүй'}</span>
           {mapHref && <a className="corp-link" href={mapHref} target="_blank" rel="noreferrer">Газрын зураг ↗</a>}
         </Row>
-        {details.dressCode && <Row label="Хувцаслалт">{details.dressCode}</Row>}
         {options.phone && <Row label="Холбоо барих"><a href={`tel:${options.phone}`}>{options.phone}</a></Row>}
       </dl>
 
@@ -75,16 +74,12 @@ export default function CorporateLayout({ invitation, options, gallery, bankPart
         </section>
       )}
 
-      {bankParts.length > 0 && (
-        <section className="pv-section corp-section" data-reveal>
-          <h2>Дансны мэдээлэл</h2>
-          <div className="pv-bank-lines">
-            {bankParts.map((part, index) => <p key={index} className={index === 1 || bankParts.length === 1 ? 'pv-bank-number' : ''}>{part}</p>)}
-          </div>
-        </section>
-      )}
+      <DressBlock details={details} />
 
-      <RsvpForm invitationId={invitation.id} demo={demo} initialGuest={invitedGuest} heading="Оролцоогоо бүртгүүлнэ үү" />
+      <GiftBlock bankParts={bankParts} details={details} />
+
+      <RsvpForm invitationId={invitation.id}
+        deadline={details.rsvpBy} demo={demo} initialGuest={invitedGuest} heading="Оролцоогоо бүртгүүлнэ үү" />
 
       <a className="pv-back" href="/"><ArrowLeft size={15} /> Invites.mn</a>
     </div>

@@ -5,10 +5,10 @@
  * skewed marquee band cutting across. Everything is left-aligned, which is
  * what separates it at a glance from the centred ceremonial templates.
  */
-import { ArrowLeft, Gift, MapPin } from 'lucide-react'
+import { ArrowLeft, MapPin } from 'lucide-react'
 import { splitEventDate } from '../templates'
 import { readDetails } from '../lib/details'
-import { Countdown, Gallery, RsvpForm } from './shared'
+import { Countdown, DressBlock, Gallery, GiftBlock, RsvpForm } from './shared'
 
 export default function BirthdayLayout({ invitation, options, gallery, bankParts, mapHref, invitedGuest, demo }) {
   const details = readDetails(options)
@@ -42,12 +42,6 @@ export default function BirthdayLayout({ invitation, options, gallery, bankParts
           <p className="bd-place">{invitation.venue || 'Байршил удахгүй зарлагдана'}</p>
           {mapHref && <a className="bd-link" href={mapHref} target="_blank" rel="noreferrer"><MapPin size={15} /> Газрын зураг ↗</a>}
         </div>
-        {details.dressCode && (
-          <div className="bd-cell">
-            <p className="bd-label">Хувцаслалт</p>
-            <p className="bd-place">{details.dressCode}</p>
-          </div>
-        )}
       </section>
 
       <Countdown target={invitation.event_at} />
@@ -72,19 +66,12 @@ export default function BirthdayLayout({ invitation, options, gallery, bankParts
         </section>
       )}
 
-      {bankParts.length > 0 && (
-        <section className="pv-section bd-section" data-reveal>
-          <h2>Данс</h2>
-          <div className="pv-bank">
-            <Gift size={18} />
-            <div className="pv-bank-lines">
-              {bankParts.map((part, index) => <p key={index} className={index === 1 || bankParts.length === 1 ? 'pv-bank-number' : ''}>{part}</p>)}
-            </div>
-          </div>
-        </section>
-      )}
+      <DressBlock details={details} />
 
-      <RsvpForm invitationId={invitation.id} demo={demo} initialGuest={invitedGuest} heading="Ирэх үү?" />
+      <GiftBlock bankParts={bankParts} details={details} />
+
+      <RsvpForm invitationId={invitation.id}
+        deadline={details.rsvpBy} demo={demo} initialGuest={invitedGuest} heading="Ирэх үү?" />
 
       <a className="pv-back" href="/"><ArrowLeft size={15} /> Invites.mn</a>
     </div>

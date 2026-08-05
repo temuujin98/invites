@@ -4,10 +4,10 @@
  * The child's name sits on a rounded plate with the parents named beneath
  * it. Everything is rounded and low-contrast; nothing here shouts.
  */
-import { ArrowLeft, CalendarDays, Gift, MapPin } from 'lucide-react'
+import { ArrowLeft, CalendarDays, MapPin } from 'lucide-react'
 import { splitEventDate } from '../templates'
 import { readDetails } from '../lib/details'
-import { Countdown, Gallery, RsvpForm } from './shared'
+import { Countdown, DressBlock, Gallery, GiftBlock, RsvpForm } from './shared'
 
 export default function NamingLayout({ invitation, options, gallery, bankParts, mapHref, invitedGuest, demo }) {
   const details = readDetails(options)
@@ -62,19 +62,12 @@ export default function NamingLayout({ invitation, options, gallery, bankParts, 
         </section>
       )}
 
-      {bankParts.length > 0 && (
-        <section className="pv-section nam-section" data-reveal>
-          <h2>Данс</h2>
-          <div className="pv-bank">
-            <Gift size={18} />
-            <div className="pv-bank-lines">
-              {bankParts.map((part, index) => <p key={index} className={index === 1 || bankParts.length === 1 ? 'pv-bank-number' : ''}>{part}</p>)}
-            </div>
-          </div>
-        </section>
-      )}
+      <DressBlock details={details} />
 
-      <RsvpForm invitationId={invitation.id} demo={demo} initialGuest={invitedGuest} heading="Ерөөл хайрлахаар ирэх үү?" />
+      <GiftBlock bankParts={bankParts} details={details} />
+
+      <RsvpForm invitationId={invitation.id}
+        deadline={details.rsvpBy} demo={demo} initialGuest={invitedGuest} heading="Ерөөл хайрлахаар ирэх үү?" />
 
       <a className="pv-back" href="/"><ArrowLeft size={15} /> Invites.mn</a>
     </div>

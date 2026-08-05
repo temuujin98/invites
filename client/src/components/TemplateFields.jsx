@@ -21,6 +21,13 @@ function Single({ extras, patch, name, placeholder, max = 120 }) {
   )
 }
 
+/* Preset dress-code colours — hosts pick from these rather than typing hex */
+const DRESS_PALETTE = [
+  '#f3e9dc', '#e8d5c4', '#d9b8a3', '#c98a7a',
+  '#b0c4b1', '#7d9d8c', '#8fa6c4', '#5b6b8c',
+  '#c9a9c8', '#8f6f9e', '#d4af6a', '#3d3a4a',
+]
+
 /* key → label + what to render. Add a group here and any template can use it. */
 export const fieldGroups = {
   couple: {
@@ -51,7 +58,51 @@ export const fieldGroups = {
   },
   dressCode: {
     label: 'Хувцаслалт',
-    render: (props) => <Single {...props} name="dressCode" placeholder="Жишээ: Гоёлын хувцас — зөөлөн өнгө" />,
+    hint: 'Санал болгох өнгөө сонгоно уу — зочдод урилга дээр дугуйгаар харагдана.',
+    render: ({ extras, patch }) => (
+      <>
+        <Single extras={extras} patch={patch} name="dressCode" placeholder="Жишээ: Гоёлын хувцас" />
+        <div className="tf-palette">
+          {DRESS_PALETTE.map((color) => {
+            const on = extras.dressColors.includes(color)
+            return (
+              <button
+                key={color}
+                type="button"
+                className={`tf-swatch ${on ? 'on' : ''}`}
+                style={{ background: color }}
+                aria-pressed={on}
+                aria-label={color}
+                title={color}
+                onClick={() => patch({
+                  dressColors: on
+                    ? extras.dressColors.filter((item) => item !== color)
+                    : [...extras.dressColors, color].slice(0, 8),
+                })}
+              />
+            )
+          })}
+        </div>
+        <Single extras={extras} patch={patch} name="dressAvoid" placeholder="Аль өнгийг зайлсхийхийг хүсэх вэ? (заавал биш)" max={160} />
+      </>
+    ),
+  },
+  gift: {
+    label: 'Бэлгийн хүсэлт',
+    hint: 'Жишээ: «Хайрцагтай бэлэг авчрахгүй байхыг хүсье». Жагсаалтын холбоос нэмж болно.',
+    render: ({ extras, patch }) => (
+      <>
+        <Single extras={extras} patch={patch} name="giftNote" placeholder="Бэлгийн талаар хүсэлт" max={200} />
+        <input type="url" value={extras.giftUrl} onChange={(event) => patch({ giftUrl: event.target.value })} placeholder="https://... (бэлгийн жагсаалт, заавал биш)" />
+      </>
+    ),
+  },
+  rsvpBy: {
+    label: 'Хариу өгөх эцсийн хугацаа',
+    hint: 'Зочдод «энэ өдрөөс өмнө хариулна уу» гэж харагдана.',
+    render: ({ extras, patch }) => (
+      <DateTimeField value={extras.rsvpBy} onChange={(next) => patch({ rsvpBy: next })} />
+    ),
   },
   age: {
     label: 'Нас / ой',

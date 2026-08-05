@@ -4,10 +4,10 @@
  * Heavy stacked type at tight leading, and the practical details live on a
  * perforated ticket stub instead of in prose. Loud on purpose.
  */
-import { ArrowLeft, Gift, MapPin } from 'lucide-react'
+import { ArrowLeft, MapPin } from 'lucide-react'
 import { splitEventDate } from '../templates'
 import { readDetails } from '../lib/details'
-import { Countdown, Gallery, RsvpForm } from './shared'
+import { Countdown, DressBlock, Gallery, GiftBlock, RsvpForm } from './shared'
 
 export default function PartyLayout({ invitation, options, gallery, bankParts, mapHref, invitedGuest, demo }) {
   const details = readDetails(options)
@@ -33,7 +33,6 @@ export default function PartyLayout({ invitation, options, gallery, bankParts, m
         <div className="pty-stub">
           <p className="pty-stub-label">Эхлэх</p>
           <p className="pty-stub-value">{parts ? parts.time : '—'}</p>
-          {details.dressCode && <p className="pty-stub-sub">{details.dressCode}</p>}
         </div>
       </section>
 
@@ -67,19 +66,12 @@ export default function PartyLayout({ invitation, options, gallery, bankParts, m
         </section>
       )}
 
-      {bankParts.length > 0 && (
-        <section className="pv-section pty-section" data-reveal>
-          <h2>Данс</h2>
-          <div className="pv-bank">
-            <Gift size={18} />
-            <div className="pv-bank-lines">
-              {bankParts.map((part, index) => <p key={index} className={index === 1 || bankParts.length === 1 ? 'pv-bank-number' : ''}>{part}</p>)}
-            </div>
-          </div>
-        </section>
-      )}
+      <DressBlock details={details} />
 
-      <RsvpForm invitationId={invitation.id} demo={demo} initialGuest={invitedGuest} heading="Ирэх үү?" />
+      <GiftBlock bankParts={bankParts} details={details} />
+
+      <RsvpForm invitationId={invitation.id}
+        deadline={details.rsvpBy} demo={demo} initialGuest={invitedGuest} heading="Ирэх үү?" />
 
       <a className="pv-back" href="/"><ArrowLeft size={15} /> Invites.mn</a>
     </div>

@@ -5,10 +5,10 @@
  * gold list rather than the plain time/activity rows the other layouts use.
  * Symmetric, wide-tracked, no photograph competing with the type.
  */
-import { ArrowLeft, Gift, MapPin } from 'lucide-react'
+import { ArrowLeft, MapPin } from 'lucide-react'
 import { splitEventDate } from '../templates'
 import { readDetails } from '../lib/details'
-import { Countdown, Gallery, RsvpForm } from './shared'
+import { Countdown, DressBlock, Gallery, GiftBlock, RsvpForm } from './shared'
 
 export default function GalaLayout({ invitation, options, gallery, bankParts, mapHref, invitedGuest, demo }) {
   const details = readDetails(options)
@@ -57,13 +57,6 @@ export default function GalaLayout({ invitation, options, gallery, bankParts, ma
         </section>
       )}
 
-      {details.dressCode && (
-        <section className="pv-section gala-section" data-reveal>
-          <h2>Хувцаслалт</h2>
-          <p className="gala-dress">{details.dressCode}</p>
-        </section>
-      )}
-
       {gallery.length > 0 && <Gallery images={gallery} />}
 
       {options.note && (
@@ -73,19 +66,12 @@ export default function GalaLayout({ invitation, options, gallery, bankParts, ma
         </section>
       )}
 
-      {bankParts.length > 0 && (
-        <section className="pv-section gala-section" data-reveal>
-          <h2>Данс</h2>
-          <div className="pv-bank">
-            <Gift size={18} />
-            <div className="pv-bank-lines">
-              {bankParts.map((part, index) => <p key={index} className={index === 1 || bankParts.length === 1 ? 'pv-bank-number' : ''}>{part}</p>)}
-            </div>
-          </div>
-        </section>
-      )}
+      <DressBlock details={details} />
 
-      <RsvpForm invitationId={invitation.id} demo={demo} initialGuest={invitedGuest} heading="Хүрэлцэн ирэхээ баталгаажуулна уу" />
+      <GiftBlock bankParts={bankParts} details={details} />
+
+      <RsvpForm invitationId={invitation.id}
+        deadline={details.rsvpBy} demo={demo} initialGuest={invitedGuest} heading="Хүрэлцэн ирэхээ баталгаажуулна уу" />
 
       <a className="pv-back" href="/"><ArrowLeft size={15} /> Invites.mn</a>
     </div>

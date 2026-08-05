@@ -6,9 +6,9 @@
  * The page itself does the scrolling: a nested scroll area inside the sheet
  * would fight the thumb on a phone, and this looks the same without that.
  */
-import { ArrowLeft, Gift } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { formatEventDate, splitEventDate } from '../templates'
-import { Countdown, Gallery, RsvpForm } from './shared'
+import { Countdown, DressBlock, Gallery, GiftBlock, RsvpForm } from './shared'
 import { readDetails } from '../lib/details'
 import { Corner, Divider, SealEmblem } from './ornaments/Ornaments'
 
@@ -88,10 +88,6 @@ export default function LetterLayout({ invitation, options, gallery, bankParts, 
             </Detail>
           )}
 
-          {details.dressCode && (
-            <Detail label="Хувцаслалт"><p className="lt-soft">{details.dressCode}</p></Detail>
-          )}
-
           {options.phone && (
             <Detail label="Холбоо барих">
               <p className="lt-strong"><a href={`tel:${options.phone}`}>{options.phone}</a></p>
@@ -127,20 +123,13 @@ export default function LetterLayout({ invitation, options, gallery, bankParts, 
           </section>
         )}
 
-        {bankParts.length > 0 && (
-          <section className="pv-section lt-section" data-reveal>
-            <h2>Данс</h2>
-            <div className="pv-bank">
-              <Gift size={18} />
-              <div className="pv-bank-lines">
-                {bankParts.map((part, index) => <p key={index} className={index === 1 || bankParts.length === 1 ? 'pv-bank-number' : ''}>{part}</p>)}
-              </div>
-            </div>
-          </section>
-        )}
+      <DressBlock details={details} />
+
+      <GiftBlock bankParts={bankParts} details={details} />
 
         <RsvpForm
           invitationId={invitation.id}
+        deadline={details.rsvpBy}
           demo={demo}
           initialGuest={invitedGuest}
           heading="Ирэх эсэхээ мэдэгдээрэй"

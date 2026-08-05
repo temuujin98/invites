@@ -4,8 +4,56 @@
  * arrangement and styling differ between templates.
  */
 import { useEffect, useRef, useState } from 'react'
-import { Music, Pause, Phone, User, Users } from 'lucide-react'
+import { Gift, Music, Pause, Phone, User, Users } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { formatEventDate } from '../templates'
+
+/*
+ * Dress code, with the recommended shades shown as swatches and any colour
+ * the hosts want left alone called out separately.
+ */
+export function DressBlock({ details = {} }) {
+  const colors = details.dressColors || []
+  if (!details.dressCode && !colors.length && !details.dressAvoid) return null
+  return (
+    <section className="pv-section" data-reveal>
+      <h2>Хувцаслалт</h2>
+      {details.dressCode && <p className="pv-note">{details.dressCode}</p>}
+      {colors.length > 0 && (
+        <div className="pv-palette">
+          <span className="pv-palette-row">
+            {colors.map((color) => <i key={color} style={{ background: color }} aria-hidden="true" />)}
+          </span>
+          <small>Санал болгох өнгө</small>
+        </div>
+      )}
+      {details.dressAvoid && <p className="pv-avoid">{details.dressAvoid}</p>}
+    </section>
+  )
+}
+
+/* Bank details and the hosts' wishes about gifts, in one section */
+export function GiftBlock({ bankParts = [], details = {} }) {
+  const { giftNote, giftUrl } = details
+  if (!bankParts.length && !giftNote && !giftUrl) return null
+  return (
+    <section className="pv-section" data-reveal>
+      <h2>{bankParts.length ? 'Данс' : 'Бэлэг'}</h2>
+      {giftNote && <p className="pv-note">{giftNote}</p>}
+      {bankParts.length > 0 && (
+        <div className="pv-bank">
+          <Gift size={18} />
+          <div className="pv-bank-lines">
+            {bankParts.map((part, index) => (
+              <p key={index} className={index === 1 || bankParts.length === 1 ? 'pv-bank-number' : ''}>{part}</p>
+            ))}
+          </div>
+        </div>
+      )}
+      {giftUrl && <a className="pv-map-button" href={giftUrl} target="_blank" rel="noreferrer">Бэлгийн жагсаалт үзэх ↗</a>}
+    </section>
+  )
+}
 
 /*
  * YouTube background music: hidden iframe player + a floating toggle.
@@ -122,7 +170,7 @@ export function Gallery({ images }) {
  * RSVP form. Owns its own state so every layout can drop it in.
  * `demo` short-circuits the insert so /demo/:id stays read-only.
  */
-export function RsvpForm({ invitationId, demo, initialGuest, heading = 'Ирэх эсэхээ мэдэгдээрэй' }) {
+export function RsvpForm({ invitationId, demo, initialGuest, deadline, heading = 'Ирэх эсэхээ мэдэгдээрэй' }) {
   const [response, setResponse] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [guestName, setGuestName] = useState(initialGuest || '')
@@ -156,6 +204,9 @@ export function RsvpForm({ invitationId, demo, initialGuest, heading = 'Ирэх
   return (
     <section className="pv-section pv-rsvp" data-reveal>
       <h2>{heading}</h2>
+      {deadline && !submitted && (
+        <p className="pv-deadline">{formatEventDate(deadline).split(' · ')[0]}-ноос өмнө хариулна уу</p>
+      )}
       {submitted ? (
         <div className="pv-thanks">Баярлалаа 💜<br /><span>Таны хариуг хүлээн авлаа</span></div>
       ) : (

@@ -26,10 +26,21 @@ function toLocalInput(iso) {
 /* every detail key the field groups can produce */
 export const detailKeys = [
   'groom', 'bride', 'groomParents', 'brideParents', 'father', 'mother',
-  'ceremonyVenue', 'dressCode', 'age', 'honoree', 'host',
+  'ceremonyVenue', 'dressCode', 'dressAvoid', 'age', 'honoree', 'host',
+  'giftNote',
 ]
 
-export const emptyDetails = Object.fromEntries([...detailKeys, 'ceremonyAt'].map((key) => [key, '']))
+/* keys that are not plain trimmed text */
+const dateKeys = ['ceremonyAt', 'rsvpBy']
+const urlKeys = ['giftUrl']
+const listKeys = ['dressColors']
+
+export const emptyDetails = {
+  ...Object.fromEntries(detailKeys.map((key) => [key, ''])),
+  ...Object.fromEntries(dateKeys.map((key) => [key, ''])),
+  ...Object.fromEntries(urlKeys.map((key) => [key, ''])),
+  dressColors: [],
+}
 
 /*
  * Builds the stored details object from the raw form fields.
@@ -41,8 +52,19 @@ export function buildDetails(source = {}) {
     const trimmed = (source[key] || '').trim()
     if (trimmed) details[key] = trimmed
   }
-  const ceremonyAt = toIso(source.ceremonyAt)
-  if (ceremonyAt) details.ceremonyAt = ceremonyAt
+  for (const key of dateKeys) {
+    const iso = toIso(source[key])
+    if (iso) details[key] = iso
+  }
+  for (const key of urlKeys) {
+    // only http(s), the same rule mapUrl follows — blocks javascript: and friends
+    const value = (source[key] || '').trim()
+    if (/^https?:\/\//i.test(value)) details[key] = value
+  }
+  for (const key of listKeys) {
+    const list = (source[key] || []).filter((item) => /^#[0-9a-f]{6}$/i.test(item)).slice(0, 8)
+    if (list.length) details[key] = list
+  }
   return Object.keys(details).length ? details : null
 }
 
@@ -55,7 +77,9 @@ export function detailsToFields(options = {}) {
   const stored = { ...(options.wedding || {}), ...(options.details || {}) }
   const fields = { ...emptyDetails }
   for (const key of detailKeys) fields[key] = stored[key] || ''
-  fields.ceremonyAt = toLocalInput(stored.ceremonyAt)
+  for (const key of dateKeys) fields[key] = toLocalInput(stored[key])
+  for (const key of urlKeys) fields[key] = stored[key] || ''
+  fields.dressColors = Array.isArray(stored.dressColors) ? stored.dressColors : []
   return fields
 }
 

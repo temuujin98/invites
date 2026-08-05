@@ -3,7 +3,7 @@
 export const templates = [
   {
     id: 'lavender-wedding',
-    fields: ['couple', 'parents', 'ceremony', 'dressCode'],
+    fields: ['couple', 'parents', 'ceremony', 'dressCode', 'gift', 'rsvpBy'],
     layout: 'letter',
     name: 'Лаванда',
     eventType: 'Хурим',
@@ -15,7 +15,7 @@ export const templates = [
   },
   {
     id: 'rose-wedding',
-    fields: ['couple', 'parents', 'ceremony', 'dressCode'],
+    fields: ['couple', 'parents', 'ceremony', 'dressCode', 'gift', 'rsvpBy'],
     layout: 'wedding',
     name: 'Сарнай',
     eventType: 'Хурим',
@@ -27,7 +27,7 @@ export const templates = [
   },
   {
     id: 'coral-birthday',
-    fields: ['age', 'dressCode'],
+    fields: ['age', 'dressCode', 'gift', 'rsvpBy'],
     layout: 'birthday',
     name: 'Корал',
     eventType: 'Төрсөн өдөр',
@@ -38,7 +38,7 @@ export const templates = [
   },
   {
     id: 'sage-ceremony',
-    fields: ['ceremony', 'dressCode'],
+    fields: ['ceremony', 'dressCode', 'gift', 'rsvpBy'],
     layout: 'ceremony',
     name: 'Ногоон',
     eventType: 'Ёслол',
@@ -49,7 +49,7 @@ export const templates = [
   },
   {
     id: 'gold-reception',
-    fields: ['host', 'dressCode'],
+    fields: ['host', 'dressCode', 'gift', 'rsvpBy'],
     layout: 'gala',
     name: 'Алт',
     eventType: 'Хүлээн авалт',
@@ -60,7 +60,7 @@ export const templates = [
   },
   {
     id: 'ocean-graduation',
-    fields: ['honoree', 'host'],
+    fields: ['honoree', 'host', 'gift', 'rsvpBy'],
     layout: 'graduation',
     name: 'Далай',
     eventType: 'Төгсөлт',
@@ -71,7 +71,7 @@ export const templates = [
   },
   {
     id: 'midnight-anniversary',
-    fields: ['couple', 'age'],
+    fields: ['couple', 'age', 'gift', 'rsvpBy'],
     layout: 'anniversary',
     name: 'Шөнө',
     eventType: 'Ойн баяр',
@@ -83,7 +83,7 @@ export const templates = [
   },
   {
     id: 'noir-party',
-    fields: ['host', 'dressCode'],
+    fields: ['host', 'dressCode', 'gift', 'rsvpBy'],
     layout: 'party',
     name: 'Нуар',
     eventType: 'Үдэшлэг',
@@ -94,7 +94,7 @@ export const templates = [
   },
   {
     id: 'blossom-naming',
-    fields: ['honoree', 'family'],
+    fields: ['honoree', 'family', 'gift', 'rsvpBy'],
     layout: 'naming',
     name: 'Цэцэг',
     eventType: 'Нэрийн баяр',
@@ -105,7 +105,7 @@ export const templates = [
   },
   {
     id: 'sky-sevleg',
-    fields: ['honoree', 'age', 'family'],
+    fields: ['honoree', 'age', 'family', 'gift', 'rsvpBy'],
     layout: 'sevleg',
     name: 'Тэнгэр',
     eventType: 'Сэвлэг үргээх',
@@ -116,7 +116,7 @@ export const templates = [
   },
   {
     id: 'terra-newhome',
-    fields: ['host'],
+    fields: ['host', 'gift', 'rsvpBy'],
     layout: 'newhome',
     name: 'Өргөө',
     eventType: 'Шинэ гэр',
@@ -127,7 +127,7 @@ export const templates = [
   },
   {
     id: 'forest-corporate',
-    fields: ['host', 'dressCode'],
+    fields: ['host', 'dressCode', 'rsvpBy'],
     layout: 'corporate',
     name: 'Ой мод',
     eventType: 'Байгууллага',
@@ -263,6 +263,7 @@ export function buildDemoInvitation(templateId) {
   if (!template) return null
   const eventAt = new Date(Date.now() + 30 * 86400000)
   eventAt.setHours(18, 0, 0, 0)
+  const rsvpBy = new Date(eventAt.getTime() - 14 * 86400000)
   const ceremonyAt = new Date(eventAt)
   ceremonyAt.setHours(14, 0, 0, 0)
   const others = templates.filter((item) => item.id !== templateId).slice(0, 2)
@@ -273,10 +274,12 @@ export function buildDemoInvitation(templateId) {
     parents: { groomParents: 'Дорж, Оюунчимэг', brideParents: 'Батбаяр, Цэрэнлхам' },
     family: { father: 'Ганбат', mother: 'Оюунчимэг' },
     ceremony: { ceremonyAt: ceremonyAt.toISOString(), ceremonyVenue: 'Улаанбаатар · Гэрлэх ёслолын ордон' },
-    dressCode: { dressCode: 'Гоёлын хувцас — зөөлөн өнгө урьж байна' },
+    dressCode: { dressCode: 'Гоёлын хувцас', dressColors: ['#f3e9dc', '#e8d5c4', '#b0c4b1', '#c9a9c8'], dressAvoid: 'Цагаан өнгийг зайлсхийхийг хүсье — сүйт бүсгүйд зориулагдсан.' },
     age: { age: { 'Ойн баяр': '10 жил', 'Сэвлэг үргээх': '5 нас' }[template.eventType] || '27' },
     honoree: { honoree: template.sample.title },
     host: { host: 'Invites.mn ХХК' },
+    gift: { giftNote: 'Таны ирсэн нь бидэнд хамгийн том бэлэг. Хайрцагтай бэлэг авчрахгүй байхыг хүсье.' },
+    rsvpBy: { rsvpBy: rsvpBy.toISOString() },
   }
   const details = asked.reduce((all, key) => ({ ...all, ...(samples[key] || {}) }), {})
   return {

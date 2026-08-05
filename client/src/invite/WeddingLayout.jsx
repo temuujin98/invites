@@ -7,10 +7,11 @@
  * appointments, and a dress code. Dark ground + gold rules, matching the
  * envelope and curtain intros the guest just opened.
  */
-import { ArrowLeft, Gift, MapPin, Phone } from 'lucide-react'
+import { ArrowLeft, MapPin, Phone } from 'lucide-react'
 import { formatEventDate, splitEventDate } from '../templates'
-import { Countdown, Gallery, RsvpForm } from './shared'
+import { Countdown, DressBlock, Gallery, GiftBlock, RsvpForm } from './shared'
 import { readDetails } from '../lib/details'
+import ScratchReveal from './ScratchReveal'
 
 function Ornament({ mark = '✦' }) {
   return <p className="wed-ornament" aria-hidden="true"><span /> {mark} <span /></p>
@@ -66,7 +67,9 @@ export default function WeddingLayout({ invitation, options, gallery, bankParts,
         )}
 
         <Ornament />
-        <DatePlate value={invitation.event_at} />
+        <ScratchReveal color="#d9b25c">
+          <DatePlate value={invitation.event_at} />
+        </ScratchReveal>
       </header>
 
       {hasParents && (
@@ -128,13 +131,6 @@ export default function WeddingLayout({ invitation, options, gallery, bankParts,
         </section>
       )}
 
-      {details.dressCode && (
-        <section className="pv-section wed-section" data-reveal>
-          <h2>Хувцаслалт</h2>
-          <p className="pv-note">{details.dressCode}</p>
-        </section>
-      )}
-
       {options.note && (
         <section className="pv-section wed-section" data-reveal>
           <h2>Тэмдэглэл</h2>
@@ -149,20 +145,13 @@ export default function WeddingLayout({ invitation, options, gallery, bankParts,
         </section>
       )}
 
-      {bankParts.length > 0 && (
-        <section className="pv-section wed-section" data-reveal>
-          <h2>Данс</h2>
-          <div className="pv-bank">
-            <Gift size={18} />
-            <div className="pv-bank-lines">
-              {bankParts.map((part, index) => <p key={index} className={index === 1 || bankParts.length === 1 ? 'pv-bank-number' : ''}>{part}</p>)}
-            </div>
-          </div>
-        </section>
-      )}
+      <DressBlock details={details} />
+
+      <GiftBlock bankParts={bankParts} details={details} />
 
       <RsvpForm
         invitationId={invitation.id}
+        deadline={details.rsvpBy}
         demo={demo}
         initialGuest={invitedGuest}
         heading="Ерөөлөө хүргэж, ирэхээ мэдэгдээрэй"

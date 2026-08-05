@@ -4,10 +4,10 @@
  * A ring holds the count of years, with the two names beneath it. The ring
  * is the one big shape on an otherwise very quiet, deep-night page.
  */
-import { ArrowLeft, CalendarDays, Gift, MapPin } from 'lucide-react'
+import { ArrowLeft, CalendarDays, MapPin } from 'lucide-react'
 import { splitEventDate } from '../templates'
 import { readDetails } from '../lib/details'
-import { Countdown, Gallery, RsvpForm } from './shared'
+import { Countdown, DressBlock, Gallery, GiftBlock, RsvpForm } from './shared'
 
 export default function AnniversaryLayout({ invitation, options, gallery, bankParts, mapHref, invitedGuest, demo }) {
   const details = readDetails(options)
@@ -64,19 +64,12 @@ export default function AnniversaryLayout({ invitation, options, gallery, bankPa
         </section>
       )}
 
-      {bankParts.length > 0 && (
-        <section className="pv-section ann-section" data-reveal>
-          <h2>Данс</h2>
-          <div className="pv-bank">
-            <Gift size={18} />
-            <div className="pv-bank-lines">
-              {bankParts.map((part, index) => <p key={index} className={index === 1 || bankParts.length === 1 ? 'pv-bank-number' : ''}>{part}</p>)}
-            </div>
-          </div>
-        </section>
-      )}
+      <DressBlock details={details} />
 
-      <RsvpForm invitationId={invitation.id} demo={demo} initialGuest={invitedGuest} heading="Хамт байх уу?" />
+      <GiftBlock bankParts={bankParts} details={details} />
+
+      <RsvpForm invitationId={invitation.id}
+        deadline={details.rsvpBy} demo={demo} initialGuest={invitedGuest} heading="Хамт байх уу?" />
 
       <a className="pv-back" href="/"><ArrowLeft size={15} /> Invites.mn</a>
     </div>
