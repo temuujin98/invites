@@ -138,7 +138,9 @@ export default function LetterLayout({ invitation, options, gallery, bankParts, 
         <p className="lt-closing" data-reveal>Таныг хүлээж байна</p>
       </article>
 
-      <a className="pv-back lt-back" href="/"><ArrowLeft size={15} /> Invites.mn</a>
+      {/* our mark belongs on the demo, never on a customer's invitation */}
+
+      {demo && <a className="pv-back lt-back" href="/"><ArrowLeft size={15} /> Invites.mn</a>}
 
       {/* envelope front — fixed, the sheet slides up behind it */}
       <div className="lt-pocket" aria-hidden="true">

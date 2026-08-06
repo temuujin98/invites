@@ -14,7 +14,9 @@ a { color: inherit; text-decoration: none; }
 ::selection { background: var(--k-black); color: var(--k-brand); }
 
 .kpage { position: relative; min-height: 100vh; background: var(--k-brand); }
-.kpage h1, .kpage h2 { font-family: Montserrat, sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: -.03em; line-height: .92; margin: 0; }
+/* keep-all holds Cyrillic words together; break-word is the last resort that
+   turns an overflow into a wrap if the display font ever fails to load */
+.kpage h1, .kpage h2 { font-family: Montserrat, sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: -.03em; line-height: .92; margin: 0; word-break: keep-all; overflow-wrap: break-word; }
 
 /* ---------- Header ---------- */
 .knav { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px clamp(20px, 4vw, 44px); }
@@ -79,7 +81,9 @@ a { color: inherit; text-decoration: none; }
 .kfooter { border-top: 2px solid var(--k-black); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 26px clamp(20px, 4vw, 44px) 34px; }
 .kfooter p { margin: 0; }
 .kfooter, .kfooter-links a { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: -.02em; text-transform: uppercase; }
-.kfooter-links { display: flex; gap: 26px; }
+/* wraps because the mail address is one unbreakable 16-character word —
+   without this the row sets a min-content wider than a 320px phone */
+.kfooter-links { display: flex; flex-wrap: wrap; gap: 12px 22px; }
 .kfooter-links a { position: relative; transition: transform .2s; }
 .kfooter-links a:hover { transform: translateX(4px); }
 
@@ -218,15 +222,19 @@ a { color: inherit; text-decoration: none; }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
-  .khero h1 { font-size: 26vw; }
+  /*
+   * The display sizes are NOT enlarged here. A vw size scales with the
+   * viewport already, so the base value fits at every width; bumping it on
+   * narrow screens is what pushed «УРИЛГА» and «ЭХЭЛЦГЭЭЕ» off the side —
+   * Cyrillic words run wider than the Latin these numbers were picked for.
+   */
   .khero-meta { flex-direction: column; align-items: flex-start; gap: 26px; }
   .kmeta-right { text-align: left; }
   .spin-badge { order: 3; align-self: center; }
   .editor-grid { grid-template-columns: 1fr; }
   .editor-preview-panel { position: static; }
-  .kservice h2 { font-size: 9vw; }
+  .kservice h2 { font-size: 8.1vw; }
   .kservice-arrow { display: none; }
-  .kcta h2 { font-size: 17vw; }
   .kfooter { flex-direction: column; align-items: flex-start; }
 }
 @media (max-width: 680px) {
@@ -852,6 +860,15 @@ a { color: inherit; text-decoration: none; }
 @keyframes scratch-pulse { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
 .scratch.done .scratch-under { animation: reveal-rise .6s cubic-bezier(.22, 1, .36, 1); }
 @media (prefers-reduced-motion: reduce) { .scratch-hint { animation: none; } }
+
+/* scroll nudge, shown once the intro is out of the way */
+.pv-cue { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 30; display: grid; justify-items: center; gap: 8px; pointer-events: none; animation: cue-in .8s ease .4s backwards; }
+.pv-cue span { font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: #ffffffa6; text-shadow: 0 2px 10px #000000a6; }
+.pv-cue i { display: block; width: 1px; height: 26px; background: linear-gradient(180deg, #ffffff00, #ffffffb3); animation: cue-fall 1.9s ease-in-out infinite; }
+@keyframes cue-in { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes cue-fall { 0% { opacity: 0; transform: translateY(-8px); } 45% { opacity: 1; } 100% { opacity: 0; transform: translateY(8px); } }
+.pv.layout-letter .pv-cue span { color: #ffffffc4; }
+@media (prefers-reduced-motion: reduce) { .pv-cue, .pv-cue i { animation: none; } }
 
 /* dress-code palette */
 .pv-palette { display: grid; gap: 8px; justify-items: center; }

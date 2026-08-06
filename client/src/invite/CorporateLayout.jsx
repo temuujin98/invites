@@ -81,7 +81,9 @@ export default function CorporateLayout({ invitation, options, gallery, bankPart
       <RsvpForm invitationId={invitation.id}
         deadline={details.rsvpBy} demo={demo} initialGuest={invitedGuest} heading="Оролцоогоо бүртгүүлнэ үү" />
 
-      <a className="pv-back" href="/"><ArrowLeft size={15} /> Invites.mn</a>
+      {/* our mark belongs on the demo, never on a customer's invitation */}
+
+      {demo && <a className="pv-back" href="/"><ArrowLeft size={15} /> Invites.mn</a>}
     </div>
   )
 }

@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
 import { getTemplate, buildDemoInvitation } from './templates'
-import { MusicPlayer } from './invite/shared'
+import { MusicPlayer, ScrollCue } from './invite/shared'
 import { useReveal } from './invite/useReveal'
 import CurtainIntro from './invite/intro/CurtainIntro'
 import EnvelopeIntro from './invite/intro/EnvelopeIntro'
@@ -85,6 +85,11 @@ export default function PublicInvitation({ demoTemplateId }) {
   const introPending = !introDone && (introKind === 'curtain' || introKind === 'envelope')
   useReveal(Boolean(invitation) && !introPending)
 
+  // the guest's tab should read as the event, not as the platform
+  useEffect(() => {
+    if (invitation?.title) document.title = `${invitation.title} — ${invitation.event_type} урилга`
+  }, [invitation])
+
   if (!isSupabaseConfigured) {
     return <main className="pv"><p className="pv-loading">Тохиргоо дутуу байна.</p></main>
   }
@@ -127,6 +132,7 @@ export default function PublicInvitation({ demoTemplateId }) {
         ? <EnvelopeIntro eventType={invitation.event_type} guest={invitedGuest} tone={tone} color={options.introColor} onDone={() => setIntroDone(true)} />
         : <CurtainIntro eventType={invitation.event_type} guest={invitedGuest} tone={tone} color={options.introColor} onDone={() => setIntroDone(true)} />)}
       {options.music?.id && <MusicPlayer music={options.music} />}
+      <ScrollCue show={!showIntro} />
 
       <Layout
         invitation={invitation}

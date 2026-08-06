@@ -9,6 +9,31 @@ import { supabase } from '../lib/supabase'
 import { formatEventDate } from '../templates'
 
 /*
+ * A nudge to scroll, shown once the intro is out of the way. It leaves on
+ * the first scroll, and gives up on its own if the guest never scrolls —
+ * a hint that outstays its welcome becomes furniture.
+ */
+export function ScrollCue({ show }) {
+  const [gone, setGone] = useState(false)
+
+  useEffect(() => {
+    if (!show || gone) return undefined
+    const onScroll = () => { if (window.scrollY > 40) setGone(true) }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    const timer = setTimeout(() => setGone(true), 9000)
+    return () => { window.removeEventListener('scroll', onScroll); clearTimeout(timer) }
+  }, [show, gone])
+
+  if (!show || gone) return null
+  return (
+    <div className="pv-cue" aria-hidden="true">
+      <span>Доош гүйлгэнэ үү</span>
+      <i />
+    </div>
+  )
+}
+
+/*
  * Dress code, with the recommended shades shown as swatches and any colour
  * the hosts want left alone called out separately.
  */
