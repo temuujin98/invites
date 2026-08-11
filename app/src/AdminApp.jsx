@@ -20,9 +20,12 @@ function formatDate(value) {
   return new Intl.DateTimeFormat('mn-MN', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value))
 }
 
-function SignIn() {
+const ADMIN_UNLOCK_KEY = 'invites.admin.unlocked'
+
+function SignIn({ onAuthenticated }) {
   const [email, setEmail] = useState('')
-  const [sent, setSent] = useState(false)
+  const [password, setPassword] = useState('')
+  const [resetSent, setResetSent] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -30,13 +33,31 @@ function SignIn() {
     event.preventDefault()
     setBusy(true)
     setError('')
-    const { error: sendError } = await supabase.auth.signInWithOtp({
+    const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/admin` },
+      password,
     })
     setBusy(false)
-    if (sendError) setError('Илгээхэд алдаа гарлаа. Дахин оролдоно уу.')
-    else setSent(true)
+    if (signInError) {
+      setError('Имэйл эсвэл нууц үг буруу байна.')
+      return
+    }
+    onAuthenticated()
+  }
+
+  async function resetPassword() {
+    if (!email.trim()) {
+      setError('Эхлээд админ имэйл хаягаа оруулна уу.')
+      return
+    }
+    setBusy(true)
+    setError('')
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/admin`,
+    })
+    setBusy(false)
+    if (resetError) setError('Нууц үг шинэчлэх имэйл илгээж чадсангүй.')
+    else setResetSent(true)
   }
 
   return (
@@ -44,15 +65,53 @@ function SignIn() {
       <form className="auth-card" onSubmit={submit}>
         <p className="eyebrow">ADMIN</p>
         <h1>Админ нэвтрэлт</h1>
-        {sent ? <p className="form-note">Холбоос илгээгдлээ — {email} хаягаа шалгана уу.</p> : (
-          <>
-            <label>Имэйл хаяг
-              <input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="admin@invites.mn" />
-            </label>
-            {error && <p className="form-error">{error}</p>}
-            <button className="create-button" disabled={busy}>{busy ? 'Илгээж байна…' : 'Нэвтрэх холбоос илгээх'}</button>
-          </>
-        )}
+        <label>Админ имэйл
+          <input type="email" autoComplete="username" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="admin@invites.mn" />
+        </label>
+        <label>Нууц үг
+          <input type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} placeholder="••••••••" />
+        </label>
+        {resetSent && <p className="form-note">Нууц үг шинэчлэх холбоосыг {email} хаяг руу илгээлээ.</p>}
+        {error && <p className="form-error">{error}</p>}
+        <button className="create-button" disabled={busy}>{busy ? 'Шалгаж байна…' : 'Нэвтрэх'}</button>
+        <button className="text-button auth-reset" type="button" disabled={busy} onClick={resetPassword}>Нууц үг мартсан</button>
+      </form>
+    </section>
+  )
+}
+
+function ResetPassword({ onComplete }) {
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+
+  async function submit(event) {
+    event.preventDefault()
+    if (password.length < 8) { setError('Нууц үг хамгийн багадаа 8 тэмдэгт байна.'); return }
+    if (password !== confirmPassword) { setError('Нууц үгнүүд таарахгүй байна.'); return }
+    setBusy(true)
+    setError('')
+    const { error: updateError } = await supabase.auth.updateUser({ password })
+    setBusy(false)
+    if (updateError) { setError('Нууц үгийг шинэчилж чадсангүй. Холбоосоо дахин авна уу.'); return }
+    window.history.replaceState({}, '', '/admin')
+    onComplete()
+  }
+
+  return (
+    <section className="auth-overlay">
+      <form className="auth-card" onSubmit={submit}>
+        <p className="eyebrow">ADMIN</p>
+        <h1>Нууц үг шинэчлэх</h1>
+        <label>Шинэ нууц үг
+          <input type="password" autoComplete="new-password" required minLength="8" value={password} onChange={(event) => setPassword(event.target.value)} />
+        </label>
+        <label>Нууц үг давтах
+          <input type="password" autoComplete="new-password" required minLength="8" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} />
+        </label>
+        {error && <p className="form-error">{error}</p>}
+        <button className="create-button" disabled={busy}>{busy ? 'Хадгалж байна…' : 'Нууц үг хадгалах'}</button>
       </form>
     </section>
   )
@@ -61,6 +120,8 @@ function SignIn() {
 export default function AdminApp() {
   const [session, setSession] = useState(null)
   const [checked, setChecked] = useState(false)
+  const [adminUnlocked, setAdminUnlocked] = useState(() => sessionStorage.getItem(ADMIN_UNLOCK_KEY) === 'true')
+  const [recoveringPassword, setRecoveringPassword] = useState(false)
   const [isAdmin, setIsAdmin] = useState(null) // null = checking
   const [invitations, setInvitations] = useState([])
   const [payments, setPayments] = useState([])
@@ -71,7 +132,18 @@ export default function AdminApp() {
   useEffect(() => {
     if (!supabase) return undefined
     supabase.auth.getSession().then(({ data }) => { setSession(data.session); setChecked(true) })
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => setSession(nextSession))
+    const { data: listener } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      setSession(nextSession)
+      if (event === 'PASSWORD_RECOVERY') {
+        sessionStorage.removeItem(ADMIN_UNLOCK_KEY)
+        setAdminUnlocked(false)
+        setRecoveringPassword(true)
+      }
+      if (event === 'SIGNED_OUT') {
+        sessionStorage.removeItem(ADMIN_UNLOCK_KEY)
+        setAdminUnlocked(false)
+      }
+    })
     return () => listener.subscription.unsubscribe()
   }, [])
 
@@ -156,16 +228,28 @@ export default function AdminApp() {
     return { revenue, active, pending, rsvpTotal }
   }, [invitations, payments])
 
+  function unlockAdmin() {
+    sessionStorage.setItem(ADMIN_UNLOCK_KEY, 'true')
+    setAdminUnlocked(true)
+  }
+
+  async function signOut() {
+    sessionStorage.removeItem(ADMIN_UNLOCK_KEY)
+    setAdminUnlocked(false)
+    await supabase.auth.signOut()
+  }
+
   if (!isSupabaseConfigured) return <div className="config-error"><h1>Тохиргоо дутуу</h1><p>.env.local шалгана уу.</p></div>
   if (!checked) return <div className="config-error"><p>Ачаалж байна…</p></div>
-  if (!session) return <SignIn />
+  if (recoveringPassword) return <ResetPassword onComplete={() => { setRecoveringPassword(false); unlockAdmin() }} />
+  if (!session || !adminUnlocked) return <SignIn onAuthenticated={unlockAdmin} />
   if (isAdmin === null) return <div className="config-error"><p>Эрх шалгаж байна…</p></div>
   if (!isAdmin) {
     return (
       <div className="config-error">
         <h1>Хандах эрхгүй</h1>
         <p>{session.user.email} хаяг админ жагсаалтад алга байна.</p>
-        <button className="create-button" onClick={() => supabase.auth.signOut()}>Гарах</button>
+        <button className="create-button" onClick={signOut}>Гарах</button>
       </div>
     )
   }
@@ -176,7 +260,7 @@ export default function AdminApp() {
         <a className="admin-brand" href="/"><img src="/brand/invites.mn/logo-wordmark-light.png" alt="INVITES.MN" /><span>ADMIN</span></a>
         <div className="admin-user">
           <span>{session.user.email}</span>
-          <button className="text-button" onClick={() => supabase.auth.signOut()}>Гарах</button>
+          <button className="text-button" onClick={signOut}>Гарах</button>
         </div>
       </header>
 
