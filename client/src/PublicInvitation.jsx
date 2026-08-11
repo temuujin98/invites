@@ -55,7 +55,15 @@ export default function PublicInvitation({ demoTemplateId }) {
 
   useEffect(() => {
     if (demoTemplateId) {
-      const demo = buildDemoInvitation(demoTemplateId)
+      const query = new URLSearchParams(window.location.search)
+      const demo = buildDemoInvitation(demoTemplateId, {
+        backgroundId: query.get('bg'),
+        title: query.get('title'),
+        venue: query.get('venue'),
+        message: query.get('message'),
+        eventAt: query.get('at'),
+        intro: query.get('intro'),
+      })
       if (demo) setInvitation(demo)
       else setError('Загвар олдсонгүй')
       setLoading(false)
@@ -130,13 +138,15 @@ export default function PublicInvitation({ demoTemplateId }) {
     : ''
 
   return (
-    <main className={`pv tone-${tone} layout-${layout}`} style={bgUrl ? { backgroundImage: `url(${bgUrl})` } : undefined}>
+    <main className={`pv tone-${tone} layout-${layout} ${bgUrl ? 'has-bg' : ''}`} style={bgUrl ? { backgroundImage: `url(${bgUrl})` } : undefined}>
       <div className="pv-veil" aria-hidden="true" />
       {showIntro && (options.intro === 'envelope'
         ? <EnvelopeIntro eventType={invitation.event_type} guest={invitedGuest} tone={tone} color={options.introColor} onDone={() => setIntroDone(true)} />
         : <CurtainIntro eventType={invitation.event_type} guest={invitedGuest} tone={tone} color={options.introColor} onDone={() => setIntroDone(true)} />)}
       {options.music?.id && <MusicPlayer music={options.music} />}
-      <ScrollCue show={!showIntro} />
+      {/* the cue is a fixed overlay — inside the editor's phone frame it just
+          sits on top of the sheet, so the framed preview asks for cue=off */}
+      <ScrollCue show={!showIntro && new URLSearchParams(window.location.search).get('cue') !== 'off'} />
 
       <Layout
         invitation={invitation}

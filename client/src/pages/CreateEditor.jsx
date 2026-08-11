@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import { insertDraftInvitation } from '../lib/createInvitation'
 import { getTemplate, formatPrice, saveDraft, loadDraft, INTRO_PRICE, messagePresets, templateFields } from '../templates'
-import { FunnelHeader, InvitePreview } from '../components/Shared'
+import { FunnelHeader } from '../components/Shared'
+import PhonePreview from '../components/PhonePreview'
 import DateTimeField from '../components/DateTimeField'
 import ExtraOptions, { emptyExtras } from '../components/ExtraOptions'
 import BackgroundPicker from '../components/BackgroundPicker'
@@ -71,16 +72,12 @@ export default function CreateEditor({ templateId }) {
     setSent(true)
   }
 
-  const previewDate = eventAt
-    ? new Intl.DateTimeFormat('mn-MN', { dateStyle: 'medium' }).format(new Date(eventAt))
-    : template.sample.date
-
   return (
     <main className="kpage funnel-page">
       <FunnelHeader label="МЭДЭЭЛЛЭЭ ОРУУЛАХ" />
       <header className="funnel-head">
-        <h1>{template.name} · {template.eventType}</h1>
-        <p className="funnel-lead">{template.description} Үнэ: <b>{formatPrice(template.price + (extras.intro ? INTRO_PRICE : 0))}</b>{extras.intro ? ' (нээлтийн эффект орсон)' : ''} · <a className="klink" href={`/demo/${template.id}`} target="_blank" rel="noreferrer">Жишээ үзэх ↗</a></p>
+        <h1>{template.eventType}</h1>
+        <p className="funnel-lead">{template.description} Үнэ: <b>{formatPrice(template.price + (extras.intro ? INTRO_PRICE : 0))}</b>{extras.intro ? ' (нээлтийн эффект орсон)' : ''} · <a className="klink" href={`/demo/${template.id}${extras.backgroundId ? `?bg=${extras.backgroundId}` : ''}`} target="_blank" rel="noreferrer">Жишээ үзэх ↗</a></p>
       </header>
       <section className="editor-grid">
         {sent ? (
@@ -141,14 +138,14 @@ export default function CreateEditor({ templateId }) {
           </form>
         )}
         <div className="editor-preview-panel">
-          <p>ШУУД ХАРАГДАЦ</p>
-          <InvitePreview
-            tone={template.tone}
-            eventType={template.eventType}
-            title={title || template.sample.title}
-            dateText={venue ? `${previewDate} · ${venue}` : previewDate}
-            bgId={extras.backgroundId || template.id}
-            big
+          <p>УТСАН ДЭЭР ХЭРХЭН ХАРАГДАХ</p>
+          <PhonePreview
+            templateId={template.id}
+            backgroundId={extras.backgroundId}
+            title={title}
+            venue={venue}
+            message={message}
+            eventAt={eventAt}
           />
         </div>
       </section>

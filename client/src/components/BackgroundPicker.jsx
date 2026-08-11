@@ -15,7 +15,7 @@ export default function BackgroundPicker({ template, value, onChange }) {
               onClick={() => onChange(background.id)}
               aria-pressed={selected}
             >
-              <img src={background.url} alt="" loading="lazy" />
+              <img src={background.thumb} alt="" loading="lazy" width="400" height="711" />
               <span>{background.name}</span>
             </button>
           )

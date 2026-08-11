@@ -1,5 +1,7 @@
 /* Invitation templates: the design lives in code, the price with the template. */
 
+import { isInvitationBackground } from './backgrounds'
+
 export const templates = [
   {
     id: 'lavender-wedding',
@@ -258,9 +260,10 @@ export const messagePresets = {
  * Fully-featured sample invitation for /demo/:templateId — shows buyers
  * exactly what the guest page (curtain, gallery, program…) looks like.
  */
-export function buildDemoInvitation(templateId) {
+export function buildDemoInvitation(templateId, overrides = {}) {
   const template = getTemplate(templateId)
   if (!template) return null
+  const { backgroundId, title, venue, message, eventAt: eventAtOverride, intro } = overrides
   const eventAt = new Date(Date.now() + 30 * 86400000)
   eventAt.setHours(18, 0, 0, 0)
   const rsvpBy = new Date(eventAt.getTime() - 14 * 86400000)
@@ -282,16 +285,18 @@ export function buildDemoInvitation(templateId) {
     rsvpBy: { rsvpBy: rsvpBy.toISOString() },
   }
   const details = asked.reduce((all, key) => ({ ...all, ...(samples[key] || {}) }), {})
+  const overrideAt = eventAtOverride ? new Date(eventAtOverride) : null
   return {
     id: null,
-    title: template.sample.title,
+    title: title || template.sample.title,
     event_type: template.eventType,
-    event_at: eventAt.toISOString(),
-    venue: 'Улаанбаатар · Тансаг өргөө',
-    message: 'Бидний амьдралын онцгой мөчид хүрэлцэн ирж, баяр баясгалангаа хуваалцахыг хүндэтгэн урьж байна.',
+    event_at: (overrideAt && !Number.isNaN(overrideAt.getTime()) ? overrideAt : eventAt).toISOString(),
+    venue: venue || 'Улаанбаатар · Тансаг өргөө',
+    message: message || 'Бидний амьдралын онцгой мөчид хүрэлцэн ирж, баяр баясгалангаа хуваалцахыг хүндэтгэн урьж байна.',
     theme: template.tone,
     template_id: template.id,
     options: {
+      ...(isInvitationBackground(backgroundId) ? { backgroundId } : {}),
       gallery: [template.id, ...others.map((item) => item.id)].map((id) => `/backgrounds/${id}.jpg`),
       program: [
         { time: '16:00', activity: 'Зочид хүлээн авах' },
@@ -301,7 +306,7 @@ export function buildDemoInvitation(templateId) {
       note: 'Энэ бол жишээ урилга — бүх мэдээллийг та өөрөө тохируулна.',
       phone: '9911xxxx',
       bank: { bank: 'Хаан банк', number: '5041xxxxxx', holder: template.sample.title.split(' ')[0] },
-      intro: template.eventType === 'Хурим' ? 'envelope' : 'curtain',
+      ...(intro === 'off' ? {} : { intro: template.eventType === 'Хурим' ? 'envelope' : 'curtain' }),
       introColor: 'auto',
       ...(Object.keys(details).length ? { details } : {}),
     },
