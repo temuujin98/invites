@@ -94,6 +94,18 @@ export default function PublicInvitation({ demoTemplateId }) {
   const introPending = !introDone && (introKind === 'curtain' || introKind === 'envelope')
   useReveal(Boolean(invitation) && !introPending)
 
+  /*
+   * Inside the editor's phone frame a native scrollbar is drawn over the
+   * rounded corners, and because it eats into the viewport the full-bleed
+   * 100vw band and gallery then overflow sideways too. Framed previews ask
+   * for cue=off, so that is the signal to hide the scrollbars.
+   */
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('cue') !== 'off') return undefined
+    document.documentElement.classList.add('pv-framed')
+    return () => document.documentElement.classList.remove('pv-framed')
+  }, [])
+
   // the guest's tab should read as the event, not as the platform
   useEffect(() => {
     if (invitation?.title) document.title = `${invitation.title} — ${invitation.event_type} урилга`
