@@ -529,12 +529,12 @@ html.pv-framed::-webkit-scrollbar { display: none; }
 .pv-field svg { color: var(--accent); }
 .pv-field input, .pv-field select { border: 0; border-bottom: 1px solid #ffffff40; background: transparent; color: var(--pv-ink); font: inherit; font-size: 17px; padding: 10px 2px; outline: none; transition: border-color .2s; }
 .pv-field input:focus, .pv-field select:focus { border-color: var(--accent); }
-.pv-field input::placeholder { color: #8d81a0; }
+.pv-field input::placeholder { color: var(--pv-ink-soft); }
 .pv-field select { cursor: pointer; color-scheme: dark; }
 .pv-field select option { background: #1a1424; color: #f1ecf8; font-size: 15px; }
 .pv-wish { width: 100%; margin-top: 22px; border: 1px solid #ffffff33; border-radius: 12px; background: transparent; padding: 15px; color: var(--pv-ink); font: inherit; font-size: 15px; min-height: 86px; resize: vertical; outline: none; transition: border-color .2s; }
 .pv-wish:focus { border-color: var(--accent); }
-.pv-wish::placeholder { color: #8d81a0; }
+.pv-wish::placeholder { color: var(--pv-ink-soft); }
 .pv-submit { display: block; width: min(100%, 360px); margin: 26px auto 0; border: 0; border-radius: 999px; padding: 17px; background: #ffffff; color: #14091f; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; transition: transform .2s, box-shadow .25s; }
 .pv-submit:hover:not(:disabled) { transform: scale(1.03); box-shadow: 0 0 30px #ffffff40; }
 .pv-submit:disabled { opacity: .4; cursor: default; }
@@ -767,6 +767,8 @@ html.pv-framed::-webkit-scrollbar { display: none; }
    Gala layout — formal reception, the programme is the centrepiece.
    ========================================================== */
 .pv.layout-gala { --gala-gold: #e0c07a; }
+/* pale gold is for the dark hall; on a cream backdrop it needs to go darker */
+.pv.layout-gala.has-bg { --gala-gold: #8a6413; }
 .pv-content.gala { gap: 46px; }
 .gala-hero { display: grid; gap: 14px; justify-items: center; width: 100%; }
 .gala-rule { display: block; width: min(100%, 300px); height: 1px; background: linear-gradient(90deg, transparent, var(--gala-gold), transparent); }
@@ -1073,6 +1075,16 @@ html.pv-framed::-webkit-scrollbar { display: none; }
 }
 /* deeper veil: the page should feel like a hall, not a photo */
 .pv.layout-wedding .pv-veil { background: linear-gradient(180deg, #080411f2 0%, #0a0612cf 30%, #080411f7 100%); }
+/*
+ * ...but that veil is near-opaque, and it sits later in the file than the
+ * shared .pv.has-bg rule at equal specificity, so a picked backdrop stayed
+ * invisible here. Light mode has to be restated for this layout, gold
+ * included — the dark-hall gold disappears on cream.
+ */
+.pv.layout-wedding.has-bg .pv-veil { background: linear-gradient(180deg, #fbf6ecd9 0%, #fbf6ec8c 30%, #fbf6ecdb 100%); }
+.pv.layout-wedding.has-bg {
+  --gold: #96701c; --gold-line: #96701c66; --gold-faint: #96701c26;
+}
 .pv-content.wed { gap: 52px; }
 .pv-content.wed h1, .pv-content.wed h2, .wed-name, .wed-parents-name, .wed-appointment-venue {
   word-break: keep-all; overflow-wrap: break-word;
@@ -1107,7 +1119,7 @@ html.pv-framed::-webkit-scrollbar { display: none; }
 .wed-parents { width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: clamp(20px, 6vw, 48px); justify-items: center; }
 .wed-parents > div { display: grid; gap: 8px; justify-items: center; text-align: center; }
 .wed-parents-label { margin: 0; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); line-height: 1.4; }
-.wed-parents-name { margin: 0; font-family: var(--wed-serif); font-size: 17px; line-height: 1.5; color: #f1ecf8; }
+.wed-parents-name { margin: 0; font-family: var(--wed-serif); font-size: 17px; line-height: 1.5; color: var(--pv-ink); }
 
 /* the invitation message, set as a quotation */
 .wed-message { position: relative; margin: 0; max-width: 46ch; font-family: var(--wed-serif); font-style: italic; font-size: 17px; line-height: 1.85; color: var(--pv-ink-soft); text-align: center; padding-top: 26px; }
