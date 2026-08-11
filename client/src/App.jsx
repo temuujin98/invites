@@ -101,6 +101,10 @@ function Landing() {
 
 export default function App() {
   const path = window.location.pathname
+  if (path.startsWith('/studio')) {
+    window.location.replace('/admin')
+    return null
+  }
   if (path.startsWith('/i/')) return <PublicInvitation />
   if (path.startsWith('/demo/')) return <PublicInvitation demoTemplateId={path.split('/')[2]} />
   if (path.startsWith('/admin')) return <AdminApp />

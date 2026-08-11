@@ -13,6 +13,7 @@ import { emptyDetails } from '../lib/details'
  * Everything is optional — empty options simply don't render on the guest page.
  */
 export const emptyExtras = {
+  backgroundId: '',
   gallery: [], mapUrl: '', program: [], note: '', phone: '',
   bankName: '', bankNumber: '', bankHolder: '',
   intro: '', introColor: 'auto',

@@ -5,6 +5,7 @@ import { getTemplate, formatPrice, saveDraft, loadDraft, INTRO_PRICE, messagePre
 import { FunnelHeader, InvitePreview } from '../components/Shared'
 import DateTimeField from '../components/DateTimeField'
 import ExtraOptions, { emptyExtras } from '../components/ExtraOptions'
+import BackgroundPicker from '../components/BackgroundPicker'
 
 /*
  * One page does it all: fill in details + email, hit continue.
@@ -118,6 +119,11 @@ export default function CreateEditor({ templateId }) {
                 </span>
               )}
             </label>
+            <BackgroundPicker
+              template={template}
+              value={extras.backgroundId}
+              onChange={(backgroundId) => setExtras((current) => ({ ...current, backgroundId }))}
+            />
             <ExtraOptions value={extras} onChange={setExtras} fields={templateFields(template)} />
             {!session && (
               <label>Имэйл хаяг
@@ -141,7 +147,7 @@ export default function CreateEditor({ templateId }) {
             eventType={template.eventType}
             title={title || template.sample.title}
             dateText={venue ? `${previewDate} · ${venue}` : previewDate}
-            bgId={template.id}
+            bgId={extras.backgroundId || template.id}
             big
           />
         </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 import { formatEventDate } from '../templates'
+import { invitationBackgroundUrl, isInvitationBackground } from '../backgrounds'
 
 /* QR code for the invitation share link */
 export function ShareQr({ url, size = 160 }) {
@@ -33,8 +34,11 @@ export function FunnelHeader({ label }) {
 
 /* Invitation preview card used in the gallery, editor, /my and admin */
 export function InvitePreview({ tone, eventType, title, dateText, big, bgId }) {
+  const customBackground = isInvitationBackground(bgId)
+    ? { backgroundImage: `linear-gradient(#fff5, #fff5), url(${invitationBackgroundUrl(bgId)})` }
+    : undefined
   return (
-    <article className={`tpl-card ${tone} ${bgId ? `bg-${bgId}` : ''} ${big ? 'tpl-card-big' : ''}`} aria-hidden="true">
+    <article className={`tpl-card ${tone} ${bgId ? `bg-${bgId}` : ''} ${big ? 'tpl-card-big' : ''}`} style={customBackground} aria-hidden="true">
       <span>{eventType}</span>
       <div>
         <p className="tpl-name">{title}</p>
@@ -52,7 +56,7 @@ export function InvitationSummary({ invitation }) {
       eventType={invitation.event_type}
       title={invitation.title}
       dateText={formatEventDate(invitation.event_at)}
-      bgId={invitation.template_id}
+      bgId={invitation.options?.backgroundId || invitation.template_id}
     />
   )
 }

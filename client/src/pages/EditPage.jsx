@@ -8,6 +8,7 @@ import { sanitizeExtras } from '../lib/createInvitation'
 import { musicToFields } from '../lib/music'
 import { detailsToFields } from '../lib/details'
 import { getTemplate, templateFields } from '../templates'
+import BackgroundPicker from '../components/BackgroundPicker'
 
 /* ISO → 'YYYY-MM-DDTHH:mm' in local time (what DateTimeField expects) */
 function toLocalInputValue(iso) {
@@ -160,6 +161,7 @@ export default function EditPage({ invitationId }) {
   const previewDate = eventAt
     ? new Intl.DateTimeFormat('mn-MN', { dateStyle: 'medium' }).format(new Date(eventAt))
     : 'Огноо тохируулаагүй'
+  const template = getTemplate(invitation.template_id)
 
   return (
     <main className="kpage funnel-page">
@@ -182,7 +184,12 @@ export default function EditPage({ invitationId }) {
           <label>Урилгын мессеж
             <textarea maxLength={400} value={message} onChange={(event) => setMessage(event.target.value)} />
           </label>
-          <ExtraOptions value={extras} onChange={setExtras} showIntro={false} fields={templateFields(getTemplate(invitation.template_id))} />
+          <BackgroundPicker
+            template={template}
+            value={extras.backgroundId}
+            onChange={(backgroundId) => setExtras((current) => ({ ...current, backgroundId }))}
+          />
+          <ExtraOptions value={extras} onChange={setExtras} showIntro={false} fields={templateFields(template)} />
           {error && <p className="kerror">{error}</p>}
           {saved && <p className="kpanel-note">✓ Хадгалагдлаа — зочдод шинэ мэдээлэл харагдана</p>}
           <div className="kform-actions">
@@ -197,7 +204,7 @@ export default function EditPage({ invitationId }) {
             eventType={invitation.event_type}
             title={title || invitation.title}
             dateText={venue ? `${previewDate} · ${venue}` : previewDate}
-            bgId={invitation.template_id}
+            bgId={extras.backgroundId || invitation.template_id}
             big
           />
         </div>

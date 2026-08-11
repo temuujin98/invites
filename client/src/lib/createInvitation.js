@@ -2,6 +2,7 @@ import { supabase } from './supabase'
 import { getTemplate, loadDraft, clearDraft, makeSlug, INTRO_PRICE } from '../templates'
 import { buildMusic } from './music'
 import { buildDetails } from './details'
+import { isInvitationBackground } from '../backgrounds'
 
 /* keep only known option keys, drop empty values and blank program rows */
 export function sanitizeExtras(extras) {
@@ -10,6 +11,7 @@ export function sanitizeExtras(extras) {
     .map((row) => ({ time: (row.time || '').trim(), activity: (row.activity || '').trim() }))
     .filter((row) => row.time || row.activity)
   const clean = {}
+  if (isInvitationBackground(source.backgroundId)) clean.backgroundId = source.backgroundId
   const gallery = (source.gallery || []).filter(Boolean).slice(0, 8)
   if (gallery.length) clean.gallery = gallery
   // only http(s) links — blocks javascript: and other schemes

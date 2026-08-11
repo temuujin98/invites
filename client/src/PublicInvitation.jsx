@@ -25,6 +25,7 @@ import PartyLayout from './invite/PartyLayout'
 import NamingLayout from './invite/NamingLayout'
 import SevlegLayout from './invite/SevlegLayout'
 import NewHomeLayout from './invite/NewHomeLayout'
+import { invitationBackgroundUrl, isInvitationBackground } from './backgrounds'
 
 const layouts = {
   wedding: WeddingLayout,
@@ -123,7 +124,10 @@ export default function PublicInvitation({ demoTemplateId }) {
     : bank ? [bank] : []
   const mapHref = options.mapUrl
     || (invitation.venue ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(invitation.venue)}` : '')
-  const bgUrl = invitation.template_id && photoBackdrop(layout) ? `/backgrounds/${invitation.template_id}.jpg` : ''
+  const selectedBackground = options.backgroundId
+  const bgUrl = invitation.template_id && (photoBackdrop(layout) || isInvitationBackground(selectedBackground))
+    ? invitationBackgroundUrl(selectedBackground, invitation.template_id)
+    : ''
 
   return (
     <main className={`pv tone-${tone} layout-${layout}`} style={bgUrl ? { backgroundImage: `url(${bgUrl})` } : undefined}>
